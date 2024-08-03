@@ -1,3 +1,7 @@
-theme: jekyll-theme-minimal
+# Site settings
 title: Bruno Stefoni 's website
 description: AI & ML blog
+author: Bruno Stefoni
+
+# Theme settings
+theme: jekyll-theme-midnight
