@@ -6,20 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% seo %}
     <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
-    {% include head-custom.html %}
   </head>
   <body>
     <div class="wrapper">
       <header>
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
         <p>{{ site.description | default: site.github.project_tagline }}</p>
-        <nav id="top-nav">
-          <a href="{{ '/' | relative_url }}" class="btn">Home</a>
-          <a href="{{ '/blog' | relative_url }}" class="btn">Blog</a>
+        <nav>
+          <a href="{{ '/' | relative_url }}">Home</a>
+          <a href="{{ '/blog' | relative_url }}">Blog</a>
         </nav>
       </header>
       <section>
-      {{ content }}
+        {{ content }}
       </section>
     </div>
   </body>
