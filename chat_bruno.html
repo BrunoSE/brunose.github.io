@@ -48,8 +48,8 @@
             overflow: hidden;
         }
         .chat-header {
-            background-color: #414339;
-            color: #f8f8f2;
+            background-color: #66d9ef; /* Changed to Monokai Bright Cyan */
+            color: #272822; /* Changed text color for better contrast */
             padding: 20px;
             font-size: 1.2em;
             font-weight: 500;
@@ -100,8 +100,8 @@
             color: #f8f8f2;
         }
         #sendButton {
-            background-color: #a6e22e;
-            color: #272822;
+            background-color: #66d9ef; /* Changed to Monokai Bright Cyan */
+            color: #272822; /* Changed text color for better contrast */
             border: none;
             padding: 10px 20px;
             margin-left: 10px;
@@ -111,7 +111,7 @@
             transition: background-color 0.3s;
         }
         #sendButton:hover {
-            background-color: #ae81ff;
+            background-color: #50c5e0; /* Slightly darker shade for hover effect */
         }
     </style>
 </head>
@@ -121,12 +121,12 @@
             <a href="/">Home</a>
             <a href="/blog.html">Blog</a>
             <a href="/chat.html">Chat</a>
-            <a href="/chat-with-bruno.html">Chat with Bruno</a>
+            <a href="/chat-with-bruno.html">Secret chat with Bruno</a>
         </nav>
     </header>
     <main>
         <div class="chat-container">
-            <div class="chat-header">Chat with Bruno</div>
+            <div class="chat-header">Secret chat with Bruno</div>
             <div id="chatBox"></div>
             <div class="input-area">
                 <input type="text" id="messageInput" placeholder="Type your message here...">
