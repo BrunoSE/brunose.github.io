@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO Meta Tags -->
+    <title>AI Agent - Ask About Bruno | Bruno Stefoni</title>
+    <meta name="description" content="Chat with Bruno's AI agent powered by RAG technology. Ask questions about Bruno's experience, projects, and expertise in AI/ML engineering.">
+    <meta name="keywords" content="AI Agent, RAG, Chatbot, Bruno Stefoni, AI Assistant">
+    <meta name="author" content="Bruno Stefoni">
+
+    <!-- Open Graph / Social Media Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://brunose.github.io/agent.html">
+    <meta property="og:title" content="AI Agent - Ask About Bruno | Bruno Stefoni">
+    <meta property="og:description" content="Chat with Bruno's AI agent powered by RAG technology.">
+    <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* Design System - Matching index.html */
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #131829;
+            --color-bg-tertiary: #1a1f3a;
+            --color-bg-elevated: #1e2442;
+            --color-text-primary: #e4e6eb;
+            --color-text-secondary: #b0b8c9;
+            --color-text-tertiary: #6b7280;
+            --color-accent-primary: #3b82f6;
+            --color-accent-secondary: #8b5cf6;
+            --color-accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --color-success: #10b981;
+            --color-error: #ef4444;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-border-focus: rgba(59, 130, 246, 0.4);
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --spacing-2xl: 4rem;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-family-mono: 'JetBrains Mono', monospace;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+
+        .nav-brand:hover {
+            color: var(--color-accent-primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--color-text-primary);
+            background: var(--color-bg-tertiary);
+        }
+
+        .nav-link.active {
+            color: var(--color-accent-primary);
+        }
+
+        /* Main Container */
+        .main-container {
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 100px var(--spacing-lg) var(--spacing-lg);
+        }
+
+        .agent-wrapper {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Header Section */
+        .agent-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .agent-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .agent-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .agent-status {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: var(--font-size-sm);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--color-success);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: var(--spacing-lg);
+            background: var(--color-bg-elevated);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .chat-header-title {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .chat-header-description {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+        }
+
+        /* Example Questions */
+        .example-questions {
+            padding: var(--spacing-md);
+            background: var(--color-bg-tertiary);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .example-questions-title {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            color: var(--color-text-secondary);
+        }
+
+        .example-chips {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+
+        .example-chip {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: var(--font-size-xs);
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .example-chip:hover {
+            background: var(--color-bg-primary);
+            border-color: var(--color-accent-primary);
+            color: var(--color-accent-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Messages Area */
+        .messages-container {
+            height: 500px;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: var(--color-bg-tertiary);
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: var(--color-accent-primary);
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: var(--spacing-sm);
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--color-accent-gradient);
+            color: white;
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            color: var(--color-accent-primary);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-lg);
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: var(--color-accent-gradient);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.assistant .message-content {
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            color: var(--color-text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: var(--font-size-xs);
+            color: var(--color-text-tertiary);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+
+        .typing-indicator.active {
+            display: flex;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--color-text-tertiary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: var(--spacing-lg);
+            background: var(--color-bg-elevated);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: flex-end;
+        }
+
+        .input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            color: var(--color-text-primary);
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            resize: none;
+            max-height: 120px;
+            transition: border-color var(--transition-fast);
+        }
+
+        #messageInput:focus {
+            outline: none;
+            border-color: var(--color-accent-primary);
+        }
+
+        #messageInput::placeholder {
+            color: var(--color-text-tertiary);
+        }
+
+        .send-button {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: var(--color-accent-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-base);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Error Message */
+        .error-message {
+            display: none;
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--color-error);
+            border-radius: var(--radius-md);
+            color: var(--color-error);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: var(--spacing-xl);
+            color: var(--color-text-secondary);
+        }
+
+        .welcome-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .agent-title {
+                font-size: var(--font-size-2xl);
+            }
+
+            .messages-container {
+                height: 400px;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .input-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .send-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">BS</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/blog.html" class="nav-link">Blog</a>
+                <a href="/agent.html" class="nav-link active">AI Agent</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="agent-wrapper">
+            <!-- Header -->
+            <div class="agent-header">
+                <h1 class="agent-title">Ask About Bruno</h1>
+                <p class="agent-subtitle">RAG-powered AI agent trained on Bruno's experience and projects</p>
+                <div class="agent-status">
+                    <span class="status-dot"></span>
+                    <span>Online & Ready</span>
+                </div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <div class="chat-header-title">Chat with BrunoAI</div>
+                    <div class="chat-header-description">
+                        Ask me anything about Bruno's AI/ML expertise, projects, or experience
+                    </div>
+                </div>
+
+                <!-- Example Questions -->
+                <div class="example-questions">
+                    <div class="example-questions-title">Try asking:</div>
+                    <div class="example-chips">
+                        <div class="example-chip" onclick="useExample(this)">What's Bruno's experience with LLM agents?</div>
+                        <div class="example-chip" onclick="useExample(this)">Tell me about Bruno's RAG projects</div>
+                        <div class="example-chip" onclick="useExample(this)">What technologies does Bruno use?</div>
+                        <div class="example-chip" onclick="useExample(this)">What certifications does Bruno have?</div>
+                    </div>
+                </div>
+
+                <!-- Messages Container -->
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        <div class="welcome-icon">🤖</div>
+                        <p>Hi! I'm an AI agent that knows all about Bruno's experience and projects.</p>
+                        <p>Ask me anything!</p>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <span>BrunoAI is thinking...</span>
+                </div>
+
+                <!-- Input Area -->
+                <div class="input-area">
+                    <div class="input-wrapper">
+                        <div class="input-container">
+                            <textarea
+                                id="messageInput"
+                                rows="1"
+                                placeholder="Ask me about Bruno's experience, skills, or projects..."
+                                autocomplete="off"
+                            ></textarea>
+                            <div class="error-message" id="errorMessage"></div>
+                        </div>
+                        <button class="send-button" id="sendButton">
+                            <span>Send</span>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            // TODO: Replace with your Fly.io backend URL when deployed
+            apiUrl: 'YOUR_FLYIO_BACKEND_URL_HERE',
+            // Groq API configuration (for direct client-side calls)
+            groqApiKey: 'YOUR_GROQ_API_KEY_HERE', // Get free key from https://console.groq.com
+            useDirectGroq: true // Set to false when using Fly.io backend
+        };
+
+        // Knowledge base about Bruno (embedded for demo)
+        const BRUNO_KNOWLEDGE = `
+Bruno Stefoni - AI Engineer
+Location: New York, NY | Email: brunostefoni12@gmail.com | Phone: +1 646 203 7124
+
+PROFESSIONAL SUMMARY:
+AI/ML Engineer with 8 years of experience architecting and deploying production AI systems, specialized in LLM agents, RAG pipelines, and cloud-native ML solutions. Proven track record leading both company product and customer-facing projects from design to deployment on GCP and AWS, building intelligent data systems and Agents that solve complex business problems, and implementing robust evaluation frameworks for AI applications.
+
+CURRENT ROLE & RECENT EXPERIENCE:
+
+CloudWerx - Senior AI/ML Engineer (Nov 2023 - Nov 2024) | Manhattan, New York
+- Led 3 of 6 customer AI/ML projects end-to-end across healthcare, cybersecurity, ecommerce, and finance
+- Deployed production systems on GCP using Vertex AI, Cloud Run, BigQuery, AlloyDB, and Kubeflow
+- Built hybrid search engine with vector + keyword search using AlloyDB and Cloud Run
+- Created RAG medical transcript system injecting clinical guidelines
+- Developed Mixtral-powered cybersecurity chatbot with RAG for audit assistance
+- Fine-tuned Stable Diffusion on Vertex AI for architecture design, improving approval rate from 30% to 60% using LoRA and GCS workflows
+- Implemented Kubeflow MLOps CI/CD pipeline for medical x-ray detection with automated deployment and monitoring
+
+Aetna - CVS Health - Data Scientist (Sep 2023 - Oct 2023) | Manhattan, New York
+- Designed A/B test framework for 9M MAU mobile app to measure campaign impact on adoption KPIs
+- Analyzed live A/A experiment data in BigQuery for demographic validation of test methodology
+
+Google - Data Scientist Intern (Jun 2022 - Aug 2022) | Mountain View, California
+- Built enterprise network datasets from multiple sources using PLX, BigQuery, and Python for strategic analysis
+- Identified 15% user churn risk through survival and time series analysis of adoption data
+- Presented insights to leadership, proposing new analytical methodologies for company-wide adoption
+
+STP - Data Scientist (May 2018 - May 2022) | Santiago, Chile
+- Deployed company-wide chatbot on on-prem infrastructure supporting 500+ field workers
+- Increased revenue by identifying routes with 25% speed discrepancy through geospatial analysis
+- Prevented $500K investment by leading statistical measurement campaign evaluating alternative solutions
+- Detected battery issues in 20% of electric fleet via anomaly detection on telemetry data
+- Improved KPI 6% by automating Twitter scraping and NLP classification for real-time disruption reporting
+
+TECHNICAL SKILLS:
+Certifications: Google Cloud Professional Machine Learning Engineer (May 2024 - May 2026)
+Programming Languages: Python, Go, Java, R, MATLAB
+AI/Agent Frameworks: Langchain, LangGraph, Google ADK, HuggingFace, Transformers, Instructor, Pydantic, OpenAI API, MCP, Arazzo, OAS 3.0, Claude Code
+ML Libraries: PyTorch, PyTorch-Lightning, XGBoost, LGBM, scikit-learn, statsmodels
+Cloud Platforms & Services: Google Cloud Platform (Vertex AI, Cloud Run, BigQuery, AlloyDB, Cloud Tasks, GCS, Compute Engine, Kubeflow), AWS (Bedrock, EC2, Lambda, RDS)
+Databases: SQLite, PostgreSQL, Snowflake, Vector DBs (Milvus, Pinecone)
+DevOps & Infrastructure: Git, Docker, Terraform, Bash, Linux, gRPC, REST APIs
+Data Analysis: Pandas, NumPy, Plotly, Seaborn, Matplotlib
+NLP: NLTK, SpaCy, fastText
+Big Data: pySpark, Dask, Dataflow, Apache Beam
+Languages: Native English and Spanish speaker, Intermediate Italian
+
+KEY PROJECTS & PUBLICATIONS:
+1. Anky: Developed production RAG system with fine-tuned LLM using SFT/DPO via llama.cpp, trained on social network data for personalized content generation
+2. Deep Learning Competition: Implemented next-frame video prediction using Transformer and ResNet CNN architectures in Joint-Embedding Predictive Architecture (JEPA) network
+3. Master's Thesis Publications: Published two peer-reviewed papers on computer microscopic simulation methodologies and applications
+4. S&P Global Capstone Project: Achieved 90% accuracy in financial news classification by fine-tuning BERT model on unlabeled corpus using self-supervised learning
+5. Text Topic Analysis: Applied LDA and GloVe word embeddings for topic modeling and semantic analysis on large-scale academic thesis corpus
+6. Twitter Sentiment Analysis: Built sentiment analysis pipeline using fastText and fine-tuned BERT for content strategy assessment and brand monitoring
+7. Hackathon Winner: Led team of 6 engineers to design and develop award-winning mobile application for public transit users
+
+EDUCATION:
+New York University - Master of Science in Data Science (2021-2023)
+- GPA: 3.8/4.0
+- Coursework: Deep Learning, Machine Learning, Big Data, Optimization & Linear Algebra, Probability & Statistics
+- Teaching Assistant for Data Science course at NYU Stern School of Business for two semesters
+
+Universidad de Chile - Bachelor and Master's degree in Engineering (2018)
+- Final grade 6.6/7.0
+- Graduated with highest distinction in top 10% GPA of cohort
+- Granted Outstanding Student Award for academic excellence
+- Teaching Assistant for five courses including Stochastic Processes and Network Optimization
+- Key Modules: Data Mining, Computer Science I and II, Probability, Statistics, Optimization, Operations Research
+
+NOTABLE ACHIEVEMENTS:
+- Improved LLM evaluation expert agreement from 30% to 70% through calibration
+- Reduced AI agent response latency from 5 minutes to 1 minute (80% improvement)
+- Led 6 production AI deployments across healthcare, cybersecurity, ecommerce, and finance
+- Improved Stable Diffusion approval rate from 30% to 60% (100% relative improvement)
+- Prevented $500K investment through data-driven analysis
+- Increased revenue through 25% route optimization discovery
+- Built chatbot supporting 500+ field workers
+- Achieved 90% accuracy on financial news classification
+- Published 2 peer-reviewed papers
+- Won hackathon with team of 6 engineers
+        `.trim();
+
+        // DOM Elements
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Example question handler
+        function useExample(element) {
+            messageInput.value = element.textContent;
+            messageInput.focus();
+        }
+
+        // Add message to chat
+        function addMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? 'You' : 'AI';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+
+            // Remove welcome message if it exists
+            const welcomeMsg = messagesContainer.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Show/hide typing indicator
+        function setTyping(isTyping) {
+            typingIndicator.classList.toggle('active', isTyping);
+            if (isTyping) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        // Show error
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        // Call Groq API directly (for demo/testing)
+        async function callGroqAPI(userMessage) {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${CONFIG.groqApiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: 'llama-3.3-70b-versatile',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: `You are BrunoAI, an AI assistant that helps people learn about Bruno Stefoni's professional experience and expertise. Use the following knowledge base to answer questions accurately and concisely. If asked about something not in the knowledge base, politely say you don't have that information.
+
+KNOWLEDGE BASE:
+${BRUNO_KNOWLEDGE}
+
+Instructions:
+- Be friendly and professional
+- Keep responses concise (2-3 sentences typically)
+- Highlight specific achievements and technical skills
+- If the question is about Bruno's experience, reference specific projects or companies
+- Don't make up information not in the knowledge base`
+                        },
+                        {
+                            role: 'user',
+                            content: userMessage
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Groq API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        // Call Fly.io backend (for production)
+        async function callFlyioBackend(userMessage) {
+            const response = await fetch(`${CONFIG.apiUrl}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: userMessage
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Backend error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.response;
+        }
+
+        // Send message
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            // Validation
+            if (CONFIG.useDirectGroq && CONFIG.groqApiKey === 'YOUR_GROQ_API_KEY_HERE') {
+                showError('Please configure your Groq API key in the CONFIG section');
+                return;
+            }
+
+            if (!CONFIG.useDirectGroq && CONFIG.apiUrl === 'YOUR_FLYIO_BACKEND_URL_HERE') {
+                showError('Please configure your Fly.io backend URL in the CONFIG section');
+                return;
+            }
+
+            // Add user message
+            addMessage('user', message);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Disable input
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            setTyping(true);
+
+            try {
+                // Call appropriate backend
+                const response = CONFIG.useDirectGroq
+                    ? await callGroqAPI(message)
+                    : await callFlyioBackend(message);
+
+                setTyping(false);
+                addMessage('assistant', response);
+            } catch (error) {
+                setTyping(false);
+                console.error('Error:', error);
+                showError('Sorry, I encountered an error. Please try again.');
+                addMessage('assistant', 'Sorry, I encountered an error processing your request. Please try again.');
+            } finally {
+                // Re-enable input
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Initial focus
+        messageInput.focus();
+    </script>
+</body>
+</html>

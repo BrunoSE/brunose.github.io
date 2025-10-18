@@ -3,82 +3,505 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bruno Stefoni's website</title>
+
+    <!-- SEO Meta Tags -->
+    <title>Bruno Stefoni | Principal AI/ML Engineer | LLM Agents & RAG Systems</title>
+    <meta name="description" content="Bruno Stefoni is a Principal AI/ML Engineer specializing in LLM agents, RAG systems, and production ML deployments. GCP ML Engineer certified with expertise in agentic systems.">
+    <meta name="keywords" content="AI Engineer, ML Engineer, LLM, RAG, AI Agents, Machine Learning, Bruno Stefoni, Agentic Systems">
+    <meta name="author" content="Bruno Stefoni">
+
+    <!-- Open Graph / Social Media Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://brunose.github.io/">
+    <meta property="og:title" content="Bruno Stefoni | Principal AI/ML Engineer">
+    <meta property="og:description" content="Principal AI/ML Engineer specializing in LLM agents, RAG systems, and production ML deployments.">
+    <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
+
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bruno Stefoni | Principal AI/ML Engineer">
+    <meta name="twitter:description" content="Principal AI/ML Engineer specializing in LLM agents, RAG systems, and production ML deployments.">
+    <meta name="twitter:image" content="https://brunose.github.io/assets/preview.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
+        /* Design System - CSS Variables */
+        :root {
+            /* Colors - Modern Developer Aesthetic */
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #131829;
+            --color-bg-tertiary: #1a1f3a;
+            --color-bg-elevated: #1e2442;
+
+            --color-text-primary: #e4e6eb;
+            --color-text-secondary: #b0b8c9;
+            --color-text-tertiary: #6b7280;
+
+            --color-accent-primary: #3b82f6;
+            --color-accent-secondary: #8b5cf6;
+            --color-accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+
+            --color-success: #10b981;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-border-focus: rgba(59, 130, 246, 0.4);
+
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --spacing-2xl: 4rem;
+
+            /* Typography */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --font-size-5xl: 3rem;
+
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        /* Reset & Base Styles */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-color: #272822; /* Monokai Editor Background */
-            color: #f8f8f2; /* Monokai Editor Foreground */
-        }
-        header {
-            background-color: #1e1f1c; /* Monokai Tab Well/Borders */
-            padding: 1rem;
-            text-align: center;
-        }
-        nav a {
-            color: #f8f8f2; /* Monokai Editor Foreground */
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-        }
-        nav a:hover {
-            background-color: #414339; /* Monokai Selection */
-        }
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            text-align: center;
-            padding: 2rem;
         }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            color: #a6e22e; /* Monokai Bright Green (similar to class name) */
-        }
-        h2 {
-            font-size: 1.5rem;
-            color: #66d9ef; /* Monokai Bright Cyan (similar to library function) */
-            margin-bottom: 2rem;
-        }
-        .social-links a {
-            display: inline-block;
-            margin: 0 0.5rem;
-            font-size: 1.2rem;
-            color: #f8f8f2; /* Monokai Editor Foreground */
+
+        .nav-brand {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--color-text-primary);
             text-decoration: none;
+            transition: color var(--transition-fast);
         }
-        .social-links a:hover {
-            color: #ae81ff; /* Monokai Bright Magenta (similar to number) */
+
+        .nav-brand:hover {
+            color: var(--color-accent-primary);
         }
-        .separator {
-            color: #f8f8f2; /* Monokai Editor Foreground */
+
+        .nav-links {
+            display: flex;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--color-text-primary);
+            background: var(--color-bg-tertiary);
+        }
+
+        .nav-link.active {
+            color: var(--color-accent-primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gradient Background Effect */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-md);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .hero-badge span {
+            color: var(--color-accent-primary);
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: var(--font-size-5xl);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-md);
+            animation: fadeInUp 0.6s ease-out 0.1s backwards;
+        }
+
+        .gradient-text {
+            background: var(--color-accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: var(--font-size-xl);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.6;
+            animation: fadeInUp 0.6s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* CTA Buttons */
+        .cta-group {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease-out 0.3s backwards;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            border: none;
+            font-family: var(--font-family);
+        }
+
+        .btn-primary {
+            background: var(--color-accent-gradient);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-elevated);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-bg-tertiary);
+            border-color: var(--color-accent-primary);
+        }
+
+        /* Social Links */
+        .social-links {
+            margin-top: var(--spacing-xl);
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            animation: fadeInUp 0.6s ease-out 0.4s backwards;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            padding: var(--spacing-xs) var(--spacing-md);
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: all var(--transition-fast);
+        }
+
+        .social-link:hover {
+            color: var(--color-text-primary);
+            border-color: var(--color-accent-primary);
+            background: var(--color-bg-tertiary);
+            transform: translateY(-2px);
+        }
+
+        /* About Section */
+        .about-section {
+            padding: var(--spacing-2xl) var(--spacing-lg);
+            background: var(--color-bg-secondary);
+        }
+
+        .about-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            text-align: center;
+        }
+
+        .about-text {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            line-height: 1.8;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-lg);
+        }
+
+        .skill-tag {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            text-align: center;
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            transition: all var(--transition-fast);
+        }
+
+        .skill-tag:hover {
+            border-color: var(--color-accent-primary);
+            color: var(--color-accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            padding: var(--spacing-xl) var(--spacing-lg);
+            background: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+
+        footer p {
+            color: var(--color-text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: var(--font-size-4xl);
+            }
+
+            .hero-description {
+                font-size: var(--font-size-lg);
+            }
+
+            .cta-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .social-links {
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                gap: var(--spacing-sm);
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="/">Home</a>
-            <a href="/blog.html">Blog</a>
-            <a href="/chat.html">Chat</a>
-        </nav>
-    </header>
-    <main>
-        <h1>Hello, I'm Bruno Stefoni</h1>
-        <h2>AI/ML Engineer</h2>
-        <div class="social-links">
-            <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank">LinkedIn</a> <span class="separator">|</span>
-            <a href="https://github.com/BrunoSE" target="_blank">GitHub</a> <span class="separator">|</span>
-            <a href="https://scholar.google.com/citations?user=clOK1mEAAAAJ" target="_blank">G.Scholar</a>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">BS</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Home</a>
+                <a href="/blog.html" class="nav-link">Blog</a>
+                <a href="/agent.html" class="nav-link">AI Agent</a>
+            </div>
         </div>
-    </main>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span>✨ Principal AI/ML Engineer</span> | GCP ML Certified
+            </div>
+
+            <h1>
+                Building the future of<br>
+                <span class="gradient-text">AI Agent Systems</span>
+            </h1>
+
+            <p class="hero-description">
+                Specializing in LLM agents, RAG pipelines, and production ML systems.
+                From research to deployment, I architect scalable AI solutions that solve real-world problems.
+            </p>
+
+            <div class="cta-group">
+                <a href="/agent.html" class="btn btn-primary">
+                    💬 Try My AI Agent
+                </a>
+                <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" class="btn btn-secondary">
+                    View LinkedIn
+                </a>
+            </div>
+
+            <div class="social-links">
+                <a href="https://github.com/BrunoSE" target="_blank" class="social-link">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://scholar.google.com/citations?user=clOK1mEAAAAJ" target="_blank" class="social-link">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 0L0 4.5v3.5c0 4.142 3.358 7.5 7.5 7.5h.5c4.142 0 7.5-3.358 7.5-7.5V4.5L8 0zm0 2.273L13 5.045v3.005c0 3.038-2.462 5.5-5.5 5.5H7c-3.038 0-5.5-2.462-5.5-5.5V5.045L8 2.273z"/>
+                        <path d="M5.5 7.5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V8a.5.5 0 0 1 .5-.5zm5 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0V8a.5.5 0 0 1 .5-.5zM8 9a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 8 9z"/>
+                    </svg>
+                    Scholar
+                </a>
+                <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" class="social-link">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/>
+                    </svg>
+                    LinkedIn
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="about-container">
+            <h2 class="section-title">What I Do</h2>
+            <p class="about-text">
+                I architect and deploy production-grade AI systems with a focus on <strong>LLM agents</strong>,
+                <strong>RAG pipelines</strong>, and <strong>agentic architectures</strong>. My work spans from
+                research to production deployment, with expertise in GCP, AWS, and modern ML frameworks.
+            </p>
+            <p class="about-text">
+                Currently building the future of AI agents through MCP (Model Context Protocol) and Arazzo,
+                while maintaining production systems that process millions of queries with high accuracy and low latency.
+            </p>
+
+            <div class="skills-grid">
+                <div class="skill-tag">LLM Agents</div>
+                <div class="skill-tag">RAG Systems</div>
+                <div class="skill-tag">Python</div>
+                <div class="skill-tag">Go</div>
+                <div class="skill-tag">GCP</div>
+                <div class="skill-tag">AWS</div>
+                <div class="skill-tag">Vector DBs</div>
+                <div class="skill-tag">ML Evaluation</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Bruno Stefoni. Built with AI-powered tools.</p>
+    </footer>
 </body>
 </html>

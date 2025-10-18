@@ -1,7 +1,21 @@
 # Site settings
-title: Bruno Stefoni's website
-description: AI & ML blog
+title: Bruno Stefoni | Principal AI/ML Engineer
+description: Principal AI/ML Engineer specializing in LLM agents, RAG systems, and production ML deployments. GCP ML Engineer certified with expertise in agentic systems.
 author: Bruno Stefoni
+url: https://brunose.github.io
+baseurl: ""
+
+# Social links
+linkedin_url: https://www.linkedin.com/in/bruno-stefoni-escudero/
+github_url: https://github.com/BrunoSE
+scholar_url: https://scholar.google.com/citations?user=clOK1mEAAAAJ
+
+# SEO
+lang: en_US
+keywords: AI Engineer, ML Engineer, LLM, RAG, AI Agents, Machine Learning, Agentic Systems
 
 # Theme settings
 theme: jekyll-theme-minimal
+
+# Build settings
+markdown: kramdown
