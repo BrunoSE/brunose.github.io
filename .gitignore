@@ -27,3 +27,5 @@ flyio_website/*
 flyio_website/
 node_modules/
 CLAUDE.md
+docs/
+docs/*
