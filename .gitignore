@@ -25,6 +25,8 @@ _site/
 *.tex
 flyio_website/*
 flyio_website/
+flyio_backend/*
+flyio_backend/
 node_modules/
 CLAUDE.md
 docs/
