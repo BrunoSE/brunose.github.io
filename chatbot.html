@@ -841,12 +841,12 @@ Instructions:
             if (!message) return;
 
             // Validation
-            if (CONFIG.useDirectGroq && CONFIG.groqApiKey === 'YOUR_GROQ_API_KEY_HERE') {
+            if (CONFIG.useDirectGroq && (!CONFIG.groqApiKey || CONFIG.groqApiKey.startsWith('YOUR_GROQ'))) {
                 showError('Please configure your Groq API key in the CONFIG section');
                 return;
             }
 
-            if (!CONFIG.useDirectGroq && CONFIG.apiUrl === 'YOUR_FLYIO_BACKEND_URL_HERE') {
+            if (!CONFIG.useDirectGroq && (!CONFIG.apiUrl || CONFIG.apiUrl.startsWith('YOUR_FLYIO'))) {
                 showError('Please configure your Fly.io backend URL in the CONFIG section');
                 return;
             }
