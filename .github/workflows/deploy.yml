@@ -28,6 +28,7 @@ jobs:
         run: |
           sed -i "s/YOUR_GROQ_API_KEY_HERE/${{ secrets.GROQ_API_KEY }}/g" chatbot.html
           sed -i "s#YOUR_FLYIO_BACKEND_URL_HERE#${{ secrets.FLYIO_BACKEND_URL }}#g" chatbot.html
+          sed -i "s/YOUR_BRUNO_API_KEY_HERE/${{ secrets.BRUNO_API_KEY }}/g" chatbot.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

@@ -619,11 +619,13 @@
     <script>
         // Configuration
         const CONFIG = {
-            // TODO: Replace with your Fly.io backend URL when deployed
+            // Fly.io backend URL
             apiUrl: 'YOUR_FLYIO_BACKEND_URL_HERE',
-            // Groq API configuration (for direct client-side calls)
+            // Backend API key for authentication
+            brunoApiKey: 'YOUR_BRUNO_API_KEY_HERE',
+            // Groq API configuration (for direct client-side calls - NOT recommended for production)
             groqApiKey: 'YOUR_GROQ_API_KEY_HERE', // Get free key from https://console.groq.com
-            useDirectGroq: true // Set to false when using Fly.io backend
+            useDirectGroq: false // Using Fly.io backend for secure API calls
         };
 
         // Knowledge base about Bruno (embedded for demo)
@@ -819,7 +821,8 @@ Instructions:
             const response = await fetch(`${CONFIG.apiUrl}/chat`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-API-Key': CONFIG.brunoApiKey
                 },
                 body: JSON.stringify({
                     message: userMessage
@@ -846,9 +849,15 @@ Instructions:
                 return;
             }
 
-            if (!CONFIG.useDirectGroq && (!CONFIG.apiUrl || CONFIG.apiUrl.startsWith('YOUR_FLYIO'))) {
-                showError('Please configure your Fly.io backend URL in the CONFIG section');
-                return;
+            if (!CONFIG.useDirectGroq) {
+                if (!CONFIG.apiUrl || CONFIG.apiUrl.startsWith('YOUR_FLYIO')) {
+                    showError('Please configure your Fly.io backend URL in the CONFIG section');
+                    return;
+                }
+                if (!CONFIG.brunoApiKey || CONFIG.brunoApiKey.startsWith('YOUR_BRUNO')) {
+                    showError('Please configure your API key in the CONFIG section');
+                    return;
+                }
             }
 
             // Add user message
