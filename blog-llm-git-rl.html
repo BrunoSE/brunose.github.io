@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teaching an LLM to Use Git Through Pure Reinforcement Learning | Bruno Stefoni</title>
+    <meta name="description" content="We built an agentic RL environment for Git tool orchestration, discovered our reward function was cheating, fixed it, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-llm-git-rl.html">
+    <meta property="og:title" content="Teaching an LLM to Use Git Through Pure Reinforcement Learning">
+    <meta property="og:description" content="We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+    <style>
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #131829;
+            --color-bg-tertiary: #1a1f3a;
+            --color-bg-elevated: #1e2442;
+            --color-text-primary: #e4e6eb;
+            --color-text-secondary: #b0b8c9;
+            --color-text-tertiary: #6b7280;
+            --color-accent-primary: #3b82f6;
+            --color-accent-secondary: #8b5cf6;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition-fast: 150ms ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        .nav-brand:hover { color: var(--color-accent-primary); }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        .nav-link:hover { color: var(--color-text-primary); background: var(--color-bg-tertiary); }
+        .nav-link.active { color: var(--color-accent-primary); }
+
+        .main-container {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+        .post-wrapper {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .post-hero {
+            margin-bottom: 4rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .post-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .post-date {
+            color: var(--color-text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+        .post-tag {
+            padding: 3px 12px;
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--color-accent-primary);
+        }
+        .post-title {
+            font-size: clamp(1.75rem, 5vw, var(--font-size-4xl));
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+        }
+        .post-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            line-height: 1.7;
+            font-style: italic;
+            border-left: 3px solid var(--color-accent-secondary);
+            padding-left: 1.5rem;
+        }
+
+        /* Prose */
+        .prose { color: var(--color-text-secondary); line-height: 1.8; }
+
+        .prose h2 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin: 3rem 0 1.25rem;
+            color: var(--color-text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .prose h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--color-text-primary);
+        }
+        .prose p { margin-bottom: 1.25rem; }
+        .prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
+        .prose li { margin-bottom: 0.6rem; }
+        .prose strong { color: var(--color-text-primary); font-weight: 600; }
+        .prose em { font-style: italic; }
+
+        .prose a {
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color var(--transition-fast);
+        }
+        .prose a:hover { border-bottom-color: var(--color-accent-primary); }
+
+        .prose code:not(pre code) {
+            font-family: var(--font-mono);
+            font-size: 0.875em;
+            background: var(--color-bg-elevated);
+            color: #e2b96f;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .prose pre {
+            background: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .prose pre code {
+            font-family: var(--font-mono);
+            font-size: var(--font-size-sm);
+            background: none;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: var(--font-size-sm);
+            display: block;
+            overflow-x: auto;
+        }
+        .prose th {
+            background: var(--color-bg-elevated);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+        }
+        .prose td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+        .prose tr:nth-child(even) td { background: var(--color-bg-secondary); }
+
+        .prose hr {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 3rem 0;
+        }
+        .prose blockquote {
+            border-left: 3px solid var(--color-accent-primary);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: var(--color-bg-secondary);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+        .prose blockquote p {
+            color: var(--color-text-primary);
+            font-style: italic;
+            margin-bottom: 0;
+        }
+
+        .mermaid {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+
+        .back-link {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        .back-link a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--transition-fast);
+        }
+        .back-link a:hover { color: var(--color-accent-primary); }
+
+        footer {
+            margin-top: 4rem;
+            padding: 3rem 2rem;
+            background: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+        footer p { color: var(--color-text-tertiary); font-size: var(--font-size-sm); }
+
+        @media (max-width: 768px) {
+            .post-title { font-size: var(--font-size-3xl); }
+            .post-wrapper { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Bruno Stefoni</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/blog.html" class="nav-link active">Blog</a>
+                <a href="/chatbot.html" class="nav-link">AI Chatbot</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="post-wrapper">
+            <div class="post-hero">
+                <div class="post-meta">
+                    <span class="post-date">February 27, 2026</span>
+                    <span class="post-tag">Reinforcement Learning</span>
+                    <span class="post-tag">LLM Agents</span>
+                    <span class="post-tag">GRPO</span>
+                    <span class="post-tag">Tool Use</span>
+                </div>
+                <h1 class="post-title">Teaching an LLM to Use Git Through Pure Reinforcement Learning</h1>
+                <p class="post-subtitle">We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, trained for 200 steps, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.</p>
+            </div>
+
+            <article class="prose">
+
+                <h2>The Bug We Hit First</h2>
+
+                <p>Three hours into our first training run:</p>
+
+                <pre><code>Step 0 → Reward: 0.960
+Step 1 → Reward: 0.971
+Step 2 → Reward: 0.983</code></pre>
+
+                <p>We'd solved multi-turn Git tool orchestration in two gradient steps. Qwen3-4B, fresh out of the box, was scoring 0.96 with zero RL training.</p>
+
+                <p>Either we'd made something embarrassingly easy, or our reward function was cheating. It was the reward function.</p>
+
+                <p><strong>The goal:</strong> train a model via outcome-only RL to chain Git tool calls to accomplish natural language goals — no hand-written step-by-step instructions. The hypothesis: the same approach that gave us o1-style reasoning for math should work for agentic tool use. A model trained this way should be able to pick up an unfamiliar MCP server and chain its tools effectively, because it has internalized the <em>structure</em> of tool orchestration, not memorized specific sequences.</p>
+
+                <hr>
+
+                <h2>The Environment</h2>
+
+                <p>We chose Git for three reasons: state is fully inspectable (reward is a state diff, not a vibes check), tools have natural data-passing relationships that force multi-step planning (<code>git_log</code> → extract hash → <code>git_show</code>), and sandboxing is trivial — each episode gets a seeded temp repo, deterministic and isolated.</p>
+
+                <p>Built on <a href="https://www.primeintellect.ai/" target="_blank">Prime Intellect Lab</a> using the <a href="https://github.com/PrimeIntellect-ai/verifiers" target="_blank"><code>verifiers</code></a> library and GitPython.</p>
+
+                <h3>The Tools</h3>
+
+                <p>The model has access to 13 Git tools. Critically, <code>repo_path</code> is hidden — the environment injects it automatically on every call, so the model sees clean schemas:</p>
+
+                <pre><code class="language-json">{
+  "type": "function",
+  "function": {
+    "name": "git_status",
+    "description": "Show the working tree status of the repository.",
+    "parameters": { "type": "object", "properties": {}, "required": [] }
+  }
+}</code></pre>
+
+                <pre><code class="language-json">{
+  "type": "function",
+  "function": {
+    "name": "git_show",
+    "description": "Show the contents and diff of a commit.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "Commit hash or reference to show (e.g. HEAD, abc1234)"
+        }
+      },
+      "required": ["revision"]
+    }
+  }
+}</code></pre>
+
+                <table>
+                    <thead>
+                        <tr><th>Tool</th><th>Type</th><th>Key Parameters</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>git_status</code></td><td>Read</td><td>—</td></tr>
+                        <tr><td><code>git_log</code></td><td>Read</td><td><code>max_count</code></td></tr>
+                        <tr><td><code>git_show</code></td><td>Read</td><td><code>revision</code></td></tr>
+                        <tr><td><code>git_diff_unstaged</code></td><td>Read</td><td>—</td></tr>
+                        <tr><td><code>git_diff_staged</code></td><td>Read</td><td>—</td></tr>
+                        <tr><td><code>git_diff</code></td><td>Read</td><td><code>target</code></td></tr>
+                        <tr><td><code>git_branch</code></td><td>Read</td><td>—</td></tr>
+                        <tr><td><code>git_add</code></td><td>Write</td><td><code>files: list[str]</code></td></tr>
+                        <tr><td><code>git_commit</code></td><td>Write</td><td><code>message</code></td></tr>
+                        <tr><td><code>git_reset</code></td><td>Write</td><td>—</td></tr>
+                        <tr><td><code>git_create_branch</code></td><td>Write</td><td><code>branch_name</code>, <code>start_point</code></td></tr>
+                        <tr><td><code>git_checkout</code></td><td>Write</td><td><code>branch_name</code></td></tr>
+                        <tr><td><code>git_init</code></td><td>Write</td><td>—</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>Episode Structure</h3>
+
+                <div class="mermaid">sequenceDiagram
+    participant Env as Environment
+    participant Model as Qwen3-4B
+    participant Repo as Sandboxed Git Repo
+
+    Env->>Repo: Create isolated tmpdir from template
+    Env->>Env: Snapshot initial state
+    Env->>Env: Resolve dynamic expected values
+
+    Env->>Model: System prompt + tool schemas + goal
+
+    loop Up to 10 turns
+        Model->>Env: Tool call
+        Env->>Repo: Execute (inject repo_path)
+        Repo->>Env: Tool output
+        Env->>Model: Tool response
+    end
+
+    Model->>Env: Final answer (no tool calls)
+    Env->>Repo: Snapshot final state, delete tmpdir
+    Env->>Env: Compute reward</div>
+
+                <h3>Repo Templates</h3>
+
+                <p>Each episode starts from a seeded template:</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Template</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>clean</code></td><td>5 commits, single <code>main</code> branch, clean working tree</td></tr>
+                        <tr><td><code>dirty</code></td><td>4 commits + modified tracked file + untracked <code>scratch.py</code></td></tr>
+                        <tr><td><code>staged</code></td><td>4 commits + <code>staged_feature.py</code> staged but not committed</td></tr>
+                        <tr><td><code>multi_branch</code></td><td>3 base commits + <code>feature-a</code> + <code>feature-b</code> branches</td></tr>
+                    </tbody>
+                </table>
+
+                <h3>66 Episodes, Four Levels</h3>
+
+                <div class="mermaid">graph LR
+    L1["Level 1<br/>20 episodes<br/>Single tool call"]
+    L2["Level 2<br/>21 episodes<br/>2-tool chain"]
+    L3["Level 3<br/>12 episodes<br/>3-4 tool chain"]
+    L4["Level 4<br/>13 episodes<br/>cross-tool threading<br/>+ branch navigation"]
+
+    L1 -->|"+ data passing"| L2
+    L2 -->|"+ conditional logic<br/>+ multi-condition writes"| L3
+    L3 -->|"+ git_diff<br/>+ round-trips<br/>+ 5 conditions"| L4
+
+    L1a["git_log → report exact hash"]
+    L1b["git_create_branch → state verified"]
+    L2a["git_log → git_show<br/>extract hash, use in show"]
+    L2b["git_add → git_commit<br/>clean working tree"]
+    L3a["git_log → git_show → git_branch<br/>exact values + full diff"]
+    L3b["git_create_branch → git_checkout<br/>→ git_add → git_commit"]
+    L4a["git_branch → git_diff → git_show<br/>first use of git_diff"]
+    L4b["checkout → log → checkout → log<br/>round-trip, report both messages"]
+
+    L1 --- L1a & L1b
+    L2 --- L2a & L2b
+    L3 --- L3a & L3b
+    L4 --- L4a & L4b</div>
+
+                <p>With <code>batch_size=256</code> and <code>rollouts_per_example=16</code>, each step draws 16 distinct episodes, each simulated 16 times. The 66 episodes cycle through roughly every 4 steps.</p>
+
+                <hr>
+
+                <h2>Infrastructure</h2>
+
+                <p>Three commands cover the cycle from code to trained model:</p>
+
+                <pre><code class="language-bash">prime env push                                    # publish to Hub as a versioned Python package
+prime rl run configs/lab/git_orchestration.toml  # launch on Prime's GPU cluster
+prime rl logs &lt;run-id&gt; -f                         # stream logs</code></pre>
+
+                <p>The environment is published as a versioned package (<code>bstefoni/git-orchestration@0.3.0</code>). The training cluster installs that exact version, so fixing a reward bug mid-run means bumping the version and relaunching — old runs aren't contaminated.</p>
+
+                <p>The config is minimal:</p>
+
+                <pre><code class="language-toml">model = "Qwen/Qwen3-4B-Instruct-2507"
+max_steps = 200
+batch_size = 256
+rollouts_per_example = 16
+
+[sampling]
+max_tokens = 1024
+temperature = 0.7
+
+[[env]]
+id = "bstefoni/git-orchestration"</code></pre>
+
+                <hr>
+
+                <h2>The Reward Function</h2>
+
+                <p>Back to the original 0.96 problem.</p>
+
+                <h3>Why the First Version Was Lying</h3>
+
+                <p>For <strong>read episodes</strong> (model must report information from tool output), we checked whether expected text fragments appeared anywhere in the completion:</p>
+
+                <pre><code class="language-python"># BROKEN: checks all messages including tool responses
+for msg in completion:
+    if msg["role"] in ("assistant", "tool"):
+        text += str(msg.get("content") or "")
+
+matches = sum(1 for f in fragments if f.lower() in text.lower())
+reward = matches / len(fragments)</code></pre>
+
+                <p>If the expected fragment is <code>"nothing to commit"</code> and the model calls <code>git_status</code>, the <em>tool response</em> contains exactly that string. The model gets full reward for making a tool call, regardless of whether its final answer made any sense.</p>
+
+                <p>The base model already knows which git tool to call for common tasks. It was essentially pre-trained to score 1.0 on this reward. No learning signal.</p>
+
+                <h3>Fix 1: Final-Message-Only Scoring</h3>
+
+                <p>Only check the model's <strong>last assistant message</strong> — the one with no tool calls:</p>
+
+                <pre><code class="language-python">def _extract_final_assistant_text(completion):
+    for msg in reversed(completion):
+        if msg.get("role") == "assistant":
+            if not msg.get("tool_calls"):  # terminal message
+                return str(msg.get("content") or "")
+    return ""</code></pre>
+
+                <p>Now the model must synthesize tool output into a final answer. Calling <code>git_status</code> and echoing the output doesn't help — it needs to actually write "the working tree is clean, nothing to commit."</p>
+
+                <h3>Fix 2: Dynamic Fragment Extraction</h3>
+
+                <p>The second weakness: if fragments are static strings like <code>"nothing to commit"</code>, the model can learn them as a lookup table. The v0.2.0+ episodes use <strong>dynamic fragments</strong> — placeholders resolved against the actual repo at episode start:</p>
+
+                <pre><code class="language-python"># Episode template
+{
+    "question": "What is the abbreviated commit hash of the most recent commit? "
+                "Include the exact hash in your answer.",
+    "expected_output_contains": ["$head_commit_hash"],  # resolved at runtime
+}</code></pre>
+
+                <p>At <code>setup_state()</code>, the placeholder becomes the real value:</p>
+
+                <pre><code class="language-python">for frag in expected["expected_output_contains"]:
+    if frag.startswith("$"):
+        val = snapshot.get(frag[1:])  # e.g., "d17aac75"
+        resolved.append(str(val))</code></pre>
+
+                <div class="mermaid">sequenceDiagram
+    participant E as setup_state()
+    participant S as Sandbox Repo
+    participant M as Model
+    participant R as Reward
+
+    E->>S: Create repo (seed=42)
+    S->>E: snapshot["head_commit_hash"] = "d17aac75"
+    E->>E: Resolve "$head_commit_hash" to "d17aac75"
+    Note over E: expected_output_contains = ["d17aac75"]
+
+    E->>M: "What is the HEAD commit hash?"
+    M->>S: git_log()
+    S->>M: "commit d17aac75, Author: Alice..."
+    M->>R: Final: "The HEAD commit hash is d17aac75"
+    R->>R: "d17aac75" in final_text? yes
+    R->>M: reward = 1.0
+
+    Note over M,R: Hallucinating "a1b2c3d4" gives reward = 0.0</div>
+
+                <p>25 of 66 episodes use dynamic fragments. The model can't memorize the answer — it must genuinely extract the value from tool output and carry it into its final message.</p>
+
+                <h3>Write Episodes: State Diff</h3>
+
+                <p>Write episodes don't check the model's text at all. Reward comes from <strong>repo state after the episode ends</strong>:</p>
+
+                <pre><code class="language-python">def _score_write_episode(actual_state, expected_state):
+    conditions_checked = 0
+    conditions_met = 0
+
+    if "expected_branches_include" in expected_state:
+        expected = set(expected_state["expected_branches_include"])
+        actual = set(actual_state["branches"])
+        conditions_checked += len(expected)
+        conditions_met += len(expected &amp; actual)
+
+    if "expected_head_branch" in expected_state:
+        conditions_checked += 1
+        if actual_state["head_branch"] == expected_state["expected_head_branch"]:
+            conditions_met += 1
+
+    if "expected_is_clean" in expected_state:
+        conditions_checked += 1
+        if actual_state["is_clean"] == expected_state["expected_is_clean"]:
+            conditions_met += 1
+
+    if "expected_head_commit_message_contains" in expected_state:
+        conditions_checked += 1
+        head_msg = (actual_state.get("head_commit_message") or "").lower()
+        if expected_state["expected_head_commit_message_contains"].lower() in head_msg:
+            conditions_met += 1
+
+    if "initial_commit_count" in expected_state:
+        conditions_checked += 1
+        if actual_state["commit_count"] > expected_state["initial_commit_count"]:
+            conditions_met += 1
+
+    return conditions_met / conditions_checked</code></pre>
+
+                <p>Reward is partial — an episode like "create branch feature-x, switch to it, stage everything, commit" scores 0.5 if the model creates and switches but fails to commit. Zero reward on a near-miss kills the learning signal.</p>
+
+                <hr>
+
+                <h2>Training</h2>
+
+                <p>Qwen3-4B-Instruct-2507 with GRPO + LoRA. LoRA freezes base weights and trains small adapter matrices at each layer — keeping memory low enough to run inference and training simultaneously on the same hardware, which matters a lot for GRPO's rollout-heavy sampling.</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Parameter</th><th>Value</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Model</td><td>Qwen/Qwen3-4B-Instruct-2507</td></tr>
+                        <tr><td>Training</td><td>GRPO + LoRA</td></tr>
+                        <tr><td>Max steps</td><td>200</td></tr>
+                        <tr><td>Batch size</td><td>256 (16 episodes × 16 rollouts)</td></tr>
+                        <tr><td>Max turns</td><td>10</td></tr>
+                        <tr><td>Max tokens</td><td>1024</td></tr>
+                        <tr><td>Temperature</td><td>0.7</td></tr>
+                    </tbody>
+                </table>
+
+                <hr>
+
+                <h2>Results: 200 Steps, One Collapse, Full Recovery</h2>
+
+                <p>The full reward curve for run <code>sheni3zblfgl2376amy1aa99</code>:</p>
+
+                <pre><code>Steps 123–149:  0.66 → climbing → 0.95–1.00  (saturation zone)
+                steps 135, 138, 141 hit exactly 1.0000
+
+Steps 150–151:  0.70 → 0.52                  (pre-collapse)
+Step  152:      0.0000                         ← cliff
+Steps 153–170:  stuck at ~0.0312              (dead zone, 19 steps)
+
+Step  171:      0.70                           ← sudden recovery
+Steps 172–175:  0.66 → 0.75 → 0.81 → 0.97
+Steps 176–189:  0.83–0.99                     (second plateau)
+
+Steps 190–191:  0.61 → 0.42                  (mini-collapse)
+Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
+
+                <h3>What Caused the Collapse</h3>
+
+                <p><strong>GRPO computes advantages as <code>(r_i - mean) / std</code> within each group of rollouts.</strong> When the model scores 0.99–1.0 on all 16 rollouts of a given prompt, <code>std(r) ≈ 0</code> — the gradient signal degrades to noise. Steps 135–149 look great on the reward chart, but they're the most dangerous phase: the model is near-saturated, and accumulated noisy gradients are quietly shifting the policy.</p>
+
+                <p>At step 152, the shift crosses a threshold. The model exits "tool-call mode."</p>
+
+                <p>Two clues confirm this is a format collapse, not random noise:</p>
+
+                <p><strong>Clue 1 — The 0.0312 number.</strong> <code>0.0312 = 1/32</code>. The dead zone isn't noise — the model is stuck at <em>exactly</em> one unit of partial credit per batch for 19 steps. It's doing something consistent and specific, earning a small fixed reward from one satisfied condition while completely failing at tool calls.</p>
+
+                <p><strong>Clue 2 — Step execution times.</strong> During normal operation, steps take 60–90 seconds. During the dead zone (steps 153–170): 20–35 seconds. The model is generating far fewer tokens — short non-tool-call responses instead of multi-turn sequences.</p>
+
+                <p>The trap completes itself: once the model stops making tool calls, all rewards drop to ~0. Now <code>std(r) = 0</code> again from the other direction — uniformly bad. GRPO can't recover without variance. The only way out is temperature-driven luck: eventually <code>temperature=0.7</code> produces a rollout that includes a valid tool call, breaks the uniformity, and gives GRPO a gradient to work with.</p>
+
+                <p>That's why recovery at step 171 is sudden — one lucky rollout cascades into 5 steps from 0.07 to 0.97.</p>
+
+                <p>The second collapse at steps 190–191 is shorter (2 steps vs. 19) because the model has already learned the recovery path once.</p>
+
+                <h3>What to Do Differently</h3>
+
+                <p>The collapse reveals a specific gap in the reward design: <strong>no partial credit for valid tool calls</strong>. If the model makes correct tool calls but gives a wrong final answer, it scores 0 on read episodes. There's a sharp cliff between "doing tool use" and "not doing tool use" — and GRPO has no gradient to pull it back from that cliff once it falls.</p>
+
+                <p>For the next run:</p>
+
+                <ul>
+                    <li><strong>Tool-call bonus</strong> (~0.1 weight): small reward for any step with a valid tool call. Creates a gradient floor — the model never falls to true-zero, and GRPO can always find a path back without needing luck.</li>
+                    <li><strong>Curriculum scheduling</strong>: unlock harder levels as easier ones saturate. 66 episodes with 16 rollouts each saturates fast; the saturation → noisy gradient cycle is the root cause of both collapses.</li>
+                    <li><strong>KL coefficient</strong>: check whether it's set. A non-zero KL penalty anchors the model to the reference policy and limits drift.</li>
+                    <li><strong>More episodes</strong>: 200+ would spread signal across more prompts and reduce per-episode saturation speed.</li>
+                </ul>
+
+                <p>The run ends well — steps 192–199 sit at 0.9943–0.9964, the model found a stable policy. The shape is a feature, not a failure: it tells us exactly what to tune.</p>
+
+                <hr>
+
+                <h2>What's Next</h2>
+
+                <ul>
+                    <li><strong>Per-level reward breakdown.</strong> The aggregate curve hides the signal. We want to see Level 1 saturating while Level 4 is still climbing — that's the shape that confirms the curriculum is working.</li>
+                    <li><strong>Error recovery episodes.</strong> Every tool in the current dataset either succeeds or returns a predictable error the model can ignore. A harder variant: the model encounters genuine failures mid-chain (checking out a branch with uncommitted changes, committing with nothing staged) and must recover from the error message. This tests adaptive replanning, not just forward chaining.</li>
+                    <li><strong>Other MCP servers.</strong> The same framework should work for a filesystem server, GitHub API server, or database server. Git is clean because state is inspectable — the interesting question is what domains have similarly verifiable reward signals.</li>
+                </ul>
+
+                <hr>
+
+                <h2>The Code</h2>
+
+                <ul>
+                    <li><strong>Environment Hub:</strong> <a href="https://app.primeintellect.ai/dashboard/environments/bstefoni/git-orchestration" target="_blank">bstefoni/git-orchestration</a></li>
+                    <li><strong>GitHub:</strong> <a href="https://github.com/BrunoSE/pirl" target="_blank">BrunoSE/pirl</a></li>
+                </ul>
+
+                <p>The environment is ~700 lines of Python across 5 files. The hard part was the reward function — designing one where the only path to high reward is actually solving the task, not satisfying a proxy.</p>
+
+                <p>That, it turns out, requires more iterations than you'd expect.</p>
+
+            </article>
+
+            <div class="back-link">
+                <a href="/blog.html">← Back to Blog</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Bruno Stefoni. Built with AI-powered tools.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            themeVariables: {
+                darkMode: true,
+                background: '#131829',
+                primaryColor: '#1e2442',
+                primaryTextColor: '#e4e6eb',
+                primaryBorderColor: 'rgba(255,255,255,0.15)',
+                lineColor: '#3b82f6',
+                secondaryColor: '#1a1f3a',
+                tertiaryColor: '#1a1f3a',
+                edgeLabelBackground: '#131829',
+                clusterBkg: '#1a1f3a'
+            }
+        });
+    </script>
+</body>
+</html>

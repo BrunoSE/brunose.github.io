@@ -630,85 +630,222 @@
 
         // Knowledge base about Bruno (embedded for demo)
         const BRUNO_KNOWLEDGE = `
-Bruno Stefoni - AI Engineer
-Location: New York, NY | Email: brunostefoni12@gmail.com | Phone: +1 646 203 7124
+Bruno Stefoni - AI/ML Engineer | Recruiter Q&A Knowledge Base
+Location: New York, NY
+Email: brunostefoni12@gmail.com
+Phone: +1 646 203 7124
+LinkedIn: https://www.linkedin.com/in/bruno-stefoni-escudero/
+GitHub: https://github.com/BrunoSE
+Website: https://brunose.github.io/
 
-PROFESSIONAL SUMMARY:
-AI/ML Engineer with 8 years of experience architecting and deploying production AI systems, specialized in LLM agents, RAG pipelines, and cloud-native ML solutions. Proven track record leading both company product and customer-facing projects from design to deployment on GCP and AWS, building intelligent data systems and Agents that solve complex business problems, and implementing robust evaluation frameworks for AI applications.
+---
+## WHO IS BRUNO / ELEVATOR PITCH
+Bruno Stefoni is a Senior AI Engineer with 8 years of experience building production AI systems — from machine learning pipelines and LLM agents to evaluation frameworks and cloud infrastructure. He specializes in turning research-quality AI into reliable, measurable, production-grade systems.
+He is currently living in Manhattan as a Senior AI Engineer, where he has built the company's first LLM evaluation framework and architected a Go/Python AI agent system for automated data analysis. He holds a Master's in Data Science from NYU (GPA 3.8/4.0) and is a certified Google Cloud Professional ML Engineer.
+Bruno's edge is that he operates at the intersection of AI engineering and infrastructure: he doesn't just build models, he builds the evaluation, CI/CD, observability, and deployment systems that make AI reliable at scale.
 
-RECENT EXPERIENCE:
+---
 
-CloudWerx - Senior AI/ML Engineer (Nov 2023 - Nov 2024) | Manhattan, New York
-- Led 3 of 6 customer AI/ML projects end-to-end across healthcare, cybersecurity, ecommerce, and finance
-- Deployed production systems on GCP using Vertex AI, Cloud Run, BigQuery, AlloyDB, and Kubeflow
-- Built hybrid search engine with vector + keyword search using AlloyDB and Cloud Run
-- Created RAG medical transcript system injecting clinical guidelines
-- Developed Mixtral-powered cybersecurity chatbot with RAG for audit assistance
-- Fine-tuned Stable Diffusion on Vertex AI for architecture design, improving approval rate from 30% to 60% using LoRA and GCS workflows
-- Implemented Kubeflow MLOps CI/CD pipeline for medical x-ray detection with automated deployment and monitoring
+## CURRENT ROLE: Senior AI Engineer (Dec 2024 – Present)
 
-Aetna - CVS Health - Data Scientist (Sep 2023 - Oct 2023) | Manhattan, New York
-- Designed A/B test framework for 9M MAU mobile app to measure campaign impact on adoption KPIs
-- Analyzed live A/A experiment data in BigQuery for demographic validation of test methodology
+**LLM Evaluation Framework (0-to-1 build)**
+The most significant thing Bruno has done is build the company's first LLM evaluation infrastructure from scratch. When he joined, the team had AI agents in production — including a text-to-SQL agent — but no systematic way to measure quality. There was no ground truth data, no signal for whether changes improved or regressed performance. The team was essentially "shipping and hoping."
 
-Google - Data Scientist Intern (Jun 2022 - Aug 2022) | Mountain View, California
-- Built enterprise network datasets from multiple sources using PLX, BigQuery, and Python for strategic analysis
-- Identified 15% user churn risk through survival and time series analysis of adoption data
-- Presented insights to leadership, proposing new analytical methodologies for company-wide adoption
+Bruno pushed leadership to prioritize measurement infrastructure over feature velocity, making a data-driven case that without ground truth, improvements were unverifiable. He then spearheaded a cross-functional effort bringing together product managers and customer success teams to gather real user queries from support tickets and user sessions, and worked with domain experts to label correct SQL and expected outputs.
 
-STP - Data Scientist (May 2018 - May 2022) | Santiago, Chile
-- Deployed company-wide chatbot on on-prem infrastructure supporting 500+ field workers
-- Increased revenue by identifying routes with 25% speed discrepancy through geospatial analysis
-- Prevented $500K investment by leading statistical measurement campaign evaluating alternative solutions
-- Detected battery issues in 20% of electric fleet via anomaly detection on telemetry data
-- Improved KPI 6% by automating Twitter scraping and NLP classification for real-time disruption reporting
+He built a custom LLM-as-judge evaluation system with iterative calibration using human annotators. The result: 70% agreement with domain expert annotators (up from 30%). The framework now runs weekly across 4 production AI applications, transforming the team's development process from guesswork to reliable quality signals.
 
-TECHNICAL SKILLS:
-Certifications: Google Cloud Professional Machine Learning Engineer (May 2024 - May 2026)
-Programming Languages: Python, Go, Java, R, MATLAB
-AI/Agent Frameworks: Langchain, LangGraph, Google ADK, HuggingFace, Transformers, Instructor, Pydantic, OpenAI API, MCP, Arazzo, OAS 3.0, Claude Code
-ML Libraries: PyTorch, PyTorch-Lightning, XGBoost, LGBM, scikit-learn, statsmodels
-Cloud Platforms & Services: Google Cloud Platform (Vertex AI, Cloud Run, BigQuery, AlloyDB, Cloud Tasks, GCS, Compute Engine, Kubeflow), AWS (Bedrock, EC2, Lambda, RDS)
-Databases: SQLite, PostgreSQL, Snowflake, Vector DBs (Milvus, Pinecone)
-DevOps & Infrastructure: Git, Docker, Terraform, Bash, Linux, gRPC, REST APIs
-Data Analysis: Pandas, NumPy, Plotly, Seaborn, Matplotlib
-NLP: NLTK, SpaCy, fastText
-Big Data: pySpark, Dask, Dataflow, Apache Beam
-Languages: Native English and Spanish speaker, Intermediate Italian
+**AI Agent / Data Intermediary System**
+Bruno engineered an in-house Go/Python AI agent that allows non-technical business users to run complex data queries against Snowflake using natural language. The agent uses Claude via AWS Bedrock and features a modular primitive architecture:
+- Intent Filtering: understanding what the user actually wants
+- Business Domain Knowledge Injection: adding domain-specific context
+- Query Decomposition: breaking complex requests into manageable parts
+- Query Composition: building the actual SQL/Snowflake queries
+- Answer Synthesis: generating final responses with stated assumptions
 
-KEY PROJECTS & PUBLICATIONS:
-1. Anky: Developed production RAG system with fine-tuned LLM using SFT/DPO via llama.cpp, trained on social network data for personalized content generation
-2. Deep Learning Competition: Implemented next-frame video prediction using Transformer and ResNet CNN architectures in Joint-Embedding Predictive Architecture (JEPA) network
-3. Master's Thesis Publications: Published two peer-reviewed papers on computer microscopic simulation methodologies and applications
-4. S&P Global Capstone Project: Achieved 90% accuracy in financial news classification by fine-tuning BERT model on unlabeled corpus using self-supervised learning
-5. Text Topic Analysis: Applied LDA and GloVe word embeddings for topic modeling and semantic analysis on large-scale academic thesis corpus
-6. Twitter Sentiment Analysis: Built sentiment analysis pipeline using fastText and fine-tuned BERT for content strategy assessment and brand monitoring
-7. Hackathon Winner: Led team of 6 engineers to design and develop award-winning mobile application for public transit users
+Users can iterate: they say things like "exclude promos" or "also include November" and the agent translates that into the right API calls. Bruno reduced response latency from 5 minutes to 1 minute (5x improvement) through context engineering and architectural redesign.
 
-EDUCATION:
-New York University - Master of Science in Data Science (2021-2023)
-- GPA: 3.8/4.0
-- Coursework: Deep Learning, Machine Learning, Big Data, Optimization & Linear Algebra, Probability & Statistics
-- Teaching Assistant for Data Science course at NYU Stern School of Business for two semesters
+**Infrastructure & Standards Work**
+- Designed standards-based agent infrastructure using Model Context Protocol (MCP) with Arazzo and OpenAPI 3.0 specifications
+- Led load testing of MCP server using K6 for capacity planning, achieving 50% server cost reduction through rightsizing
+- Designed automated AI report processing pipeline using AWS Bedrock, Temporal workflow orchestration, and Kafka event streaming
+- Developed 5 Go microservices with gRPC and REST APIs powering the company's AI-driven analytics platform
 
-Universidad de Chile - Bachelor and Master's degree in Engineering (2018)
-- Final grade 6.6/7.0
-- Graduated with highest distinction in top 10% GPA of cohort
-- Granted Outstanding Student Award for academic excellence
-- Teaching Assistant for five courses including Stochastic Processes and Network Optimization
-- Key Modules: Data Mining, Computer Science I and II, Probability, Statistics, Optimization, Operations Research
+---
 
-NOTABLE ACHIEVEMENTS:
-- Improved LLM evaluation expert agreement from 30% to 70% through calibration
-- Reduced AI chatbot response latency from 5 minutes to 1 minute (80% improvement)
+## PREVIOUS ROLE: CLOUDWERX — Senior AI/ML Engineer (Nov 2023 – Nov 2024)
+
+CloudWerx is an AI/ML consultancy based in Manhattan. Bruno led 3 of 6 customer-facing AI/ML projects end-to-end across healthcare, cybersecurity, ecommerce, and finance. He also acted as primary technical liaison with Google Cloud, coordinating architecture reviews for cloud migrations for 6 companies into GCP.
+
+**Agentic Healthcare System (APE Framework)**
+Bruno architected and deployed an Analyze-Plan-Execute (APE) agentic framework for a healthcare startup's patient care platform. The system automated patient progress notes and health assessments, reducing documentation time from 7 minutes to 2 minutes per note. He designed a multi-agent system with specialized agents (Care Concierge, Symptom Triage, Preventive Care) that coordinated across AlloyDB, AWS RDS, and BigQuery. Care Managers could approve, modify, or reject AI-generated recommendations, with agents adapting based on feedback.
+
+**MLOps CI/CD Pipeline**
+Implemented a Kubeflow MLOps CI/CD pipeline for a medical x-ray detection system with automated model deployment and monitoring. This was a full production pipeline: training triggers, automated testing, deployment, and post-deployment monitoring.
+
+**Production Systems Deployed on GCP**
+- Hybrid vector + keyword search engine on AlloyDB and Cloud Run
+- RAG system for medical transcripts injecting clinical guidelines
+- Mixtral-powered cybersecurity chatbot with RAG for audit compliance
+- Fine-tuned Stable Diffusion on Vertex AI using LoRA, improving design approval rate from 30% to 60%
+- Patient context synthesis pipeline from transcripts (engineered workaround when clinical notes weren't yet available)
+
+**Load Testing & Performance Engineering**
+Led load testing and profiling efforts to optimize latency and token usage across AI services. Optimized Cloud Run configurations to minimize latency. Set up production logging and monitoring standards across the team.
+
+**Google Cloud Partnership**
+Acted as the primary technical liaison with Google Cloud, coordinating deep-dive architecture reviews to unblock pending questions on data pipelines. This involved presenting multi-agent system designs, discussing data pipeline architecture across AlloyDB and BigQuery, and addressing technical questions from Google's team.
+
+**Team Leadership**
+Facilitated weekly AI standups, translated vague product requirements into Asana tickets and concrete engineering tasks, mentored a direct report on the APE framework and JPM demo preparation, and drove codebase standardization (prompt/parameter versioning, stress testing processes).
+
+---
+
+## EARLIER EXPERIENCE
+
+**Aetna (CVS Health) — Data Scientist (Sep 2023 – Oct 2023, New York)**
+Short engagement at a major healthcare insurer. Designed an A/B test framework for a mobile app with 9 million monthly active users to measure campaign impact on adoption KPIs. Analyzed live A/A experiment data in BigQuery for demographic validation of test methodology.
+
+**Google — Data Scientist Intern (Jun 2022 – Aug 2022, Mountain View, CA)**
+Built enterprise network datasets from PLX, BigQuery, and Python for strategic analysis. Identified a 15% user churn risk through survival analysis and time series analysis of adoption data. Presented insights to leadership and proposed new analytical methodologies for company-wide adoption.
+
+**STP — Data Scientist (May 2018 – May 2022, Santiago, Chile)**
+STP is a public transit company. Bruno spent 4 years here building data products from scratch:
+- Deployed a company-wide chatbot on on-prem infrastructure supporting 500+ field workers
+- Increased revenue by identifying bus routes with 25% speed discrepancy through geospatial analysis
+- Prevented a $500K investment by leading a statistical measurement campaign that evaluated alternative solutions with data
+- Detected battery issues in 20% of the electric fleet using anomaly detection on telemetry data
+- Built a Twitter scraping pipeline with NLP classification for real-time service disruption reporting, improving a key operational KPI by 6%
+
+---
+
+## TECHNICAL SKILLS
+
+**Programming Languages:** Python (primary), Go, Java, R, MATLAB, Bash
+
+**AI/ML Frameworks:** LangChain, LangGraph, Google ADK, HuggingFace Transformers, PyTorch, PyTorch-Lightning, Instructor, Pydantic
+
+**Agent & API Standards:** Model Context Protocol (MCP), Arazzo, OpenAPI 3.0 (OAS 3.0), Claude Code SDK, OpenAI API
+
+**ML Libraries:** XGBoost, LightGBM, scikit-learn, statsmodels
+
+**Cloud Platforms:**
+- GCP: Vertex AI, Cloud Run, BigQuery, AlloyDB, Cloud Tasks, GCS, Compute Engine, Kubeflow
+- AWS: Bedrock, EC2, Lambda, RDS
+
+**Databases:** PostgreSQL, SQLite, Snowflake, Vector DBs (Milvus, Pinecone)
+
+**DevOps & Infrastructure:** Git, Docker, Terraform, gRPC, REST APIs, K6 (load testing), Temporal (workflow orchestration), Kafka (event streaming), Linux
+
+**Data & Analytics:** Pandas, NumPy, pySpark, Dask, Apache Beam (Dataflow), Plotly, Seaborn, Matplotlib
+
+**NLP:** NLTK, SpaCy, fastText, BERT fine-tuning, SFT/DPO
+
+**Certifications:** Google Cloud Professional Machine Learning Engineer (May 2024 – May 2026)
+
+**Languages:** Native English and Spanish, Intermediate Italian
+
+---
+
+## KEY METRICS & ACHIEVEMENTS
+
+- Improved LLM judge agreement with domain experts from 30% to 70% through iterative calibration
+- Reduced AI agent response latency from 5 minutes to 1 minute (5x improvement)
+- Reduced documentation time from 7 minutes to 2 minutes per patient note (3.5x improvement)
+- Achieved 50% server cost reduction via K6 load testing and rightsizing
+- Improved Stable Diffusion design approval rate from 30% to 60% (2x improvement)
+- Built evaluation framework running weekly across 4 production AI applications
 - Led 6 production AI deployments across healthcare, cybersecurity, ecommerce, and finance
-- Improved Stable Diffusion approval rate from 30% to 60% (100% relative improvement)
-- Prevented $500K investment through data-driven analysis
-- Increased revenue through 25% route optimization discovery
-- Built chatbot supporting 500+ field workers
-- Achieved 90% accuracy on financial news classification
-- Published 2 peer-reviewed papers
-- Won hackathon with team of 6 engineers
+- Prevented a $500K investment through data-driven statistical analysis
+- Built on-prem chatbot supporting 500+ field workers
+- Achieved 90% accuracy on financial news classification (S&P Global project)
+- Published 2 peer-reviewed academic papers
+- Won a hackathon leading a team of 6 engineers
+
+---
+
+## BEHAVIORAL EXAMPLES (STAR FORMAT)
+
+**Dealing with conflict / pushing back on leadership:**
+Bruno had to convince leadership to slow down visible feature work to build evaluation infrastructure. He made a data-driven case that without ground truth, the team was "flying blind" — no way to tell if changes improved or regressed quality. Leadership agreed. The resulting framework now runs weekly across 4 production AI apps and transformed the team's ability to ship with confidence.
+
+**Proactiveness:**
+At STP, without being asked, Bruno noticed the operations team was manually monitoring Twitter for service disruptions. He built a scraping + NLP classification pipeline that automated this process, improving a key operational KPI by 6% and freeing up staff from manual monitoring.
+
+**Teamwork:**
+At CloudWerx, Bruno coordinated across frontend, Rails backend, clinical experts, product managers, and AI engineers (8+ collaborators) to define schemas and build AI features for a healthcare platform. He facilitated weekly standups and broke architecture into parallelizable Asana tickets, enabling the team to build independently and hit demo deadlines.
+
+**Problem solving / performance engineering:**
+The AI agent had a 5-minute response latency. Bruno systematically diagnosed the bottleneck, redesigned the system into modular primitives (intent filtering, domain knowledge injection, query decomposition, answer synthesis), and optimized each component independently. Result: 5-minute latency reduced to 1 minute.
+
+**Leadership under ambiguity:**
+At CloudWerx, product requirements for the JPM demo agentic system were vague with a hard deadline. Bruno drafted the first architecture for the APE framework after working through requirements with the AI director and product, translated everything into concrete Asana tickets, mentored his direct report on the framework, and delivered the backend on time.
+
+**Adaptability:**
+Bruno has switched from a healthcare AI context (CloudWerx) to ecommerce, adtech, etc., and from Python-only to a Go/Python polyglot codebase. Within months he was driving major initiatives: building the evaluation framework, architecting the modular agent system, and contributing production Go microservices.
+
+**Creativity:**
+At CloudWerx, patient context for AI agents was blocked on a legacy EHR integration that wasn't ready. Rather than wait, Bruno engineered a pipeline that synthesized patient context purely from transcripts. The system launched on time, gathered real user data, and was designed to incorporate clinical notes once the integration was complete — which it did seamlessly.
+
+---
+
+## NOTABLE PROJECTS
+
+**Anky:** Production RAG system with a fine-tuned LLM using SFT/DPO via llama.cpp, trained on social network data for personalized content generation.
+
+**Deep Learning Competition:** Implemented next-frame video prediction using Transformer and ResNet CNN architectures in a Joint-Embedding Predictive Architecture (JEPA) network.
+
+**S&P Global Capstone:** Achieved 90% accuracy in financial news classification by fine-tuning BERT on an unlabeled corpus using self-supervised learning.
+
+**Master's Thesis Publications:** Published two peer-reviewed papers on computer microscopic simulation methodologies and applications.
+
+**Twitter Sentiment Analysis:** Built sentiment analysis pipeline using fastText and fine-tuned BERT for content strategy and brand monitoring.
+
+**Hackathon Winner:** Led a team of 6 engineers to design and develop an award-winning mobile application for public transit users.
+
+---
+
+## EDUCATION
+
+**New York University — M.S. in Data Science (2021–2023)**
+GPA: 3.8/4.0. Coursework: Deep Learning, Machine Learning, Big Data, Optimization & Linear Algebra, Probability & Statistics. Teaching Assistant for Data Science at NYU Stern School of Business for two semesters.
+
+**Universidad de Chile — Bachelor's + Master's in Engineering (2018)**
+Final grade: 6.6/7.0 (top 10% of cohort). Graduated with highest distinction. Outstanding Student Award. Teaching Assistant for five courses including Stochastic Processes and Network Optimization.
+
+---
+
+## FREQUENTLY ASKED RECRUITER QUESTIONS
+
+**Q: What is Bruno's total years of experience?**
+A: 8 years of professional experience in AI/ML and data science, starting at STP in 2018.
+
+**Q: Is Bruno open to relocation?**
+A: Bruno is based in New York, NY and is not looking to relocate. He is open to in-person, hybrid, and remote roles.
+
+**Q: What is Bruno's visa/work authorization status?**
+A: Please contact Bruno directly at brunostefoni12@gmail.com for immigration/work authorization questions.
+
+**Q: What industries has Bruno worked in?**
+A: Adtech, healthcare AI (CloudWerx), health insurance (Aetna), tech (Google), and public transit/transportation (STP). He has also worked on projects in cybersecurity, ecommerce, and finance through CloudWerx.
+
+**Q: What is Bruno's strongest technical area?**
+A: Production LLM systems and evaluation frameworks. Bruno specializes in taking AI research from prototype to reliable, measurable production systems — including building the infrastructure (CI/CD, evaluation pipelines, observability) that makes that possible.
+
+**Q: Can Bruno work in a polyglot codebase?**
+A: Yes. Bruno works daily in a Go/Python polyglot environment, developing Go microservices with gRPC and Python ML/AI services. He is comfortable operating across languages and adapting to existing codebases.
+
+**Q: Does Bruno have MLOps experience?**
+A: Yes. He implemented a Kubeflow MLOps CI/CD pipeline at CloudWerx with automated model deployment and monitoring, built LLM evaluation pipelines (running weekly across 4 production apps), and has worked with Temporal, Kafka, Cloud Run, Vertex AI, and Docker for production ML infrastructure.
+
+**Q: Does Bruno have experience with cloud infrastructure?**
+A: Yes — extensive GCP experience (Vertex AI, Cloud Run, BigQuery, AlloyDB, Kubeflow, Compute Engine) and solid AWS experience (Bedrock, EC2, Lambda, RDS). He holds a current Google Cloud Professional ML Engineer certification.
+
+**Q: What is Bruno's leadership experience?**
+A: Bruno has led technical direction on multiple projects as a senior engineer. At CloudWerx, he led 3 of 6 client-facing AI projects end-to-end, mentored a direct report, and acted as primary technical liaison with Google Cloud. He led the cross-functional effort to build evaluation infrastructure, convincing leadership to change priorities and coordinating across product, customer success, and engineering.
+
+**Q: What makes Bruno different from other AI engineers?**
+A: Most AI engineers focus on the model. Bruno focuses on making the model trustworthy at scale. His hallmark work — building evaluation frameworks from scratch, calibrating LLM judges against human annotators, designing modular architectures that are testable and measurable — reflects a belief that AI systems need infrastructure as much as they need good models. He brings both the ML depth and the engineering rigor to build AI that actually works in production.
         `.trim();
 
         // DOM Elements
