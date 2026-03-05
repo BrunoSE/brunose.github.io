@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nombre Guaguas: Exploring a Century of Chilean Baby Name Trends | Bruno Stefoni</title>
+    <meta name="description" content="A fully serverless dashboard that visualizes baby name trends in Chile from 1920 to 2025, with an AI chat assistant for natural language exploration. Built on Cloudflare's edge network.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-guaguas.html">
+    <meta property="og:title" content="Nombre Guaguas: Exploring a Century of Chilean Baby Name Trends">
+    <meta property="og:description" content="A fully serverless dashboard that visualizes baby name trends in Chile from 1920 to 2025, with an AI chat assistant built on Cloudflare's edge network.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #131829;
+            --color-bg-tertiary: #1a1f3a;
+            --color-bg-elevated: #1e2442;
+            --color-text-primary: #e4e6eb;
+            --color-text-secondary: #b0b8c9;
+            --color-text-tertiary: #6b7280;
+            --color-accent-primary: #3b82f6;
+            --color-accent-secondary: #8b5cf6;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition-fast: 150ms ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        .nav-brand:hover { color: var(--color-accent-primary); }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        .nav-link:hover { color: var(--color-text-primary); background: var(--color-bg-tertiary); }
+        .nav-link.active { color: var(--color-accent-primary); }
+
+        .main-container {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+        .post-wrapper {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .post-hero {
+            margin-bottom: 4rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .post-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .post-date {
+            color: var(--color-text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+        .post-tag {
+            padding: 3px 12px;
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--color-accent-primary);
+        }
+        .post-title {
+            font-size: clamp(1.75rem, 5vw, var(--font-size-4xl));
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+        }
+        .post-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            line-height: 1.7;
+            font-style: italic;
+            border-left: 3px solid var(--color-accent-secondary);
+            padding-left: 1.5rem;
+        }
+
+        /* Prose */
+        .prose { color: var(--color-text-secondary); line-height: 1.8; }
+
+        .prose h2 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin: 3rem 0 1.25rem;
+            color: var(--color-text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .prose h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--color-text-primary);
+        }
+        .prose p { margin-bottom: 1.25rem; }
+        .prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
+        .prose li { margin-bottom: 0.6rem; }
+        .prose strong { color: var(--color-text-primary); font-weight: 600; }
+        .prose em { font-style: italic; }
+
+        .prose a {
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color var(--transition-fast);
+        }
+        .prose a:hover { border-bottom-color: var(--color-accent-primary); }
+
+        .prose code:not(pre code) {
+            font-family: var(--font-mono);
+            font-size: 0.875em;
+            background: var(--color-bg-elevated);
+            color: #e2b96f;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .prose hr {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 3rem 0;
+        }
+
+        .back-link {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        .back-link a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--transition-fast);
+        }
+        .back-link a:hover { color: var(--color-accent-primary); }
+
+        footer {
+            margin-top: 4rem;
+            padding: 3rem 2rem;
+            background: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+        footer p { color: var(--color-text-tertiary); font-size: var(--font-size-sm); }
+
+        @media (max-width: 768px) {
+            .post-title { font-size: var(--font-size-3xl); }
+            .post-wrapper { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Bruno Stefoni</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/blog.html" class="nav-link active">Blog</a>
+                <a href="/chatbot.html" class="nav-link">AI Chatbot</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="post-wrapper">
+            <div class="post-hero">
+                <div class="post-meta">
+                    <span class="post-date">March 5, 2026</span>
+                    <span class="post-tag">Cloudflare Workers</span>
+                    <span class="post-tag">Data Visualization</span>
+                    <span class="post-tag">AI</span>
+                    <span class="post-tag">Serverless</span>
+                </div>
+                <h1 class="post-title">Nombre Guaguas: Exploring a Century of Chilean Baby Name Trends</h1>
+                <p class="post-subtitle">What names were popular in Chile in the 1950s? Is "Mateo" really taking over? When did "Jos&eacute;" peak? A fully serverless dashboard with an AI assistant to explore it all.</p>
+            </div>
+
+            <article class="prose">
+
+                <p>What names were popular in Chile in the 1950s? Is "Mateo" really taking over? When did "Jos&eacute;" peak? These are the kinds of questions that <strong>Nombre Guaguas</strong> answers &mdash; a fully serverless dashboard that visualizes baby name trends in Chile from 1920 to 2025.</p>
+
+                <p>The word <em>guagua</em> comes from the Quechua word <em>wawa</em> and is used in Chile and other South American countries to refer to a baby. It felt like the perfect name for a project dedicated to exploring how Chileans have named their children over the past century.</p>
+
+                <h2>The Data</h2>
+
+                <p>The updated dataset until 2025 comes from Chile's Civil Registry (<em>Servicio de Registro Civil e Identificaci&oacute;n</em>) and was originally compiled by <a href="https://github.com/rivaquiroga/guaguas" target="_blank">Riva Quiroga</a> for the years 1920-2021. It contains <strong>over 887,000 records</strong> spanning from 1920 to 2025, where each record represents a unique combination of name, gender, and year along with the number of registrations.</p>
+
+                <p>Before loading the data, every name goes through a normalization process: converted to lowercase, accents removed from vowels (so "Mar&iacute;a" becomes "maria"), but preserving the <em>&ntilde;</em> (so "Mu&ntilde;oz" stays "mu&ntilde;oz"). This ensures that searches work consistently regardless of how users type a name.</p>
+
+                <p>The data lives in a <strong>Cloudflare D1</strong> database &mdash; a serverless SQLite-compatible database that sits at the edge, close to users. With indexes on name, gender, year, and a composite index on all three, queries return results in milliseconds.</p>
+
+                <h2>The Backend</h2>
+
+                <p>The entire backend is a single <strong>Cloudflare Worker</strong> &mdash; a serverless function that runs at the edge across Cloudflare's global network. It exposes two main endpoints:</p>
+
+                <ul>
+                    <li><strong><code>/api/names</code></strong> &mdash; Accepts a name, optional gender filter, and year range, then queries D1 and returns the time series data. Simple, fast, and stateless.</li>
+                    <li><strong><code>/api/chat</code></strong> &mdash; An AI-powered chat endpoint that lets users explore the data conversationally in both Spanish and English.</li>
+                </ul>
+
+                <p>Rate limiting is handled through <strong>Cloudflare KV</strong>, capping requests at 10 per minute per IP address to keep things fair without needing any external infrastructure.</p>
+
+                <h2>The AI Chat Assistant</h2>
+
+                <p>One of the more interesting features is the built-in chat assistant. Instead of just offering a search box, users can type natural language queries like <em>"Show me Mar&iacute;a and Jos&eacute; since 1960"</em> or <em>"Compare Sof&iacute;a and Martina"</em>.</p>
+
+                <p>Under the hood, this uses <strong>Groq's API</strong> with function calling. The AI has access to three tools:</p>
+
+                <ul>
+                    <li><strong><code>visualize_names</code></strong> &mdash; Replace the current chart with new names</li>
+                    <li><strong><code>add_name</code></strong> &mdash; Add a name to the existing chart</li>
+                    <li><strong><code>clear_chart</code></strong> &mdash; Clear the chart entirely</li>
+                </ul>
+
+                <p>When a user sends a message, two things happen in parallel: the main AI model processes the request and decides which tools to call, while a separate moderation model checks that the message is actually about names (blocking off-topic requests like recipes or general knowledge questions). This dual-model approach keeps the assistant focused and responsive.</p>
+
+                <p>The chat also maintains conversation history (last 10 messages) so users can have natural back-and-forth interactions, and it responds in the same language the user is browsing in.</p>
+
+                <h2>The Frontend</h2>
+
+                <p>The frontend is a static site served through <strong>Cloudflare Pages</strong> &mdash; no framework, no build step, just HTML, CSS, and JavaScript.</p>
+
+                <p>For charting, <strong>Plotly.js</strong> renders interactive scatter plots with spline interpolation, showing how names rise and fall in popularity over the decades. Users can hover over any point to see exact counts, and export charts as high-resolution PNGs.</p>
+
+                <p><strong>Bootstrap 5</strong> provides the responsive layout, while <strong>noUiSlider</strong> powers the year range selector, letting users zoom into specific decades with a smooth drag interaction.</p>
+
+                <p>The interface supports both <strong>Spanish and English</strong> through a lightweight i18n system. Spanish is the default (this is a Chilean project, after all), and users can switch to English via a URL parameter. The language preference carries through to the AI chat, chart labels, and all UI elements.</p>
+
+                <p>Name pills appear below the chart as colored tags that match the chart lines, and users can click the &times; on any pill to remove that name from the visualization. The URL updates in real time with the current selection, making it easy to share specific comparisons with a link.</p>
+
+                <h2>The Infrastructure</h2>
+
+                <p>The entire application runs on <strong>Cloudflare's edge network</strong> with zero traditional servers:</p>
+
+                <ul>
+                    <li><strong>Workers</strong> for the API logic</li>
+                    <li><strong>D1</strong> for the database</li>
+                    <li><strong>Pages</strong> for the static frontend</li>
+                    <li><strong>KV</strong> for rate limiting state</li>
+                </ul>
+
+                <p>This means the app runs close to users worldwide, scales automatically, and costs practically nothing to operate. Deployment is a single <code>wrangler deploy</code> command for the backend, and the frontend auto-deploys on every git push.</p>
+
+                <h2>Try It Out</h2>
+
+                <p>The dashboard is live at <a href="https://guaguas.pages.dev/" target="_blank"><strong>guaguas.pages.dev</strong></a>. Search for your name, compare it against others, or just chat with the AI to explore trends you never knew existed in Chilean naming history.</p>
+
+                <hr>
+
+                <p><em>Data source: <a href="https://github.com/rivaquiroga/guaguas" target="_blank">guaguas</a> by Riva Quiroga, based on data from Chile's Servicio de Registro Civil e Identificaci&oacute;n.</em></p>
+
+            </article>
+
+            <div class="back-link">
+                <a href="/blog.html">&larr; Back to Blog</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Bruno Stefoni. Built with AI-powered tools.</p>
+    </footer>
+</body>
+</html>
