@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teaching a 4B Model to Chain Git Operations Through Pure RL | Bruno Stefoni</title>
+    <meta name="description" content="Training Qwen3-4B to chain multi-turn git tool calls using pure reinforcement learning with no demonstrations. A debugging story across 6 reward function versions.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-pirl.html">
+    <meta property="og:title" content="Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story">
+    <meta property="og:description" content="Training Qwen3-4B to chain multi-turn git tool calls using pure reinforcement learning with no demonstrations. A debugging story across 6 reward function versions.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+
+    <style>
+        :root {
+            --color-bg-primary: #0a0e27;
+            --color-bg-secondary: #131829;
+            --color-bg-tertiary: #1a1f3a;
+            --color-bg-elevated: #1e2442;
+            --color-text-primary: #e4e6eb;
+            --color-text-secondary: #b0b8c9;
+            --color-text-tertiary: #6b7280;
+            --color-accent-primary: #3b82f6;
+            --color-accent-secondary: #8b5cf6;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --transition-fast: 150ms ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(10, 14, 39, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 2rem;
+            z-index: 100;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-brand {
+            font-weight: 600;
+            font-size: var(--font-size-lg);
+            color: var(--color-text-primary);
+            text-decoration: none;
+            transition: color var(--transition-fast);
+        }
+        .nav-brand:hover { color: var(--color-accent-primary); }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        .nav-link:hover { color: var(--color-text-primary); background: var(--color-bg-tertiary); }
+        .nav-link.active { color: var(--color-accent-primary); }
+
+        .main-container {
+            padding-top: 100px;
+            min-height: 100vh;
+            padding-bottom: 4rem;
+        }
+        .post-wrapper {
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .post-hero {
+            margin-bottom: 4rem;
+            padding-bottom: 3rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .post-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .post-date {
+            color: var(--color-text-tertiary);
+            font-size: var(--font-size-sm);
+        }
+        .post-tag {
+            padding: 3px 12px;
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-border);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--color-accent-primary);
+        }
+        .post-title {
+            font-size: clamp(1.75rem, 5vw, var(--font-size-4xl));
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--color-text-primary);
+        }
+        .post-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+            line-height: 1.7;
+            font-style: italic;
+            border-left: 3px solid var(--color-accent-secondary);
+            padding-left: 1.5rem;
+        }
+
+        /* Prose */
+        .prose { color: var(--color-text-secondary); line-height: 1.8; }
+
+        .prose h2 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin: 3rem 0 1.25rem;
+            color: var(--color-text-primary);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .prose h3 {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            margin: 2.5rem 0 1rem;
+            color: var(--color-text-primary);
+        }
+        .prose p { margin-bottom: 1.25rem; }
+        .prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
+        .prose li { margin-bottom: 0.6rem; }
+        .prose strong { color: var(--color-text-primary); font-weight: 600; }
+        .prose em { font-style: italic; }
+
+        .prose a {
+            color: var(--color-accent-primary);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color var(--transition-fast);
+        }
+        .prose a:hover { border-bottom-color: var(--color-accent-primary); }
+
+        .prose code:not(pre code) {
+            font-family: var(--font-mono);
+            font-size: 0.875em;
+            background: var(--color-bg-elevated);
+            color: #e2b96f;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .prose pre {
+            background: #0d1117;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+        .prose pre code {
+            font-family: var(--font-mono);
+            font-size: var(--font-size-sm);
+            background: none;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+        }
+
+        .prose table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: var(--font-size-sm);
+            display: block;
+            overflow-x: auto;
+        }
+        .prose th {
+            background: var(--color-bg-elevated);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+            color: var(--color-text-primary);
+            white-space: nowrap;
+        }
+        .prose td {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+        }
+        .prose tr:nth-child(even) td { background: var(--color-bg-secondary); }
+
+        .prose hr {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 3rem 0;
+        }
+        .prose blockquote {
+            border-left: 3px solid var(--color-accent-primary);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            background: var(--color-bg-secondary);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+        }
+        .prose blockquote p {
+            color: var(--color-text-primary);
+            font-style: italic;
+            margin-bottom: 0;
+        }
+
+        .back-link {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-border);
+        }
+        .back-link a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--transition-fast);
+        }
+        .back-link a:hover { color: var(--color-accent-primary); }
+
+        footer {
+            margin-top: 4rem;
+            padding: 3rem 2rem;
+            background: var(--color-bg-primary);
+            border-top: 1px solid var(--color-border);
+            text-align: center;
+        }
+        footer p { color: var(--color-text-tertiary); font-size: var(--font-size-sm); }
+
+        @media (max-width: 768px) {
+            .post-title { font-size: var(--font-size-3xl); }
+            .post-wrapper { padding: 0 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-brand">Bruno Stefoni</a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/blog.html" class="nav-link active">Blog</a>
+                <a href="/chatbot.html" class="nav-link">AI Chatbot</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="post-wrapper">
+            <div class="post-hero">
+                <div class="post-meta">
+                    <span class="post-date">March 10, 2026</span>
+                    <span class="post-tag">Reinforcement Learning</span>
+                    <span class="post-tag">LLM Agents</span>
+                    <span class="post-tag">GRPO</span>
+                    <span class="post-tag">Tool Use</span>
+                </div>
+                <h1 class="post-title">Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</h1>
+                <p class="post-subtitle">Training Qwen3-4B to discover multi-turn git tool chains entirely from reward signal &mdash; no demonstrations, no SFT. Six reward function versions, four failure modes, and the fix that finally worked.</p>
+            </div>
+
+            <article class="prose">
+
+                <p>Training a language model to use tools is usually done with supervised fine-tuning &mdash; you collect demonstrations of correct tool use and train the model to imitate them. We took a different approach: <strong>pure reinforcement learning with no demonstrations</strong>. The model had to discover how to chain git operations (status &rarr; log &rarr; show &rarr; add &rarr; commit) entirely from reward signal.</p>
+
+                <p>This is the story of how we got a 4-billion-parameter model (Qwen3-4B-Instruct) from broken to near-perfect on multi-turn git tool use &mdash; and the four things that broke along the way.</p>
+
+                <h2>The Setup</h2>
+
+                <h3>Environment</h3>
+
+                <p>We built a sandboxed git environment with <strong>13 tools</strong> the model can call:</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Category</th><th>Tools</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Read</td><td><code>git_status</code>, <code>git_log</code>, <code>git_show</code>, <code>git_diff</code>, <code>git_diff_staged</code>, <code>git_diff_unstaged</code>, <code>git_branch</code></td></tr>
+                        <tr><td>Write</td><td><code>git_add</code>, <code>git_commit</code>, <code>git_checkout</code>, <code>git_create_branch</code>, <code>git_reset</code>, <code>git_pull</code></td></tr>
+                    </tbody>
+                </table>
+
+                <p>Each episode drops the model into a fresh, deterministic git repository (seeded from the question text) and asks it to complete a task. There are four sandbox templates:</p>
+
+                <ul>
+                    <li><strong>clean</strong>: 5 commits, clean working tree</li>
+                    <li><strong>dirty</strong>: 4 commits + modified tracked file + untracked <code>scratch.py</code></li>
+                    <li><strong>staged</strong>: 4 commits + staged but uncommitted changes</li>
+                    <li><strong>multi_branch</strong>: 3 branches (<code>main</code>, <code>feature-a</code>, <code>feature-b</code>) with independent commits</li>
+                </ul>
+
+                <h3>Episodes</h3>
+
+                <p>100 episodes across 4 difficulty levels:</p>
+
+                <table>
+                    <thead>
+                        <tr><th>Level</th><th>Tools Required</th><th>Example</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>L1 (20)</td><td>1 tool</td><td>"Check the repository status"</td></tr>
+                        <tr><td>L2 (21)</td><td>2 tools</td><td>"Get the HEAD commit hash from the log and show that commit"</td></tr>
+                        <tr><td>L3 (28)</td><td>3-4 tools</td><td>"Show staged diff, then find and display the two most recent commits"</td></tr>
+                        <tr><td>L4 (31)</td><td>4-5+ tools</td><td>"Switch to feature-a, get its HEAD hash, return to main, create a branch from feature-a's HEAD"</td></tr>
+                    </tbody>
+                </table>
+
+                <p>Episodes are split roughly 50/50 between <strong>read</strong> (report information) and <strong>write</strong> (mutate the repository). Read episodes use dynamic fragment matching &mdash; placeholders like <code>$head_commit_hash</code> are resolved against the actual sandbox state at runtime, so the model can't guess answers.</p>
+
+                <h3>Training Setup</h3>
+
+                <ul>
+                    <li><strong>Model</strong>: Qwen3-4B-Instruct-2507 (4B parameters)</li>
+                    <li><strong>Algorithm</strong>: GRPO (Group Relative Policy Optimization) with LoRA</li>
+                    <li><strong>Platform</strong>: Prime Intellect's TOPLOC distributed RL infrastructure</li>
+                    <li><strong>Batch size</strong>: 256, <strong>rollouts per example</strong>: 16</li>
+                    <li><strong>Max tokens</strong>: 1024, <strong>temperature</strong>: 0.9</li>
+                </ul>
+
+                <p>GRPO works by sampling multiple rollouts per episode, computing rewards, then normalizing within each group: advantage = (r - mean(r)) / std(r). The model learns to do more of what scored above average and less of what scored below.</p>
+
+                <h2>v0.3.0: Variance Starvation</h2>
+
+                <p>Our first real training run looked promising for about 30 steps, then collapsed.</p>
+
+                <pre><code>Step 1:   Reward 0.96
+Step 30:  Reward 0.99
+Step 50:  Reward 0.0312
+Step 51:  Reward 0.0312
+...
+Step 68:  Reward 0.0312</code></pre>
+
+                <p><strong>What happened</strong>: The reward function was scoring tool <em>responses</em>, not the model's final answer. Since git commands return deterministic output, even random tool calls produced reward ~0.96. The model quickly hit 0.99+ on all 16 rollouts within each group.</p>
+
+                <p>When all rollouts score nearly the same, <code>std(r) &asymp; 0</code>. GRPO divides by std, so the advantages become enormous noisy values &rarr; the gradient signal degrades &rarr; the model's policy drifts &rarr; it stops making tool calls entirely &rarr; reward collapses to 0.0312 (the format-gate minimum for a single partial match).</p>
+
+                <p><strong>The 19-step dead zone</strong> (steps 50-68) was stuck at exactly 0.0312 &mdash; the model had completely lost the ability to make tool calls and was getting minimal partial credit from text that happened to contain a matching fragment.</p>
+
+                <p><strong>Root cause</strong>: Variance starvation. When the reward function doesn't discriminate between rollouts, GRPO has nothing to learn from.</p>
+
+                <h2>v0.4.0: The Plateau</h2>
+
+                <p>We redesigned the reward function with three components:</p>
+
+                <ol>
+                    <li><strong>Format gate</strong>: No tool calls &rarr; reward 0.0 (hard cutoff)</li>
+                    <li><strong>Tool bonus</strong>: 0.1 &times; fraction of successful tool calls</li>
+                    <li><strong>Outcome score</strong> (0.0&ndash;1.0):
+                        <ul>
+                            <li>Read episodes: fraction of expected fragments found in the <em>final assistant message only</em></li>
+                            <li>Write episodes: fraction of expected state conditions satisfied (branches exist, clean working tree, correct commit message, etc.)</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p>Key fix: only scoring the final message meant the model had to actually <em>understand and report</em> what it found, not just parrot tool output.</p>
+
+                <p>We also added <strong>dynamic fragments</strong> &mdash; <code>$head_commit_hash</code>, <code>$commit_count</code>, etc. &mdash; resolved against the actual sandbox at episode setup time. This prevented the model from memorizing static answers.</p>
+
+                <p>We enabled <strong>online difficulty filtering</strong> to focus training on episodes the model hadn't mastered yet.</p>
+
+                <p><strong>Result</strong>: The reward flatlined at 0.68 for 265 steps. Then crashed.</p>
+
+                <pre><code>Step 1:   Reward 0.68
+Step 100: Reward 0.68
+Step 200: Reward 0.68
+Step 265: Buffer crash — "No environments left with examples"</code></pre>
+
+                <p><strong>Diagnosing the plateau</strong>: We decoded the reward value. With the tool bonus formula, a reward of 0.68 means:</p>
+
+                <ul>
+                    <li>Read episodes: ~0.1 (tool bonus) + ~0.58 (outcome) &asymp; 0.68 (partial fragment matching)</li>
+                    <li>Write episodes: ~0.1 (tool bonus) + 0.0 (outcome) &asymp; 0.1</li>
+                </ul>
+
+                <p>The <em>average</em> was 0.68 because read episodes scored ~0.8+ while write episodes scored exactly 0.1. The model had learned to use read tools effectively but never learned to call write tools (<code>git_add</code>, <code>git_commit</code>, <code>git_create_branch</code>).</p>
+
+                <p><strong>Why write episodes stalled</strong>: On write episodes, the model would call read tools (git_status, git_log) &mdash; earning the 0.1 tool bonus &mdash; but never attempted git_add or git_commit. Since all 16 rollouts for a write episode scored the same 0.1, there was no within-group variance &rarr; no gradient &rarr; no learning. The same variance starvation problem, just at 0.1 instead of 0.99.</p>
+
+                <h2>v0.5.0&ndash;v0.6.0: Buffer Drain</h2>
+
+                <p>We tried two fixes:</p>
+
+                <p><strong>v0.5.0</strong>: Added a <strong>write-tool bonus</strong> &mdash; if the model calls any write-specific tool (<code>git_add</code>, <code>git_commit</code>, <code>git_checkout</code>, <code>git_create_branch</code>, <code>git_reset</code>), it gets a 0.2 bonus instead of 0.1 &times; tool_success_rate. This creates a gradient: rollouts that attempt write operations score higher than those that only read.</p>
+
+                <p>We also tried a <strong>phased curriculum</strong>: Phase 1 trains on read-only episodes first, Phase 2 adds writes.</p>
+
+                <p><strong>v0.5.1</strong>: The reads-only Phase 1 worked but saturated quickly. Moving to Phase 2 with difficulty filtering enabled caused a crash:</p>
+
+                <pre><code>RuntimeError: No environments left with examples</code></pre>
+
+                <p>The difficulty filter was draining episodes faster than the model could learn them. An episode with all rollouts scoring 1.0 gets marked "easy" and removed. An episode with all rollouts scoring 0.1 gets marked "hard" and removed. Eventually, no episodes remain.</p>
+
+                <p><strong>v0.6.0</strong>: Same crash. The filter's easy/hard thresholds couldn't handle the bimodal reward distribution (reads &asymp; 1.0, writes &asymp; 0.1).</p>
+
+                <h2>v0.6.1: The Fix</h2>
+
+                <p>Two changes:</p>
+
+                <ol>
+                    <li><strong>Disabled difficulty filtering entirely</strong>. The write-tool bonus provides enough within-group variance for GRPO to learn without needing to filter episodes.</li>
+                    <li><strong>Kept the write-tool bonus at 0.2</strong>. This is the key insight: on write episodes, a rollout that calls <code>git_add</code> scores 0.2 while one that only calls <code>git_status</code> scores 0.1. That 0.1 difference gives GRPO signal to reinforce the write-tool behavior, which then leads to actual successful writes (outcome score &gt; 0) in later rollouts.</li>
+                </ol>
+
+                <p><strong>Result</strong>:</p>
+
+                <pre><code>Step 1:   Reward 0.68
+Step 50:  Reward 0.85
+Step 100: Reward 0.95
+Step 150: Reward 0.99
+Step 200: Reward 1.00
+Step 250: Reward 0.99
+Step 300: Reward 0.99</code></pre>
+
+                <p>The model went from 0.68 to near-perfect in ~150 steps, then sustained 0.97&ndash;1.00 for the remaining 150 steps. Total training time: approximately 3 hours.</p>
+
+                <h2>What the Model Learned</h2>
+
+                <p>By step 150, the model had discovered these multi-step tool chains with zero demonstrations:</p>
+
+                <p><strong>Read chains</strong>: <code>git_log</code> &rarr; extract commit hash &rarr; <code>git_show &lt;hash&gt;</code> &rarr; report findings. The model learned to parse structured git output, extract specific values (commit hashes, file names), and thread them into subsequent tool calls.</p>
+
+                <p><strong>Write chains</strong>: <code>git_status</code> &rarr; <code>git_add .</code> &rarr; <code>git_commit -m "message"</code> &rarr; <code>git_create_branch &lt;name&gt;</code>. The model learned the correct ordering of git operations and that you must stage before committing.</p>
+
+                <p><strong>Cross-branch navigation</strong>: <code>git_checkout feature-a</code> &rarr; <code>git_log</code> &rarr; extract info &rarr; <code>git_checkout main</code> &rarr; <code>git_create_branch &lt;name&gt;</code>. The model learned to navigate between branches, gather information, and return &mdash; a 4-5 tool chain requiring state tracking across turns.</p>
+
+                <h2>Why This Is Interesting</h2>
+
+                <p><strong>Model size</strong>: 4B parameters. Most published tool-use training uses SFT with curated demonstrations on 70B+ models. We used pure RL on a model 17&times; smaller.</p>
+
+                <p><strong>No demonstrations</strong>: The model had no examples of correct tool use. It discovered <code>git_log &rarr; extract hash &rarr; git_show</code> entirely from the reward signal telling it "you reported the right commit hash" vs "you didn't."</p>
+
+                <p><strong>Multi-turn reasoning</strong>: This isn't single-turn function calling. The model makes 3-5 sequential tool calls, each depending on the output of the previous one. It learned to parse structured text output, extract specific values, and use them as arguments in subsequent calls.</p>
+
+                <p><strong>The reward design was everything</strong>: We spent 6 versions getting the reward right. The final insight &mdash; that a small bonus (0.2 vs 0.1) for <em>attempting</em> the right category of tool is enough to bootstrap learning &mdash; is general. Any RL setup where one action type is harder than another can benefit from a "you're on the right track" bonus that creates within-group variance for policy gradient methods.</p>
+
+                <h2>Lessons Learned</h2>
+
+                <ol>
+                    <li><strong>Variance starvation is the silent killer of GRPO training</strong>. If all rollouts in a group score the same, there's no gradient &mdash; no matter how high or low the score. Watch for flat reward curves and decode the actual per-episode-type rewards.</li>
+                    <li><strong>Difficulty filtering can backfire with bimodal reward distributions</strong>. If half your episodes are "easy" (reward &asymp; 1.0) and half are "hard" (reward &asymp; 0.1), the filter removes everything. The model never gets a chance to learn the hard tasks because they're filtered before it can start making progress.</li>
+                    <li><strong>Small reward bonuses create large learning effects</strong>. The 0.1 difference between "called a write tool" (0.2) and "only called read tools" (0.1) was enough to bootstrap an entire capability. You don't need large reward differences &mdash; you need <em>any</em> difference that correlates with the right behavior direction.</li>
+                    <li><strong>Decode your reward values</strong>. When we saw 0.68, we didn't just see "needs improvement." We decomposed it: 0.68 = average of read episodes (~0.8+) and write episodes (~0.1). This told us exactly what was broken and why.</li>
+                    <li><strong>Start simple, add complexity only when you understand the failure mode</strong>. We tried difficulty filtering, phased curricula, reads-only training &mdash; all before understanding that the core issue was within-group variance on write episodes. The fix was simpler than any of the attempted solutions.</li>
+                </ol>
+
+                <h2>What's Next</h2>
+
+                <ul>
+                    <li><strong>Evaluation on held-out L5 tasks</strong>: Merge conflicts, cherry-pick, stash/pop &mdash; git operations the model has never seen. Does it generalize from the tool-use patterns it learned, or did it memorize 100 task templates?</li>
+                    <li><strong>Scale the model</strong>: Qwen3-8B or 14B with the same curriculum. If 4B hits 1.0, a larger model may generalize better to unseen scenarios.</li>
+                    <li><strong>Harder curricula</strong>: Interactive rebase, conflict resolution, multi-remote workflows &mdash; tasks that require genuine reasoning, not just tool chaining.</li>
+                </ul>
+
+                <hr>
+
+                <p><em>Trained on <a href="https://www.primeintellect.ai/" target="_blank">Prime Intellect</a> using TOPLOC distributed RL. Environment built with <a href="https://github.com/willccbb/verifiers" target="_blank">verifiers</a>.</em></p>
+
+            </article>
+
+            <div class="back-link">
+                <a href="/blog.html">&larr; Back to Blog</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Bruno Stefoni. Built with AI-powered tools.</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</body>
+</html>
