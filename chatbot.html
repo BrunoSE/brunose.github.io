@@ -17,603 +17,503 @@
     <meta property="og:description" content="Chat with Bruno's AI chatbot powered by RAG technology.">
     <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
 
-    <!-- Fonts -->
+        <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        /* Design System - Matching index.html */
-        :root {
-            --color-bg-primary: #0a0e27;
-            --color-bg-secondary: #131829;
-            --color-bg-tertiary: #1a1f3a;
-            --color-bg-elevated: #1e2442;
-            --color-text-primary: #e4e6eb;
-            --color-text-secondary: #b0b8c9;
-            --color-text-tertiary: #6b7280;
-            --color-accent-primary: #3b82f6;
-            --color-accent-secondary: #8b5cf6;
-            --color-accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            --color-success: #10b981;
-            --color-error: #ef4444;
-            --color-border: rgba(255, 255, 255, 0.1);
-            --color-border-focus: rgba(59, 130, 246, 0.4);
-            --spacing-xs: 0.5rem;
-            --spacing-sm: 1rem;
-            --spacing-md: 1.5rem;
-            --spacing-lg: 2rem;
-            --spacing-xl: 3rem;
-            --spacing-2xl: 4rem;
-            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --font-family-mono: 'JetBrains Mono', monospace;
-            --font-size-xs: 0.75rem;
-            --font-size-sm: 0.875rem;
-            --font-size-base: 1rem;
-            --font-size-lg: 1.125rem;
-            --font-size-xl: 1.25rem;
-            --font-size-2xl: 1.5rem;
-            --font-size-3xl: 2rem;
-            --radius-sm: 0.375rem;
-            --radius-md: 0.5rem;
-            --radius-lg: 0.75rem;
-            --radius-xl: 1rem;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
-            --transition-fast: 150ms ease;
-            --transition-base: 250ms ease;
-            --transition-slow: 350ms ease;
-        }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+:root {
+    --stone-dark: #1a1612;
+    --gold: #c9a227;
+    --gold-bright: #e8c84a;
+    --gold-dim: #8a7018;
+    --gold-deep: #6b5410;
+    --parchment: #d4c4a0;
+    --parchment-hi: #e8dcb8;
+    --parchment-lo: #b8a478;
+    --ink: #1a1208;
+    --ink-soft: #3d2e1a;
+    --ink-faded: #5c4a32;
+    --font-title: 'Cinzel', Georgia, serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --error: #8b1a1a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: var(--font-body);
+    background: #1a1612;
+    color: var(--ink);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+.hall {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background:
+        radial-gradient(ellipse 30% 50% at 0% 40%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 50% at 100% 55%, rgba(201, 162, 39, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 30% at 50% 0%, rgba(90, 70, 40, 0.22) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, transparent 0px, transparent 47px, rgba(0,0,0,0.12) 47px, rgba(0,0,0,0.12) 50px),
+        linear-gradient(180deg, #252018 0%, #1a1612 40%, #12100c 100%);
+}
+.topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: linear-gradient(180deg, #4a3820 0%, #2e2214 40%, #1e160e 100%);
+    border-bottom: 3px solid var(--gold-dim);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201, 162, 39, 0.25);
+}
+.topbar-inner {
+    max-width: 960px; margin: 0 auto;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.65rem 1.25rem;
+}
+.brand {
+    font-family: var(--font-title);
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--gold-bright); text-decoration: none;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(201, 162, 39, 0.35), 0 2px 2px rgba(0,0,0,0.8);
+}
+.brand:hover { color: #ffe066; }
+.nav-tabs { display: flex; gap: 0.35rem; }
+.nav-tab {
+    font-family: var(--font-title);
+    font-size: 0.72rem; font-weight: 600;
+    color: #a89060; text-decoration: none;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.45rem 0.95rem;
+    background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
+    border: 1px solid #5a4420;
+    box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.12), 0 2px 4px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+}
+.nav-tab:hover {
+    color: var(--gold-bright);
+    border-color: var(--gold-dim);
+    background: linear-gradient(180deg, #4a3820 0%, #3a2c18 100%);
+}
+.nav-tab.active {
+    color: var(--gold-bright);
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
+    box-shadow: inset 0 1px 0 rgba(232, 200, 74, 0.25), 0 0 12px rgba(201, 162, 39, 0.2);
+}
+.stage {
+    flex: 1;
+    position: relative; z-index: 1;
+    max-width: 920px; width: 100%;
+    margin: 1.25rem auto 0;
+    padding: 0 1rem 1.5rem;
+    display: flex; flex-direction: column;
+}
+.panel {
+    flex: 1;
+    display: flex; flex-direction: column;
+    position: relative;
+    background:
+        repeating-linear-gradient(90deg, transparent 0px, transparent 5px, rgba(0,0,0,0.06) 5px, rgba(0,0,0,0.06) 6px),
+        linear-gradient(180deg, #5a3c22 0%, #3e2818 25%, #2e1e12 70%, #22160c 100%);
+    border: 4px solid #a07820;
+    box-shadow:
+        0 0 0 2px #1a1008, 0 0 0 7px #3a2814, 0 0 0 9px #6b5410, 0 0 0 10px #1a1008,
+        0 16px 50px rgba(0,0,0,0.75),
+        inset 0 0 80px rgba(0,0,0,0.35),
+        inset 0 2px 0 rgba(232, 200, 74, 0.2);
+    min-height: 0;
+}
+.rivet {
+    position: absolute; width: 12px; height: 12px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e8c84a, #c9a227 40%, #6b5410 75%, #3a2c08 100%);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255, 230, 120, 0.45);
+    z-index: 6;
+}
+.rivet-tl { top: 6px; left: 6px; }
+.rivet-tr { top: 6px; right: 6px; }
+.rivet-bl { bottom: 6px; left: 6px; }
+.rivet-br { bottom: 6px; right: 6px; }
+.scroll {
+    flex: 1;
+    display: flex; flex-direction: column;
+    margin: 16px;
+    min-height: 0;
+    background-color: var(--parchment);
+    background-image:
+        radial-gradient(ellipse 100px 70px at 8% 10%, rgba(100, 70, 30, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 80px 60px at 92% 85%, rgba(90, 55, 20, 0.14) 0%, transparent 70%),
+        linear-gradient(175deg, var(--parchment-hi) 0%, var(--parchment) 40%, var(--parchment-lo) 100%);
+    border: 2px solid #8a7040;
+    box-shadow: inset 0 0 40px rgba(80, 50, 15, 0.12);
+    position: relative;
+}
+.agent-header {
+    text-align: center;
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid rgba(138, 112, 24, 0.35);
+}
+.agent-title {
+    font-family: var(--font-title);
+    font-size: clamp(1.5rem, 3.5vw, 1.9rem);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+.agent-subtitle {
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-faded);
+    margin-bottom: 0.75rem;
+}
+.agent-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-title);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    padding: 0.3rem 0.75rem;
+    border: 1px solid rgba(138, 112, 24, 0.4);
+    background: rgba(201, 162, 39, 0.08);
+}
+.status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #2d6b2d;
+    box-shadow: 0 0 8px rgba(60, 160, 60, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.chat-header {
+    padding: 0.9rem 1.25rem;
+    background: linear-gradient(180deg, rgba(60, 40, 15, 0.12), transparent);
+    border-bottom: 1px solid rgba(138, 112, 24, 0.25);
+}
+.chat-header-title {
+    font-family: var(--font-title);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-bottom: 0.2rem;
+}
+.chat-header-description {
+    font-size: 0.92rem;
+    color: var(--ink-faded);
+}
+.example-questions {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(138, 112, 24, 0.2);
+}
+.example-questions-title {
+    font-family: var(--font-title);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 0.5rem;
+}
+.example-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.example-chip {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: rgba(60, 40, 15, 0.08);
+    border: 1px solid #a08850;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: var(--font-body);
+}
+.example-chip:hover {
+    border-color: var(--gold);
+    color: var(--gold-deep);
+    background: rgba(201, 162, 39, 0.1);
+}
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    min-height: 280px;
+    max-height: 48vh;
+}
+.welcome-message {
+    text-align: center;
+    color: var(--ink-faded);
+    padding: 2rem 1rem;
+}
+.welcome-icon {
+    font-family: var(--font-title);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--gold-bright);
+    width: 48px; height: 48px;
+    margin: 0 auto 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #5a4428, #2a1e10);
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 12px rgba(201, 162, 39, 0.25);
+}
+.welcome-message p { margin-bottom: 0.35rem; }
+.message {
+    display: flex;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.message.user { justify-content: flex-end; }
+.message.assistant { justify-content: flex-start; }
+.message-content {
+    max-width: 78%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+.message.user .message-content {
+    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
+    color: var(--gold-bright);
+    border: 1px solid var(--gold);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.message.assistant .message-content {
+    background: rgba(255, 248, 230, 0.45);
+    color: var(--ink);
+    border: 1px solid #8a7040;
+}
+.typing-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 1.25rem 0.75rem;
+    color: var(--ink-faded);
+    font-size: 0.9rem;
+    font-style: italic;
+}
+.typing-indicator.active { display: flex; }
+.typing-dots { display: flex; gap: 4px; }
+.typing-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold-dim);
+    animation: bounce 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-4px); opacity: 1; }
+}
+.input-area {
+    padding: 1rem 1.25rem 1.25rem;
+    border-top: 1px solid rgba(138, 112, 24, 0.35);
+    background: rgba(60, 40, 15, 0.06);
+}
+.input-wrapper {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-end;
+}
+.input-container { flex: 1; }
+#messageInput {
+    width: 100%;
+    resize: none;
+    padding: 0.75rem 0.9rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--ink);
+    background: rgba(255, 248, 230, 0.5);
+    border: 2px solid #8a7040;
+    outline: none;
+    min-height: 48px;
+    max-height: 140px;
+    line-height: 1.45;
+    transition: border-color 0.15s ease;
+}
+#messageInput:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.15);
+}
+#messageInput::placeholder { color: var(--ink-faded); }
+.error-message {
+    display: none;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--error);
+}
+.error-message.active { display: block; }
+.send-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1.25rem;
+    font-family: var(--font-title);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold-bright);
+    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 45%, #2a1e0c 100%);
+    border: 2px solid var(--gold);
+    cursor: pointer;
+    box-shadow:
+        0 0 0 1px #1a1008,
+        0 3px 0 #1a1008,
+        inset 0 1px 0 rgba(232, 200, 74, 0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+.send-button:hover:not(:disabled) {
+    color: #ffe066;
+    border-color: var(--gold-bright);
+    transform: translateY(-1px);
+}
+.send-button:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 1px #1a1008, 0 1px 0 #1a1008;
+}
+.send-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.page-foot {
+    text-align: center;
+    padding: 1.25rem 1rem 0.75rem;
+    position: relative; z-index: 1;
+}
+.page-foot p {
+    font-family: var(--font-title);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(160, 130, 60, 0.4);
+}
+@media (max-width: 768px) {
+    .messages-container { max-height: 42vh; min-height: 220px; }
+    .message-content { max-width: 88%; }
+    .input-wrapper { flex-direction: column; align-items: stretch; }
+    .send-button { width: 100%; }
+    .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.65rem; }
+    .brand { font-size: 0.9rem; letter-spacing: 0.08em; }
+    .scroll { margin: 10px; }
+    .panel { border-width: 3px; }
+}
 
-        body {
-            font-family: var(--font-family);
-            background: var(--color-bg-primary);
-            color: var(--color-text-primary);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 14, 39, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--color-border);
-            padding: var(--spacing-sm) var(--spacing-lg);
-            z-index: 100;
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-brand {
-            font-weight: 600;
-            font-size: var(--font-size-lg);
-            color: var(--color-text-primary);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-        }
-
-        .nav-brand:hover {
-            color: var(--color-accent-primary);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: var(--spacing-md);
-            align-items: center;
-        }
-
-        .nav-link {
-            color: var(--color-text-secondary);
-            text-decoration: none;
-            font-size: var(--font-size-sm);
-            font-weight: 500;
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
-        }
-
-        .nav-link:hover {
-            color: var(--color-text-primary);
-            background: var(--color-bg-tertiary);
-        }
-
-        .nav-link.active {
-            color: var(--color-accent-primary);
-        }
-
-        /* Main Container */
-        .main-container {
-            padding-top: 80px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 100px var(--spacing-lg) var(--spacing-lg);
-        }
-
-        .agent-wrapper {
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        /* Header Section */
-        .agent-header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-        }
-
-        .agent-title {
-            font-size: var(--font-size-3xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .agent-subtitle {
-            color: var(--color-text-secondary);
-            font-size: var(--font-size-lg);
-            margin-bottom: var(--spacing-md);
-        }
-
-        .agent-status {
-            display: inline-flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-            padding: var(--spacing-xs) var(--spacing-md);
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            border-radius: 50px;
-            font-size: var(--font-size-sm);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--color-success);
-            border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* Chat Container */
-        .chat-container {
-            background: var(--color-bg-secondary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-xl);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Chat Header */
-        .chat-header {
-            padding: var(--spacing-lg);
-            background: var(--color-bg-elevated);
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .chat-header-title {
-            font-size: var(--font-size-lg);
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-
-        .chat-header-description {
-            font-size: var(--font-size-sm);
-            color: var(--color-text-secondary);
-        }
-
-        /* Example Questions */
-        .example-questions {
-            padding: var(--spacing-md);
-            background: var(--color-bg-tertiary);
-            border-bottom: 1px solid var(--color-border);
-        }
-
-        .example-questions-title {
-            font-size: var(--font-size-sm);
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
-            color: var(--color-text-secondary);
-        }
-
-        .example-chips {
-            display: flex;
-            gap: var(--spacing-xs);
-            flex-wrap: wrap;
-        }
-
-        .example-chip {
-            padding: var(--spacing-xs) var(--spacing-sm);
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            border-radius: 50px;
-            font-size: var(--font-size-xs);
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-
-        .example-chip:hover {
-            background: var(--color-bg-primary);
-            border-color: var(--color-accent-primary);
-            color: var(--color-accent-primary);
-            transform: translateY(-1px);
-        }
-
-        /* Messages Area */
-        .messages-container {
-            height: 500px;
-            overflow-y: auto;
-            padding: var(--spacing-lg);
-            display: flex;
-            flex-direction: column;
-            gap: var(--spacing-md);
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: var(--color-bg-tertiary);
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-            background: var(--color-border);
-            border-radius: 4px;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb:hover {
-            background: var(--color-accent-primary);
-        }
-
-        /* Message Bubbles */
-        .message {
-            display: flex;
-            gap: var(--spacing-sm);
-            animation: fadeInUp 0.3s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .message.user {
-            flex-direction: row-reverse;
-        }
-
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: var(--font-size-sm);
-            flex-shrink: 0;
-        }
-
-        .message.user .message-avatar {
-            background: var(--color-accent-gradient);
-            color: white;
-        }
-
-        .message.assistant .message-avatar {
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            color: var(--color-accent-primary);
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: var(--spacing-sm) var(--spacing-md);
-            border-radius: var(--radius-lg);
-            line-height: 1.6;
-        }
-
-        .message.user .message-content {
-            background: var(--color-accent-gradient);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.assistant .message-content {
-            background: var(--color-bg-elevated);
-            border: 1px solid var(--color-border);
-            color: var(--color-text-primary);
-            border-bottom-left-radius: 4px;
-        }
-
-        .message-time {
-            font-size: var(--font-size-xs);
-            color: var(--color-text-tertiary);
-            margin-top: var(--spacing-xs);
-        }
-
-        /* Typing Indicator */
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: var(--spacing-xs);
-            padding: var(--spacing-sm) var(--spacing-md);
-            color: var(--color-text-tertiary);
-            font-size: var(--font-size-sm);
-        }
-
-        .typing-indicator.active {
-            display: flex;
-        }
-
-        .typing-dots {
-            display: flex;
-            gap: 4px;
-        }
-
-        .typing-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--color-text-tertiary);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.7;
-            }
-            30% {
-                transform: translateY(-10px);
-                opacity: 1;
-            }
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: var(--spacing-lg);
-            background: var(--color-bg-elevated);
-            border-top: 1px solid var(--color-border);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: var(--spacing-sm);
-            align-items: flex-end;
-        }
-
-        .input-container {
-            flex: 1;
-            position: relative;
-        }
-
-        #messageInput {
-            width: 100%;
-            padding: var(--spacing-sm) var(--spacing-md);
-            background: var(--color-bg-secondary);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-lg);
-            color: var(--color-text-primary);
-            font-family: var(--font-family);
-            font-size: var(--font-size-base);
-            resize: none;
-            max-height: 120px;
-            transition: border-color var(--transition-fast);
-        }
-
-        #messageInput:focus {
-            outline: none;
-            border-color: var(--color-accent-primary);
-        }
-
-        #messageInput::placeholder {
-            color: var(--color-text-tertiary);
-        }
-
-        .send-button {
-            padding: var(--spacing-sm) var(--spacing-lg);
-            background: var(--color-accent-gradient);
-            color: white;
-            border: none;
-            border-radius: var(--radius-lg);
-            font-weight: 600;
-            font-size: var(--font-size-base);
-            cursor: pointer;
-            transition: all var(--transition-base);
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-xs);
-        }
-
-        .send-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-glow);
-        }
-
-        .send-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Error Message */
-        .error-message {
-            display: none;
-            padding: var(--spacing-sm) var(--spacing-md);
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--color-error);
-            border-radius: var(--radius-md);
-            color: var(--color-error);
-            font-size: var(--font-size-sm);
-            margin-top: var(--spacing-sm);
-        }
-
-        .error-message.active {
-            display: block;
-        }
-
-        /* Welcome Message */
-        .welcome-message {
-            text-align: center;
-            padding: var(--spacing-xl);
-            color: var(--color-text-secondary);
-        }
-
-        .welcome-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .agent-title {
-                font-size: var(--font-size-2xl);
-            }
-
-            .messages-container {
-                height: 400px;
-            }
-
-            .message-content {
-                max-width: 85%;
-            }
-
-            .input-wrapper {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .send-button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-container">
-            <a href="/" class="nav-brand">Bruno Stefoni</a>
-            <div class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/blog.html" class="nav-link">Blog</a>
-                <a href="/chatbot.html" class="nav-link active">AI Chatbot</a>
+    <div class="hall">
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a href="/" class="brand">Bruno Stefoni</a>
+                <nav class="nav-tabs">
+                    <a href="/" class="nav-tab">Home</a>
+                    <a href="/blog.html" class="nav-tab">Blog</a>
+                    <a href="/chatbot.html" class="nav-tab active">AI Chatbot</a>
+                </nav>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <!-- Main Container -->
-    <div class="main-container">
-        <div class="agent-wrapper">
-            <!-- Header -->
-            <div class="agent-header">
-                <h1 class="agent-title">Ask About Bruno</h1>
-                <p class="agent-subtitle">RAG-powered AI chatbot trained on Bruno's experience and projects</p>
-                <div class="agent-status">
-                    <span class="status-dot"></span>
-                    <span>Online & Ready</span>
-                </div>
-            </div>
-
-            <!-- Chat Container -->
-            <div class="chat-container">
-                <!-- Chat Header -->
-                <div class="chat-header">
-                    <div class="chat-header-title">Chat with Bruno's ResumeAI</div>
-                    <div class="chat-header-description">
-                        Ask me anything about Bruno's AI/ML expertise, projects, or experience
-                    </div>
-                </div>
-
-                <!-- Example Questions -->
-                <div class="example-questions">
-                    <div class="example-questions-title">Try asking:</div>
-                    <div class="example-chips">
-                        <div class="example-chip" onclick="useExample(this)">What's Bruno's experience with LLM agents?</div>
-                        <div class="example-chip" onclick="useExample(this)">Tell me about Bruno's RAG projects</div>
-                        <div class="example-chip" onclick="useExample(this)">What technologies does Bruno use?</div>
-                        <div class="example-chip" onclick="useExample(this)">What certifications does Bruno have?</div>
-                    </div>
-                </div>
-
-                <!-- Messages Container -->
-                <div class="messages-container" id="messagesContainer">
-                    <div class="welcome-message">
-                        <div class="welcome-icon">🤖</div>
-                        <p>Hi! I'm an AI chatbot that knows all about Bruno's experience and projects.</p>
-                        <p>Ask me anything!</p>
-                    </div>
-                </div>
-
-                <!-- Typing Indicator -->
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dots">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                    <span>Bruno's ResumeAI is thinking...</span>
-                </div>
-
-                <!-- Input Area -->
-                <div class="input-area">
-                    <div class="input-wrapper">
-                        <div class="input-container">
-                            <textarea
-                                id="messageInput"
-                                rows="1"
-                                placeholder="Ask me about Bruno's projects, skills, etc.."
-                                autocomplete="off"
-                            ></textarea>
-                            <div class="error-message" id="errorMessage"></div>
+        <main class="stage">
+            <div class="panel">
+                <span class="rivet rivet-tl" aria-hidden="true"></span>
+                <span class="rivet rivet-tr" aria-hidden="true"></span>
+                <span class="rivet rivet-bl" aria-hidden="true"></span>
+                <span class="rivet rivet-br" aria-hidden="true"></span>
+                <div class="scroll">
+                    <div class="agent-header">
+                        <h1 class="agent-title">Ask About Bruno</h1>
+                        <p class="agent-subtitle">RAG-powered AI chatbot trained on Bruno's experience and projects</p>
+                        <div class="agent-status">
+                            <span class="status-dot"></span>
+                            <span>Online &amp; Ready</span>
                         </div>
-                        <button class="send-button" id="sendButton">
-                            <span>Send</span>
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
-                            </svg>
-                        </button>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <div class="chat-header-title">Chat with Bruno's ResumeAI</div>
+                            <div class="chat-header-description">
+                                Ask me anything about Bruno's AI/ML expertise, projects, or experience
+                            </div>
+                        </div>
+
+                        <div class="example-questions">
+                            <div class="example-questions-title">Try asking:</div>
+                            <div class="example-chips">
+                                <div class="example-chip" onclick="useExample(this)">What's Bruno's experience with LLM agents?</div>
+                                <div class="example-chip" onclick="useExample(this)">Tell me about Bruno's RAG projects</div>
+                                <div class="example-chip" onclick="useExample(this)">What technologies does Bruno use?</div>
+                                <div class="example-chip" onclick="useExample(this)">What certifications does Bruno have?</div>
+                            </div>
+                        </div>
+
+                        <div class="messages-container" id="messagesContainer">
+                            <div class="welcome-message">
+                                <div class="welcome-icon">B</div>
+                                <p>Hi! I'm an AI chatbot that knows all about Bruno's experience and projects.</p>
+                                <p>Ask me anything!</p>
+                            </div>
+                        </div>
+
+                        <div class="typing-indicator" id="typingIndicator">
+                            <div class="typing-dots">
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                                <div class="typing-dot"></div>
+                            </div>
+                            <span>Bruno's ResumeAI is thinking...</span>
+                        </div>
+
+                        <div class="input-area">
+                            <div class="input-wrapper">
+                                <div class="input-container">
+                                    <textarea
+                                        id="messageInput"
+                                        rows="1"
+                                        placeholder="Ask me about Bruno's projects, skills, etc.."
+                                        autocomplete="off"
+                                    ></textarea>
+                                    <div class="error-message" id="errorMessage"></div>
+                                </div>
+                                <button class="send-button" id="sendButton">
+                                    <span>Send</span>
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
+
+        <footer class="page-foot">
+            <p>&copy; 2026 Bruno Stefoni · Victory</p>
+        </footer>
     </div>
 
     <script>
@@ -640,13 +540,21 @@ Website: https://brunose.github.io/
 
 ---
 ## WHO IS BRUNO / ELEVATOR PITCH
-Bruno Stefoni is a Senior AI Engineer with 8 years of experience building production AI systems — from machine learning pipelines and LLM agents to evaluation frameworks and cloud infrastructure. He specializes in turning research-quality AI into reliable, measurable, production-grade systems.
-He is currently living in Manhattan as a Senior AI Engineer, where he has built the company's first LLM evaluation framework and architected a Go/Python AI agent system for automated data analysis. He holds a Master's in Data Science from NYU (GPA 3.8/4.0) and is a certified Google Cloud Professional ML Engineer.
+Bruno Stefoni is an AI/ML Engineer with 8 years of experience building production AI infrastructure. He specializes in LLMOps, AI observability, and evaluation frameworks for production LLM systems, with a track record of architecting agentic systems, building LLM-as-judge evaluation pipelines, and deploying AI infrastructure using MCP servers.
+He is currently living in Manhattan, starting as an AI Engineer at DRW Holdings in May 2026. Previously, he was Principal AI Engineer at VideoAmp, where he built the company's first LLM evaluation framework, architected a Go/Python AI agent system for automated data analysis against Snowflake, and led the re-design of MCP servers using a Progressive Discovery pattern. He holds a Master's in Data Science from NYU (GPA 3.8/4.0) and is a certified Google Cloud Professional ML Engineer.
 Bruno's edge is that he operates at the intersection of AI engineering and infrastructure: he doesn't just build models, he builds the evaluation, CI/CD, observability, and deployment systems that make AI reliable at scale.
 
 ---
 
-## CURRENT ROLE: Senior AI Engineer (Dec 2024 – Present)
+## CURRENT ROLE: DRW Holdings — AI Engineer (May 2026 – Present)
+
+Bruno joined DRW Holdings, a principal trading firm in Manhattan, as an AI Engineer in May 2026. Details on current responsibilities are to be determined as he ramps up in the role.
+
+---
+
+## MOST RECENT ROLE: VideoAmp — Principal AI Engineer (Dec 2024 – Apr 2026)
+
+VideoAmp is an adtech/measurement company. Bruno served as Principal AI Engineer for ~1.5 years, driving the company's AI infrastructure strategy.
 
 **LLM Evaluation Framework (0-to-1 build)**
 The most significant thing Bruno has done is build the company's first LLM evaluation infrastructure from scratch. When he joined, the team had AI agents in production — including a text-to-SQL agent — but no systematic way to measure quality. There was no ground truth data, no signal for whether changes improved or regressed performance. The team was essentially "shipping and hoping."
@@ -671,14 +579,17 @@ Users can iterate: they say things like "exclude promos" or "also include Novemb
 - Designed automated AI report processing pipeline using AWS Bedrock, Temporal workflow orchestration, and Kafka event streaming
 - Developed 5 Go microservices with gRPC and REST APIs powering the company's AI-driven analytics platform
 
+**MCP Servers Re-design — Progressive Discovery Pattern**
+Led and implemented a re-design of the company's MCP servers, adopting a Progressive Discovery pattern via tool-search meta-tools. Instead of exposing all tools upfront, agents discover the right tools on demand through search. Results showed improved eval scores and a 93% context length reduction for Agents connecting to 70+ tools over MCP — a major win for both cost and reliability at scale.
+
 ---
 
-## PREVIOUS ROLE: CLOUDWERX — Senior AI/ML Engineer (Nov 2023 – Nov 2024)
+## EARLIER ROLE: CLOUDWERX — Senior AI/ML Engineer (Nov 2023 – Nov 2024)
 
 CloudWerx is an AI/ML consultancy based in Manhattan. Bruno led 3 of 6 customer-facing AI/ML projects end-to-end across healthcare, cybersecurity, ecommerce, and finance. He also acted as primary technical liaison with Google Cloud, coordinating architecture reviews for cloud migrations for 6 companies into GCP.
 
 **Agentic Healthcare System (APE Framework)**
-Bruno architected and deployed an Analyze-Plan-Execute agentic framework for a healthcare startup's patient care platform. The system automated patient progress notes and health assessments, reducing documentation time from 7 minutes to 2 minutes per note. He designed a multi-agent system with specialized agents that coordinated across AlloyDB, AWS RDS, and BigQuery. Care Managers could approve, modify, or reject AI-generated recommendations, with agents adapting based on feedback.
+Bruno architected and deployed an Analyze-Plan-Execute (APE) agentic framework for a healthcare startup's patient care platform. The system automated patient progress notes and health assessments, reducing documentation time from 7 minutes to 2 minutes per note. He designed a multi-agent system with specialized agents (Care Concierge, Symptom Triage, Preventive Care) that coordinated across AlloyDB, AWS RDS, and BigQuery. Care Managers could approve, modify, or reject AI-generated recommendations, with agents adapting based on feedback.
 
 **MLOps CI/CD Pipeline**
 Implemented a Kubeflow MLOps CI/CD pipeline for a medical x-ray detection system with automated model deployment and monitoring. This was a full production pipeline: training triggers, automated testing, deployment, and post-deployment monitoring.
@@ -753,6 +664,7 @@ STP is a public transit company. Bruno spent 4 years here building data products
 - Reduced AI agent response latency from 5 minutes to 1 minute (5x improvement)
 - Reduced documentation time from 7 minutes to 2 minutes per patient note (3.5x improvement)
 - Achieved 50% server cost reduction via K6 load testing and rightsizing
+- Delivered 93% context length reduction for Agents connecting to 70+ tools via MCP Progressive Discovery re-design
 - Improved Stable Diffusion design approval rate from 30% to 60% (2x improvement)
 - Built evaluation framework running weekly across 4 production AI applications
 - Led 6 production AI deployments across healthcare, cybersecurity, ecommerce, and finance
@@ -827,7 +739,7 @@ A: Bruno is based in New York, NY and is not looking to relocate. He is open to 
 A: Please contact Bruno directly at brunostefoni12@gmail.com for immigration/work authorization questions.
 
 **Q: What industries has Bruno worked in?**
-A: Adtech, healthcare AI (CloudWerx), health insurance (Aetna), tech (Google), and public transit/transportation (STP). He has also worked on projects in cybersecurity, ecommerce, and finance through CloudWerx.
+A: Finance/principal trading (DRW Holdings), adtech/measurement (VideoAmp), healthcare AI (CloudWerx), health insurance (Aetna), tech (Google), and public transit/transportation (STP). He has also worked on projects in cybersecurity, ecommerce, and finance through CloudWerx.
 
 **Q: What is Bruno's strongest technical area?**
 A: Production LLM systems and evaluation frameworks. Bruno specializes in taking AI research from prototype to reliable, measurable production systems — including building the infrastructure (CI/CD, evaluation pipelines, observability) that makes that possible.
@@ -842,7 +754,7 @@ A: Yes. He implemented a Kubeflow MLOps CI/CD pipeline at CloudWerx with automat
 A: Yes — extensive GCP experience (Vertex AI, Cloud Run, BigQuery, AlloyDB, Kubeflow, Compute Engine) and solid AWS experience (Bedrock, EC2, Lambda, RDS). He holds a current Google Cloud Professional ML Engineer certification.
 
 **Q: What is Bruno's leadership experience?**
-A: Bruno has led technical direction on multiple projects as a senior engineer. At CloudWerx, he led 3 of 6 client-facing AI projects end-to-end, mentored a direct report, and acted as primary technical liaison with Google Cloud. He led the cross-functional effort to build evaluation infrastructure, convincing leadership to change priorities and coordinating across product, customer success, and engineering.
+A: Bruno has led technical direction on multiple projects as a senior/principal engineer. At VideoAmp (Principal AI Engineer), he led the cross-functional effort to build evaluation infrastructure, convincing leadership to change priorities and coordinating across product, customer success, and engineering. He also led and implemented the MCP servers Progressive Discovery re-design. At CloudWerx, he led 3 of 6 client-facing AI projects end-to-end, mentored a direct report, and acted as primary technical liaison with Google Cloud.
 
 **Q: What makes Bruno different from other AI engineers?**
 A: Most AI engineers focus on the model. Bruno focuses on making the model trustworthy at scale. His hallmark work — building evaluation frameworks from scratch, calibrating LLM judges against human annotators, designing modular architectures that are testable and measurable — reflects a belief that AI systems need infrastructure as much as they need good models. He brings both the ML depth and the engineering rigor to build AI that actually works in production.

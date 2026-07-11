@@ -32,3 +32,4 @@ CLAUDE.md
 docs/
 docs/*
 knowledgebase.txt
+.playwright-mcp/
