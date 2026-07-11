@@ -1169,7 +1169,6 @@
                     </nav>
                     <div class="hud-controls">
                         <button type="button" class="hud-btn" id="mapToggle" aria-pressed="false" title="Toggle dark map">Map: Day</button>
-                        <button type="button" class="hud-btn" id="soundToggle" aria-pressed="false" title="Toggle UI sounds">Sound: Off</button>
                     </div>
                 </div>
             </div>
@@ -1409,66 +1408,15 @@
     <script>
         (function () {
             var mapBtn = document.getElementById('mapToggle');
-            var soundBtn = document.getElementById('soundToggle');
-            var soundOn = false;
-            var audioCtx = null;
 
-            function loadPrefs() {
-                try {
-                    if (localStorage.getItem('bruno-map') === 'dark') {
-                        document.body.classList.add('dark-map');
-                        mapBtn.textContent = 'Map: Night';
-                        mapBtn.classList.add('on');
-                        mapBtn.setAttribute('aria-pressed', 'true');
-                    }
-                    if (localStorage.getItem('bruno-sound') === 'on') {
-                        soundOn = true;
-                        soundBtn.textContent = 'Sound: On';
-                        soundBtn.classList.add('on');
-                        soundBtn.setAttribute('aria-pressed', 'true');
-                    }
-                } catch (e) {}
-            }
-
-            function playClick() {
-                if (!soundOn) return;
-                try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                    var t = audioCtx.currentTime;
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(520, t);
-                    osc.frequency.exponentialRampToValueAtTime(180, t + 0.08);
-                    gain.gain.setValueAtTime(0.07, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(t);
-                    osc.stop(t + 0.11);
-                } catch (e) {}
-            }
-
-            function playToggle(on) {
-                if (!soundOn && !on) return;
-                try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx.state === 'suspended') audioCtx.resume();
-                    var t = audioCtx.currentTime;
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(on ? 300 : 220, t);
-                    osc.frequency.linearRampToValueAtTime(on ? 600 : 140, t + 0.12);
-                    gain.gain.setValueAtTime(0.06, t);
-                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(t);
-                    osc.stop(t + 0.16);
-                } catch (e) {}
-            }
+            try {
+                if (localStorage.getItem('bruno-map') === 'dark') {
+                    document.body.classList.add('dark-map');
+                    mapBtn.textContent = 'Map: Night';
+                    mapBtn.classList.add('on');
+                    mapBtn.setAttribute('aria-pressed', 'true');
+                }
+            } catch (e) {}
 
             mapBtn.addEventListener('click', function () {
                 var dark = document.body.classList.toggle('dark-map');
@@ -1476,25 +1424,7 @@
                 mapBtn.classList.toggle('on', dark);
                 mapBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
                 try { localStorage.setItem('bruno-map', dark ? 'dark' : 'day'); } catch (e) {}
-                playToggle(dark);
             });
-
-            soundBtn.addEventListener('click', function () {
-                soundOn = !soundOn;
-                soundBtn.textContent = soundOn ? 'Sound: On' : 'Sound: Off';
-                soundBtn.classList.toggle('on', soundOn);
-                soundBtn.setAttribute('aria-pressed', soundOn ? 'true' : 'false');
-                try { localStorage.setItem('bruno-sound', soundOn ? 'on' : 'off'); } catch (e) {}
-                if (soundOn) playToggle(true);
-            });
-
-            document.addEventListener('click', function (e) {
-                var el = e.target.closest('a, button');
-                if (!el || el === mapBtn || el === soundBtn) return;
-                playClick();
-            }, true);
-
-            loadPrefs();
         })();
     </script>
 </body>
