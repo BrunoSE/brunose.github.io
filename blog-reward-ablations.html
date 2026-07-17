@@ -469,9 +469,26 @@ body {
                         </table>
                         <p>This is not a trained transfer result. It is the eval harness: same reward shape, different tools, room to measure whether a git-trained policy learned orchestration structure or git trivia.</p>
 
+                        
+                        <h2>Live confirmation: A0 vs A3 on Prime</h2>
+                        <p>We also ran short hosted GRPO jobs (Qwen3.5-4B, 50 steps, batch 128, 8 rollouts) with the same env package and <code>GIT_ORCH_ABLATION=A0|A3</code>.</p>
+                        <table>
+                            <thead>
+                                <tr><th>Metric</th><th>A0 (final only)</th><th>A3 (score tool responses)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Status</td><td>Completed 50/50</td><td>Failed at step 43</td></tr>
+                                <tr><td>Reward mean, step 0</td><td>0.897</td><td><strong>0.975</strong></td></tr>
+                                <tr><td>Zero-advantage filter rate</td><td>82%</td><td><strong>94%</strong></td></tr>
+                                <tr><td>Effective batch size (avg)</td><td>0.18</td><td><strong>0.06</strong></td></tr>
+                                <tr><td>Reward min observed</td><td>can hit 0.10</td><td>floor ~0.60</td></tr>
+                            </tbody>
+                        </table>
+                        <p>A3 failed because post-batch filters dropped <em>all</em> rollouts for 10 consecutive batches: training starvation, not a random infrastructure blip. That matches the offline story: when almost every group has near-identical high rewards, GRPO has nothing left to train on.</p>
+
                         <h2>What this does not claim</h2>
                         <ul>
-                            <li>No new live GRPO training curves under A0 vs A3</li>
+                            <li>These live runs are short (50 steps) and not a full re-train of the original 300-step experiment</li>
                             <li>No claim that a new checkpoint improved from offline scores alone</li>
                             <li>No claim that filesystem transfer already works for a trained policy</li>
                         </ul>
