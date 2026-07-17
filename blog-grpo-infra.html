@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Multi-Turn Git RL Rollouts Actually Run | Bruno Stefoni</title>
+    <meta name="description" content="Concrete pipeline for agentic GRPO on git tool use: sandboxes, hidden paths, multi-turn tool loops, group rewards, and platform filters that set effective batch size.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-grpo-infra.html">
+    <meta property="og:title" content="How Multi-Turn Git RL Rollouts Actually Run">
+    <meta property="og:description" content="Sandboxes, tool loops, group rewards, and filters: the pipeline behind effective-batch GRPO debugging.">
+    <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+
+
+
+:root {
+    --stone-dark: #1a1612;
+    --stone: #2a241c;
+    --wood: #3b2715;
+    --gold: #c9a227;
+    --gold-bright: #e8c84a;
+    --gold-dim: #8a7018;
+    --gold-deep: #6b5410;
+    --parchment: #d4c4a0;
+    --parchment-hi: #e8dcb8;
+    --parchment-lo: #b8a478;
+    --ink: #1a1208;
+    --ink-soft: #3d2e1a;
+    --ink-faded: #5c4a32;
+    --font-title: 'Cinzel', Georgia, serif;
+    --font-body: 'Source Serif 4', Georgia, serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    font-family: var(--font-body);
+    background: var(--stone-dark);
+    color: var(--ink);
+    line-height: 1.65;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+.hall {
+    min-height: 100vh;
+    position: relative;
+    background:
+        radial-gradient(ellipse 30% 50% at 0% 40%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 50% at 100% 55%, rgba(201, 162, 39, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 30% at 50% 0%, rgba(90, 70, 40, 0.22) 0%, transparent 55%),
+        repeating-linear-gradient(0deg, transparent 0px, transparent 47px, rgba(0,0,0,0.12) 47px, rgba(0,0,0,0.12) 50px),
+        repeating-linear-gradient(90deg, transparent 0px, transparent 95px, rgba(0,0,0,0.07) 95px, rgba(0,0,0,0.07) 98px),
+        linear-gradient(180deg, #252018 0%, #1a1612 40%, #12100c 100%);
+    padding-bottom: 2.5rem;
+}
+.hall::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 30%, rgba(0,0,0,0.5) 100%);
+    z-index: 40;
+}
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(180deg, #4a3820 0%, #2e2214 40%, #1e160e 100%);
+    border-bottom: 3px solid var(--gold-dim);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201, 162, 39, 0.25);
+}
+.topbar::before {
+    content: '';
+    position: absolute;
+    bottom: -5px; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
+    opacity: 0.55;
+}
+.topbar-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.25rem;
+}
+.brand {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    text-decoration: none;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(201, 162, 39, 0.35), 0 2px 2px rgba(0,0,0,0.8);
+}
+.brand:hover { color: #ffe066; }
+.nav-tabs { display: flex; gap: 0.35rem; }
+.nav-tab {
+    font-family: var(--font-title);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #a89060;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.45rem 0.95rem;
+    background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
+    border: 1px solid #5a4420;
+    box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.12), 0 2px 4px rgba(0,0,0,0.4);
+    transition: all 0.15s ease;
+}
+.nav-tab:hover {
+    color: var(--gold-bright);
+    border-color: var(--gold-dim);
+    background: linear-gradient(180deg, #4a3820 0%, #3a2c18 100%);
+}
+.nav-tab.active {
+    color: var(--gold-bright);
+    border-color: var(--gold);
+    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
+    box-shadow: inset 0 1px 0 rgba(232, 200, 74, 0.25), 0 0 12px rgba(201, 162, 39, 0.2);
+    text-shadow: 0 0 8px rgba(201, 162, 39, 0.35);
+}
+.stage {
+    position: relative;
+    z-index: 1;
+    max-width: 920px;
+    margin: 1.5rem auto 0;
+    padding: 0 1rem;
+}
+.panel {
+    position: relative;
+    background:
+        repeating-linear-gradient(90deg, transparent 0px, transparent 5px, rgba(0,0,0,0.06) 5px, rgba(0,0,0,0.06) 6px),
+        linear-gradient(180deg, #5a3c22 0%, #3e2818 25%, #2e1e12 70%, #22160c 100%);
+    border: 4px solid #a07820;
+    box-shadow:
+        0 0 0 2px #1a1008,
+        0 0 0 7px #3a2814,
+        0 0 0 9px #6b5410,
+        0 0 0 10px #1a1008,
+        0 16px 50px rgba(0,0,0,0.75),
+        inset 0 0 80px rgba(0,0,0,0.35),
+        inset 0 2px 0 rgba(232, 200, 74, 0.2);
+}
+.rivet {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e8c84a, #c9a227 40%, #6b5410 75%, #3a2c08 100%);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255, 230, 120, 0.45);
+    z-index: 6;
+}
+.rivet-tl { top: 6px; left: 6px; }
+.rivet-tr { top: 6px; right: 6px; }
+.rivet-bl { bottom: 6px; left: 6px; }
+.rivet-br { bottom: 6px; right: 6px; }
+.scroll {
+    margin: 16px;
+    padding: 2.25rem 2.25rem 2.5rem;
+    background-color: var(--parchment);
+    background-image:
+        radial-gradient(ellipse 100px 70px at 8% 10%, rgba(100, 70, 30, 0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 80px 60px at 92% 85%, rgba(90, 55, 20, 0.14) 0%, transparent 70%),
+        repeating-linear-gradient(0.5deg, transparent 0, transparent 3px, rgba(80, 50, 20, 0.02) 3px, rgba(80, 50, 20, 0.02) 4px),
+        linear-gradient(175deg, var(--parchment-hi) 0%, var(--parchment) 40%, var(--parchment-lo) 100%);
+    border: 2px solid #8a7040;
+    box-shadow: inset 0 0 40px rgba(80, 50, 15, 0.12), 0 0 0 1px rgba(201, 162, 39, 0.15);
+    position: relative;
+}
+.page-foot {
+    text-align: center;
+    padding: 2rem 1rem 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+.page-foot p {
+    font-family: var(--font-title);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(160, 130, 60, 0.4);
+}
+@media (max-width: 768px) {
+    .scroll { padding: 1.5rem 1.1rem 1.75rem; margin: 10px; }
+    .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.65rem; letter-spacing: 0.06em; }
+    .brand { font-size: 0.9rem; letter-spacing: 0.08em; }
+    .panel { border-width: 3px; }
+}
+
+.post-meta {
+    display: flex; flex-wrap: wrap; gap: 0.45rem 0.7rem;
+    align-items: center; margin-bottom: 1rem;
+}
+.post-date {
+    font-family: var(--font-title);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gold-deep);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.post-tag {
+    padding: 0.12rem 0.55rem;
+    font-family: var(--font-title);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    border: 1px solid rgba(138, 112, 24, 0.4);
+    background: rgba(201, 162, 39, 0.06);
+}
+.post-title {
+    font-family: var(--font-title);
+    font-size: clamp(1.45rem, 3.8vw, 2rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: 0.02em;
+}
+.post-subtitle {
+    color: var(--ink-soft);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    font-style: italic;
+    border-left: 3px solid var(--gold);
+    padding-left: 1.15rem;
+    margin-bottom: 1.75rem;
+}
+.div-gold {
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    margin: 0.25rem 0 1.75rem;
+}
+.div-gold::before, .div-gold::after {
+    content: ''; flex: 1; height: 2px; max-width: 160px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
+    opacity: 0.55;
+}
+.div-gold span { color: var(--gold); font-size: 0.7rem; }
+.prose { color: var(--ink-soft); line-height: 1.8; font-size: 1.05rem; }
+.prose h2 {
+    font-family: var(--font-title);
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2.5rem 0 1rem;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(138, 112, 24, 0.35);
+}
+.prose h3 {
+    font-family: var(--font-title);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 2rem 0 0.85rem;
+    color: var(--ink);
+    letter-spacing: 0.03em;
+}
+.prose p { margin-bottom: 1.15rem; }
+.prose ul, .prose ol { margin: 0 0 1.15rem 1.4rem; }
+.prose li { margin-bottom: 0.5rem; }
+.prose strong { color: var(--ink); font-weight: 600; }
+.prose em { font-style: italic; }
+.prose a {
+    color: var(--gold-deep);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(138, 112, 24, 0.45);
+}
+.prose a:hover { color: #8a6010; border-bottom-color: var(--gold); }
+.prose code:not(pre code) {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: rgba(60, 40, 15, 0.12);
+    color: #6b3a10;
+    padding: 2px 6px;
+    border: 1px solid rgba(138, 112, 24, 0.25);
+}
+.prose pre {
+    background: #1a140c;
+    border: 2px solid #6b5410;
+    padding: 1.1rem 1.15rem;
+    overflow-x: auto;
+    margin: 1.35rem 0;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
+}
+.prose pre code {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: none;
+    padding: 0;
+    border: none;
+    color: #d4c4a0;
+}
+.prose table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.35rem 0;
+    font-size: 0.92rem;
+    display: block;
+    overflow-x: auto;
+}
+.prose th {
+    background: rgba(60, 40, 15, 0.15);
+    padding: 0.65rem 0.85rem;
+    text-align: left;
+    border: 1px solid rgba(138, 112, 24, 0.4);
+    font-family: var(--font-title);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    white-space: nowrap;
+}
+.prose td {
+    padding: 0.65rem 0.85rem;
+    border: 1px solid rgba(138, 112, 24, 0.3);
+    color: var(--ink-soft);
+}
+.prose tr:nth-child(even) td { background: rgba(60, 40, 15, 0.06); }
+.prose hr {
+    border: none;
+    border-top: 1px solid rgba(138, 112, 24, 0.35);
+    margin: 2.5rem 0;
+}
+.prose blockquote {
+    border-left: 3px solid var(--gold);
+    padding: 0.9rem 1.2rem;
+    margin: 1.35rem 0;
+    background: rgba(60, 40, 15, 0.08);
+}
+.prose blockquote p {
+    color: var(--ink);
+    font-style: italic;
+    margin-bottom: 0;
+}
+.mermaid {
+    background: rgba(60, 40, 15, 0.1);
+    border: 2px solid #8a7040;
+    padding: 1.25rem;
+    margin: 1.35rem 0;
+    overflow-x: auto;
+    text-align: center;
+}
+.back-link {
+    margin-top: 2.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(138, 112, 24, 0.3);
+}
+.back-link a {
+    font-family: var(--font-title);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    text-decoration: none;
+}
+.back-link a:hover { color: var(--gold); }
+@media (max-width: 768px) {
+    .post-title { font-size: 1.45rem; }
+}
+
+    
+    
+    </style>
+</head>
+<body>
+    <div class="hall">
+        <header class="topbar">
+            <div class="topbar-inner">
+                <a href="/" class="brand">Bruno Stefoni</a>
+                <nav class="nav-tabs">
+                    <a href="/" class="nav-tab">Home</a>
+                    <a href="/blog.html" class="nav-tab active">Blog</a>
+                    <a href="/chatbot.html" class="nav-tab">AI Chatbot</a>
+                </nav>
+            </div>
+        </header>
+
+        <main class="stage">
+            <div class="panel">
+                <span class="rivet rivet-tl" aria-hidden="true"></span>
+                <span class="rivet rivet-tr" aria-hidden="true"></span>
+                <span class="rivet rivet-bl" aria-hidden="true"></span>
+                <span class="rivet rivet-br" aria-hidden="true"></span>
+                <div class="scroll">
+                    <div class="post-hero">
+                        <div class="post-meta">
+                            <span class="post-date">July 17, 2026</span>
+                            <span class="post-tag">Infrastructure</span>
+                            <span class="post-tag">GRPO</span>
+                            <span class="post-tag">Agentic RL</span>
+                            <span class="post-tag">MLOps</span>
+                        </div>
+                        <h1 class="post-title">How Multi-Turn Git RL Rollouts Actually Run</h1>
+                        <p class="post-subtitle">Not Temporal. Not a custom trainer cluster you maintain by hand. Here is the concrete path from a natural-language goal to a GRPO update for git tool use on Prime Intellect + verifiers.</p>
+                    </div>
+
+                    <div class="div-gold"><span>◆</span></div>
+
+                    <article class="prose">
+                        <p>Earlier posts argued that mean reward is a bad solo health metric for agentic GRPO, and that reward design can erase the learning signal. This post is the plumbing: what actually executes when you train a multi-turn git agent.</p>
+
+                        <p>Stack, honestly:</p>
+                        <ul>
+                            <li><strong>Environment package:</strong> Python, <code>verifiers</code>, GitPython, temp-dir sandboxes</li>
+                            <li><strong>Trainer:</strong> Prime Intellect hosted GRPO (prime-rl under the hood)</li>
+                            <li><strong>Delivery:</strong> versioned env wheel on the Environments Hub, config TOML + CLI</li>
+                        </ul>
+                        <p>No custom Temporal workflows and no hand-rolled gRPC reward service for these runs. The interesting complexity is still real: isolation, determinism, multi-turn tool loops, group scoring, and filters.</p>
+
+                        <h2>1. Ship the environment as a versioned package</h2>
+
+                        <p>The unit of deployment is not a git repo checkout on the GPU box. It is a built wheel pushed to the Hub:</p>
+<pre><code>cd environments/git-orchestration
+prime env push --auto-bump
+# e.g. bstefoni/git-orchestration@0.7.1
+</code></pre>
+                        <p>Training configs pin that id. When you change reward logic, you bump the version and relaunch. Old runs keep the old package. That versioning is the main “CI for RL envs” property that matters in practice: you cannot accidentally mix A0 scoring from Monday with A3 code from Tuesday inside one confusing blob.</p>
+
+                        <p>Ablations ride an env var into the worker:</p>
+<pre><code>prime rl run configs/lab/ablation_A0_short.toml \
+  -e GIT_ORCH_ABLATION=A0
+</code></pre>
+                        <p><code>load_environment()</code> reads <code>GIT_ORCH_ABLATION</code>, selects a <code>RewardConfig</code>, and closes over it in the group reward function. Same wheel, different scoring recipes.</p>
+
+                        <h2>2. One episode = one disposable git universe</h2>
+
+                        <p>Before the model acts, the env creates state:</p>
+                        <ol>
+                            <li><code>setup_state</code> builds a temp directory git repo from a template (<code>clean</code>, <code>dirty</code>, <code>staged</code>, <code>multi_branch</code>) with a seed.</li>
+                            <li>It snapshots initial state (HEAD hash, branches, cleanliness, etc.).</li>
+                            <li>Dynamic answer fragments like <code>$head_commit_hash</code> are resolved against that snapshot so the model must report real values, not memorized strings.</li>
+                            <li>After the rollout, cleanup snapshots the final repo, then deletes the temp dir.</li>
+                        </ol>
+
+                        <p>Isolation is boring and non-negotiable. Write episodes mutate repos. Without per-rollout sandboxes, one trajectory poisons the next. Seeds keep the same episode id reproducible across the 8 rollouts in a GRPO group so “same prompt, different samples” is a fair comparison.</p>
+
+                        <h2>3. Tools the model sees vs tools the env runs</h2>
+
+                        <p>There are 13 git tools (status, log, show, diffs, branch, add, commit, checkout, …). The model never receives <code>repo_path</code>. Registration looks like:</p>
+<pre><code>self.add_tool(tool_func, args_to_skip=["repo_path"])
+</code></pre>
+                        <p>On every call, <code>update_tool_args</code> injects the episode’s path. That is a small design choice with large security and schema benefits: the policy cannot invent paths; tool JSON schemas stay clean; reward and tools share one authoritative workspace.</p>
+
+                        <p>Tool implementations are thin GitPython wrappers that return strings. Errors surface as tool messages. The multi-turn loop is “model emits tool call → env executes → tool result message → repeat” until a final assistant message with no tool calls, or max turns (10).</p>
+
+                        <h2>4. Anatomy of one training step</h2>
+
+                        <p>For the short comparison runs we used:</p>
+                        <ul>
+                            <li><code>batch_size = 128</code> prompts</li>
+                            <li><code>rollouts_per_example = 8</code> samples per prompt</li>
+                            <li>Up to 10 tool turns per sample</li>
+                        </ul>
+
+                        <p>Conceptual flow:</p>
+<pre><code>for step in 1..max_steps:
+  sample up to 128 goals from the episode dataset
+  for each goal:
+    spawn 8 independent sandboxes (same template + seed)
+    for each of 8 rollouts:
+      multi-turn tool loop against that sandbox
+      score reward in [0, 1]
+    GRPO advantages within the group of 8
+  apply filters (e.g. drop groups with zero advantage)
+  optimizer update on what remains  # "effective batch"
+</code></pre>
+
+                        <p>That last line is where the earlier posts connect. You can spend a full step of GPU and still train on a tiny effective batch if filters discard most groups. Mean reward can still look excellent.</p>
+
+                        <h2>5. Scoring is a first-class service inside the env</h2>
+
+                        <p>Reward is not a separate microservice. It is a group-level function inside the env package, invoked after rollouts complete:</p>
+                        <ul>
+                            <li><strong>Read episodes:</strong> fraction of expected fragments in the final assistant text (A0), or also in tool text (A3 bug mode).</li>
+                            <li><strong>Write episodes:</strong> fraction of expected final-repo conditions (branch exists, clean tree, commit message substring, …).</li>
+                            <li><strong>Format gate:</strong> no tool calls → 0 (unless ablation turns the gate off).</li>
+                            <li><strong>Tool bonuses:</strong> small credit for successful tools; elevated write-tool bonus in A0.</li>
+                        </ul>
+
+                        <p>We also log group metrics (mean/std by read vs write, variance-starved flags). Those lines are for debugging reward health; the trainer’s own filter metrics (zero-advantage rate, effective batch) are what killed A3 in production logs.</p>
+
+                        <h2>6. Why step 0 can take forever</h2>
+
+                        <p>Multi-turn rollouts dominate wall time. Each of 128×8 trajectories may issue several model calls and git operations. In practice the orchestrator sits on “batch filling” for a long time before the first step metrics appear. That is expected for this env class; it is not a stuck job unless logs show errors or filter empty-batch loops.</p>
+
+                        <p>When A3 died, it was not sandbox thrash. It was consecutive steps where post-batch filters dropped every rollout (<code>consecutive empty batches: 10/10</code>), then <code>BackoffLimitExceeded</code>. The infrastructure did its job: it refused to pretend an empty training signal was a successful step forever.</p>
+
+                        <h2>7. What you operate day to day</h2>
+
+                        <p>The operator surface is intentionally small:</p>
+<pre><code>prime env push
+prime rl run configs/lab/....toml -e GIT_ORCH_ABLATION=A0
+prime rl logs &lt;run-id&gt;
+prime rl metrics &lt;run-id&gt;
+prime rl progress &lt;run-id&gt;
+</code></pre>
+
+                        <p>Locally, unit tests and an offline ablation harness score fixed policies without GPUs. That is how we measured “perfect vs empty final” advantages before spending cluster time. Hosted runs then checked whether those scoring differences show up as zero-advantage rate and effective batch under real GRPO.</p>
+
+                        <h2>8. Design principles that mattered</h2>
+
+                        <ol>
+                            <li><strong>Deterministic sandboxes per rollout</strong> — fair groups, no cross-talk.</li>
+                            <li><strong>Hide privileged args</strong> — model never owns the filesystem path.</li>
+                            <li><strong>Version the env, not tribal knowledge</strong> — wheel + Hub id beats “whatever is on the box.”</li>
+                            <li><strong>Score in-process</strong> — fewer moving parts than a remote reward API for this scale.</li>
+                            <li><strong>Log filters, not only reward</strong> — the health of GRPO is contrast and kept batch size.</li>
+                            <li><strong>Offline policy scoring before live train</strong> — cheaper way to catch lying rewards.</li>
+                        </ol>
+
+                        <h2>What this is not</h2>
+
+                        <ul>
+                            <li>Not a full open-source dump of the trainer internals (those live in Prime’s stack).</li>
+                            <li>Not a claim that you need Kubernetes YAML to reproduce the insight; you need a correct env contract and metrics that surface filtering.</li>
+                            <li>Not Temporal/Kafka architecture cosplay. If we had built a custom multi-tenant trainer, that would be a different post.</li>
+                        </ul>
+
+                        <h2>Takeaway</h2>
+
+                        <p>The infrastructure for this project is a thin, ruthless loop: versioned env → parallel sandboxed multi-turn rollouts → group rewards → filters → GRPO update. Most of the research leverage sits in the env and the reward. Most of the operational leverage sits in watching what the filters leave behind.</p>
+
+                        <p>If mean reward is the vanity metric, effective batch is the capacity metric. The pipeline above is how that capacity gets created and destroyed.</p>
+
+                        <hr>
+                        <p>Related:</p>
+                        <ul>
+                            <li><a href="/blog-effective-batch.html">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</a></li>
+                            <li><a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a></li>
+                            <li><a href="/blog-pirl.html">Teaching a 4B Model to Chain Git Operations Through Pure RL</a></li>
+                        </ul>
+                    </article>
+
+                    <div class="back-link">
+                        <a href="/blog.html">&larr; Back to Blog</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="page-foot">
+            <p>&copy; 2026 Bruno Stefoni · Victory</p>
+        </footer>
+    </div>
+</body>
+</html>
