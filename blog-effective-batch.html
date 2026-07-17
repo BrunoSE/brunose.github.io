@@ -409,17 +409,39 @@ body {
                     <article class="prose">
                         <p>If you only watch mean reward during agentic GRPO, you will miss the failure mode that actually ends runs.</p>
 
-                        <p>We trained the same git tool-use environment three ways (short runs: 50 steps, batch 128, 8 rollouts). Mean reward was high for all of them. Only one finished in good health. One finished weak. One starved to death.</p>
+                        <p>We trained the same multi-turn git tool-use environment three ways, changing only the reward recipe. Short hosted runs: Qwen3.5-4B, 50 steps, batch size 128 prompts, 8 rollouts per prompt. Mean reward was high for all three. Only one finished in good health. One finished weak. One starved to death.</p>
+
+                        <h2>Setup in plain terms</h2>
+
+                        <p>Each training step roughly looks like this:</p>
+                        <ol>
+                            <li>Sample many <strong>prompts</strong> (goals like “report the HEAD commit hash”).</li>
+                            <li>For each prompt, sample a <strong>group</strong> of 8 rollouts (same goal, different samples).</li>
+                            <li>Score every rollout with the reward function (0 to 1).</li>
+                            <li>GRPO computes advantages <em>inside each group</em>: better-than-group-mean rollouts get positive updates, worse ones negative.</li>
+                            <li>The trainer may <strong>filter out</strong> groups that give no learning signal (for example every rollout ties), so the update uses only what is left.</li>
+                        </ol>
+
+                        <p>So “batch 128” is not 128 independent gradients. It is up to 128 prompts × 8 rollouts, then filters. If filters throw almost everything away, the <strong>effective</strong> batch is tiny even though you paid for a full rollout step.</p>
+
+                        <h2>What A0 / A1 / A3 actually change</h2>
+
+                        <p>Same tools, same episodes, same model. Only scoring differs:</p>
+                        <ul>
+                            <li><strong>A0 (baseline)</strong>: on read tasks, only the model’s <em>final message</em> is checked for correct values. Write tools get a slightly higher bonus than read-only tools when the write outcome is not yet correct (0.2 vs 0.1). That bonus is a “you’re trying the right class of action” signal.</li>
+                            <li><strong>A1</strong>: same final-message rule, but write tools no longer get the elevated bonus (everything tool-related scales like 0.1). Offline, that erased the preference for write attempts when outcomes were still zero.</li>
+                            <li><strong>A3</strong>: on read tasks, correct strings found in <em>tool outputs</em> also count (the original bug). Calling <code>git_status</code> and saying “Done” can score almost as well as reporting the real answer.</li>
+                        </ul>
 
                         <h2>The misleading chart</h2>
 
                         <table>
                             <thead>
-                                <tr><th>Ablation</th><th>Mean reward (avg)</th><th>Looks fine?</th></tr>
+                                <tr><th>Ablation</th><th>Mean reward (avg over run)</th><th>Looks fine?</th></tr>
                             </thead>
                             <tbody>
                                 <tr><td>A0 baseline</td><td>0.973</td><td>Yes</td></tr>
-                                <tr><td>A1 no write-tool bonus</td><td>0.980</td><td>Yes</td></tr>
+                                <tr><td>A1 no elevated write bonus</td><td>0.980</td><td>Yes</td></tr>
                                 <tr><td>A3 score tool responses</td><td>0.982</td><td>Yes</td></tr>
                             </tbody>
                         </table>
@@ -433,57 +455,68 @@ body {
                                 <tr><th>Metric</th><th>A0</th><th>A1</th><th>A3</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>Status</td><td>Completed</td><td>Completed</td><td><strong>Failed @ step 43</strong></td></tr>
+                                <tr><td>Status</td><td>Completed 50/50</td><td>Completed 50/50</td><td><strong>Failed @ step 43</strong></td></tr>
                                 <tr><td>Zero-advantage filter rate</td><td><strong>82%</strong></td><td>89%</td><td><strong>94%</strong></td></tr>
                                 <tr><td>Effective batch size (avg)</td><td><strong>0.18</strong></td><td>0.11</td><td><strong>0.06</strong></td></tr>
                                 <tr><td>Reward mean at step 0</td><td>0.90</td><td>0.92</td><td><strong>0.98</strong></td></tr>
                             </tbody>
                         </table>
 
-                        <p><strong>Zero-advantage rate</strong> is the fraction of groups where every rollout scores the same (or near enough that GRPO advantage collapses). High means the buffer has nothing useful to keep.</p>
+                        <p><strong>Zero-advantage rate</strong> (platform filter): share of groups the trainer treats as having no usable within-group contrast. In practice this is almost always “everyone scored the same,” so GRPO advantages are ~0. High means most of your rollouts never enter a useful update.</p>
 
-                        <p><strong>Effective batch size</strong> is what is left after filters. When it trends toward zero, you are not training: you are paying for rollouts that get discarded.</p>
+                        <p><strong>Effective batch size</strong> (platform metric, reported as a fraction of the nominal batch): after filters, how much of the step still contributes to training. On these runs the nominal batch is 128 prompts. An effective batch of <strong>0.18</strong> means on average you kept roughly <strong>0.18 × 128 ≈ 23</strong> prompts worth of signal per step; <strong>0.06</strong> is roughly <strong>8</strong>. When it hits zero for many steps in a row, you are only paying for discarded rollouts.</p>
+
+                        <p>These are not proxies I invented after the fact. They are the filter/batch fields the trainer already logs. The ranking they induce matches which jobs finished and which died.</p>
 
                         <h2>What happened to A3</h2>
 
-                        <p>A3 scores fragments in tool responses as well as the final message. Offline, that made “call tools and say Done” look almost as good as “call tools and report the answer.” Live, the same saturation showed up as:</p>
+                        <p>A3 scores answer fragments in tool responses as well as the final message. Offline, “call tools and say Done” scored almost as high as “call tools and report the answer” (perfect−empty advantage collapsed from 0.90 to ~0.01). Live, the same saturation showed up as:</p>
                         <ul>
-                            <li>Higher mean reward from step 0</li>
-                            <li>Nearly every group filtered as zero-advantage</li>
-                            <li>Ten consecutive batches where <em>all</em> 128 rollouts were dropped</li>
+                            <li>Higher mean reward from step 0 (0.98 vs 0.90)</li>
+                            <li>~94% of groups filtered as zero-advantage (vs ~82% for A0)</li>
+                            <li>Effective batch stuck near ~0.06</li>
+                            <li>Ten consecutive steps where filters dropped <em>all</em> 128 rollouts</li>
                             <li>Job death: <code>BackoffLimitExceeded</code></li>
                         </ul>
 
-                        <p>That is not a flaky cluster. That is a reward function that looks successful while starving the optimizer.</p>
+                        <p>I am not claiming a fancy causal graph beyond the mechanism GRPO already implies: if within-group rewards do not differ, advantages vanish, filters empty the batch, training cannot proceed. A3 makes rewards look high while that contrast disappears. That is a reward-design failure that presents as “success” on the mean-reward chart.</p>
 
                         <h2>What A1 taught us</h2>
 
-                        <p>A1 keeps final-message-only scoring but removes the elevated write-tool bonus. It finished 50 steps. It did not crash. It still looked worse on the health metrics than A0: higher zero-advantage, smaller effective batch, slightly less <code>git_add</code> / <code>git_commit</code>.</p>
+                        <p>A1 keeps final-message-only scoring but removes the elevated write-tool bonus. It finished 50 steps. It did not crash. Relative to A0 it still looked worse on health metrics: zero-advantage 89% vs 82%, effective batch 0.11 vs 0.18, and slightly lower average <code>git_add</code> / <code>git_commit</code> rates.</p>
 
-                        <p>So the ranking is not binary “works / dies.” It is a spectrum of how much signal you leave on the table each step.</p>
+                        <p>So the ranking is not only “works / dies.” A1 is the middle of a spectrum: still trainable, but less usable signal per dollar of rollouts. Offline, removing the write bonus wiped a 0.10 gap between “tried a write tool” and “only inspected” when the write outcome was still wrong. Live, we see the same <em>direction</em> on write-tool rates and filter health, not a second A3-style collapse.</p>
 
                         <h2>Dashboard rules I would actually use</h2>
 
                         <ol>
-                            <li><strong>Primary:</strong> effective batch size (or 1 − filter rate). Alert if it stays near zero for N steps.</li>
-                            <li><strong>Primary:</strong> zero-advantage rate. Alert if it climbs past ~0.9 and stays there.</li>
-                            <li><strong>Secondary:</strong> mean reward. Useful for “is the task solvable,” bad as a solo health check.</li>
-                            <li><strong>Secondary:</strong> reward min within groups. If min never drops (A3 floor ~0.6), you may be over-crediting bad rollouts.</li>
-                            <li><strong>Context:</strong> tool mix (write vs read). Confirms whether the policy is exploring the hard actions you care about.</li>
+                            <li><strong>Primary: effective batch size</strong> (fraction of nominal batch kept). Alert if it stays under ~0.1 for several consecutive steps; treat near-zero for 5–10 steps as an emergency.</li>
+                            <li><strong>Primary: zero-advantage rate</strong>. Alert if it stays above ~0.9. That is “almost every group is a tie.”</li>
+                            <li><strong>Secondary: mean reward</strong>. Useful for “is the task solvable at all,” bad as a solo health check. High mean + high zero-advantage is a red flag, not a win.</li>
+                            <li><strong>Secondary: reward min</strong> across rollouts in a step. If the floor never drops (A3 often sat near ~0.6 while A0 could still hit 0.1), you may be over-crediting bad trajectories.</li>
+                            <li><strong>Context: tool mix</strong> (write vs read calls). Checks whether the policy still attempts the hard actions you care about.</li>
                         </ol>
 
                         <h2>Why mean reward lies here</h2>
 
-                        <p>GRPO learns from <em>within-group</em> differences. A batch where every rollout scores 0.98 is a great average and a useless gradient. Mean reward rises when the reward function is generous <em>or</em> when the policy improves. Effective batch falls when the reward function stops distinguishing good from bad.</p>
+                        <p>GRPO learns from <em>within-group</em> differences. A group where every rollout scores 0.98 is a great average and a useless gradient. Mean reward rises when the reward function is generous <em>or</em> when the policy improves. Effective batch falls when the reward function stops distinguishing good from bad.</p>
 
-                        <p>In tool-use RL, those two effects often move together: a buggy reward inflates scores and collapses variance at the same time. That is exactly the pattern offline ablations predicted and live A3 confirmed.</p>
+                        <p>In tool-use RL those two effects often move together: a buggy reward inflates scores and collapses variance at the same time. Offline ablations predicted that pattern; live A3 confirmed it by dying with a prettier mean than A0.</p>
+
+                        <h2>Limits</h2>
+
+                        <ul>
+                            <li>These are short 50-step runs, not full 300-step campaigns.</li>
+                            <li>Effective batch and zero-advantage are platform filter metrics; exact filter thresholds are the trainer’s, not hand-tuned in this post.</li>
+                            <li>A1’s effect is smaller than A3’s. I would not claim “write bonus alone saves training” from this data, only that A0 looked healthier than A1 on the signal metrics we care about.</li>
+                        </ul>
 
                         <h2>Practical takeaway</h2>
 
-                        <p>If you are debugging agentic GRPO and the reward curve looks “too good,” open the filter panel before you celebrate. The run that is about to die often has the prettiest mean.</p>
+                        <p>If you are debugging agentic GRPO and the reward curve looks “too good,” open the filter panel before you celebrate. Rank runs by effective batch and zero-advantage first. The run that is about to die often has the prettiest mean.</p>
 
                         <hr>
-                        <p>Related: <a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a> (offline tables + live A0/A1/A3 summary).</p>
+                        <p>Related: <a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a> (offline tables + live A0/A1/A3 numbers).</p>
                     </article>
 
                     <div class="back-link">
