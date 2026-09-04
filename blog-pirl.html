@@ -403,6 +403,7 @@ body {
                                     </div>
                                     <h1 class="post-title">Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</h1>
                                     <p class="post-subtitle">Training Qwen3-4B to discover multi-turn git tool chains entirely from reward signal &mdash; no demonstrations, no SFT. Six reward function versions, four failure modes, and the fix that finally worked.</p>
+                                    <blockquote><p><em>Version note.</em> This post describes a 100-episode dataset (L1: 20, L2: 21, L3: 28, L4: 31). The environment has since grown to <strong>v0.8.0</strong> with 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62). The debugging narrative is kept as-run.</p></blockquote>
                                 </div>
 
                                 <div class="div-gold"><span>◆</span></div>
@@ -604,6 +605,15 @@ body {
                                     <hr>
 
                                     <p><em>Trained on <a href="https://www.primeintellect.ai/" target="_blank">Prime Intellect</a> using TOPLOC distributed RL. Environment built with <a href="https://github.com/willccbb/verifiers" target="_blank">verifiers</a>.</em></p>
+
+                                    <hr>
+
+                                    <p><em>Follow-ups:</em></p>
+                                    <ul>
+                                        <li><a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a> — the reward science behind the six versions</li>
+                                        <li><a href="/blog-effective-batch.html">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</a> — live A0/A1/A3 comparison</li>
+                                        <li><a href="/blog-grpo-infra.html">How Multi-Turn Git RL Rollouts Actually Run</a> — the pipeline</li>
+                                    </ul>
 
                                 </article>
 

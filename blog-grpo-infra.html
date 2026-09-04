@@ -424,7 +424,7 @@ body {
                         <p>The unit of deployment is not a git repo checkout on the GPU box. It is a built wheel pushed to the Hub:</p>
 <pre><code>cd environments/git-orchestration
 prime env push --auto-bump
-# e.g. bstefoni/git-orchestration@0.7.1
+# e.g. bstefoni/git-orchestration@0.7.1 (live ablation runs; current package is v0.8.0)
 </code></pre>
                         <p>Training configs pin that id. When you change reward logic, you bump the version and relaunch. Old runs keep the old package. That versioning is the main “CI for RL envs” property that matters in practice: you cannot accidentally mix A0 scoring from Monday with A3 code from Tuesday inside one confusing blob.</p>
 

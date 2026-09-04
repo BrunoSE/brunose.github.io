@@ -402,9 +402,10 @@ body {
                                     </div>
                                     <h1 class="post-title">Teaching an LLM to Use Git Through Pure Reinforcement Learning</h1>
                                     <p class="post-subtitle">We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, trained for 200 steps, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.</p>
+                                    <blockquote><p><em>Version note.</em> This narrative is from the v0.3.0 era (66 episodes, 25 with dynamic fragments, temperature 0.7). The environment has since grown to <strong>v0.8.0</strong>: 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62), formalized reward presets A0–A6, and pinned training hyperparameters. The story below is kept as-run; for what the numbers taught us, see the follow-ups.</p></blockquote>
                                 </div>
 
-                                <div class="div-gold"><span>◆</span></div>
+                                 <div class="div-gold"><span>◆</span></div>
 
                                 <article class="prose">
 
@@ -786,6 +787,15 @@ body {
                                     <p>The environment is ~700 lines of Python across 5 files. The hard part was the reward function — designing one where the only path to high reward is actually solving the task, not satisfying a proxy.</p>
 
                                     <p>That, it turns out, requires more iterations than you'd expect.</p>
+
+                                    <hr>
+
+                                    <p><em>Follow-ups:</em></p>
+                                    <ul>
+                                        <li><a href="/blog-pirl.html">Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</a> — six reward versions, four failure modes</li>
+                                        <li><a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a> — why the original reward failed, measured</li>
+                                        <li><a href="/blog-effective-batch.html">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</a> — the metric that predicts run death</li>
+                                    </ul>
 
                                 </article>
 

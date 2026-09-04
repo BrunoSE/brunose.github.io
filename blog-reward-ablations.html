@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What Offline Ablations Reveal About Agentic Tool-Use Rewards | Bruno Stefoni</title>
-    <meta name="description" content="Offline ablations across 100 git episodes show why scoring tool responses erases the GRPO learning signal, and why a small write-tool bonus matters.">
+    <meta name="description" content="Offline ablations across 200 git episodes show why scoring tool responses erases the GRPO learning signal, and why a small write-tool bonus matters.">
     <meta name="author" content="Bruno Stefoni">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://brunose.github.io/blog-reward-ablations.html">
     <meta property="og:title" content="What Offline Ablations Reveal About Agentic Tool-Use Rewards">
-    <meta property="og:description" content="Offline ablations across 100 git episodes show why scoring tool responses erases the GRPO learning signal.">
+    <meta property="og:description" content="Offline ablations across 200 git episodes show why scoring tool responses erases the GRPO learning signal.">
     <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -401,7 +401,7 @@ body {
                             <span class="post-tag">Tool Use</span>
                         </div>
                         <h1 class="post-title">What Offline Ablations Reveal About Agentic Tool-Use Rewards</h1>
-                        <p class="post-subtitle">We scored fixed policies across 100 git episodes under six reward variants. The numbers are offline. They show why scoring tool responses erases the learning signal GRPO needs, and why a small write-tool bonus is decisive.</p>
+                        <p class="post-subtitle">We scored fixed policies across 200 git episodes under six reward variants. The numbers are offline. They show why scoring tool responses erases the learning signal GRPO needs, and why a small write-tool bonus is decisive.</p>
                     </div>
 
                     <div class="div-gold"><span>◆</span></div>
@@ -426,7 +426,7 @@ body {
                             </thead>
                             <tbody>
                                 <tr><td>A0 (final-message only)</td><td>0.100</td><td><strong>0.900</strong></td><td>0%</td></tr>
-                                <tr><td>A3 (score tool responses too)</td><td>0.989</td><td><strong>0.013</strong></td><td><strong>97%</strong></td></tr>
+                                <tr><td>A3 (score tool responses too)</td><td>0.980</td><td><strong>0.020</strong></td><td><strong>94%</strong></td></tr>
                             </tbody>
                         </table>
                         <p>A3 does not merely over-credit lazy rollouts. It makes the good policy and the lazy policy look almost the same. Under GRPO, advantages are <code>(r_i - mean) / std</code> within a group. If perfect and empty both score ~0.99, there is nothing left to reinforce. That is the offline explanation of the original failure mode: the reward was already saturated before training started.</p>
@@ -450,8 +450,8 @@ body {
                                 <tr><th>Buffer</th><th>Stuck write groups kept</th><th>Stuck write groups discarded</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>A0 (<code>hard_threshold=0.0</code>)</td><td>39/39</td><td>0</td></tr>
-                                <tr><td>A6 (<code>hard_threshold=0.1</code>)</td><td>8/39</td><td><strong>31/39</strong></td></tr>
+                                <tr><td>A0 (<code>hard_threshold=0.0</code>)</td><td>86/86</td><td>0</td></tr>
+                                <tr><td>A6 (<code>hard_threshold=0.1</code>)</td><td>18/86</td><td><strong>68/86</strong></td></tr>
                             </tbody>
                         </table>
                         <p>If stuck write attempts score around 0.1-0.4, a hard threshold of 0.1 throws most of them out before the model can climb. That matches the buffer-drain failure mode from training.</p>
@@ -494,13 +494,13 @@ body {
                             <li>No claim that a new checkpoint improved from offline scores alone</li>
                             <li>No claim that filesystem transfer already works for a trained policy</li>
                         </ul>
-                        <p>The offline numbers explain the failure modes. Live A0 vs A3 / A1 runs are the next measurement.</p>
+                        <p>The offline numbers explain the failure modes. The live runs above confirm the ordering: A3 saturates and dies, A1 trains weakly, A0 stays healthiest.</p>
 
-                        <h2>What to train next</h2>
+                        <h2>What is next</h2>
                         <ol>
-                            <li><strong>A0 vs A3</strong> on git-orchestration: confirm that final-message-only scoring restores a learnable advantage online</li>
-                            <li><strong>A0 vs A1</strong> on write-heavy mix: confirm the 0.10 write-tool gradient matters in training</li>
-                            <li><strong>Zero-shot FS eval</strong> of the best git-trained checkpoint</li>
+                            <li><strong>Zero-shot FS eval</strong> of the best git-trained checkpoint: does it transfer orchestration structure or git trivia?</li>
+                            <li><strong>Per-level reward breakdown</strong>: confirm Level 1 saturates while Level 4 still climbs.</li>
+                            <li><strong>Full-scale A0 run</strong> (256 batch / 16 rollouts) to check the short-run ranking holds.</li>
                         </ol>
 
                         <hr>
