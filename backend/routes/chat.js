@@ -37,7 +37,7 @@ Location: New York, NY | Email: brunostefoni12@gmail.com
 LinkedIn: https://www.linkedin.com/in/bruno-stefoni-escudero/ | GitHub: https://github.com/BrunoSE | Website: https://brunose.github.io/
 
 PROFESSIONAL SUMMARY:
-AI/ML Engineer with 8 years of experience building production AI infrastructure. Specialized in LLMOps, AI observability, and evaluation frameworks for production LLM systems. Track record of architecting agentic systems, building LLM-as-judge evaluation pipelines, and deploying AI infrastructure using MCP servers. Hands-on expertise in Python, Go, GCP, and AWS.
+AI/ML Engineer with 8 years of experience building production AI infrastructure. Specialized in LLMOps, AI observability, and evaluation frameworks for production LLM systems. Track record of architecting agentic systems, building LLM-as-judge evaluation pipelines, and deploying AI infrastructure using MCP servers. Hands-on expertise in Python, GCP, and AWS.
 
 CURRENT ROLE:
 DRW Holdings - AI Engineer (May 2026 – Present) | Manhattan, New York
@@ -45,12 +45,14 @@ DRW Holdings - AI Engineer (May 2026 – Present) | Manhattan, New York
 
 MOST RECENT ROLE:
 VideoAmp - Principal AI Engineer (Dec 2024 – Apr 2026) | Manhattan, New York
-- Drove 0-to-1 creation of LLM evaluation infrastructure; LLM-as-judge framework achieving 70% agreement with domain experts, running weekly across 4 production AI applications
+- Drove 0-to-1 creation of LLM evaluation infrastructure; calibrated LLM judge reaching 70% agreement with domain-expert labels (up from 30%) on a labelled dataset of 100 real workflows; the eval set (those 100 plus 100 synthetic variations) runs weekly across 4 production AI applications
 - Engineered in-house Go/Python AI agent (Claude via AWS Bedrock) for automated data analysis against Snowflake; modular primitives (intent filtering, domain knowledge injection, query decomposition, answer synthesis); reduced latency from 5min to 1min
 - Designed standards-based agent infrastructure using MCP with Arazzo and OpenAPI 3.0; K6 load testing achieved 50% server cost reduction
 - Designed automated AI report processing pipeline using AWS Bedrock, Temporal, and Kafka
 - Led MCP servers re-design with Progressive Discovery pattern via tool-search meta-tools; 93% context length reduction for agents connecting to 70+ tools
-- Developed Go microservices with gRPC and REST APIs powering AI-driven analytics
+- Developed Go microservices with gRPC and REST APIs powering AI-driven analytics (codebase was roughly 90% Python, 10% Go; Python is his primary language)
+- The AI agent was used by multiple internal and client-facing teams
+- Worked with the Claude Code SDK at VideoAmp
 
 CloudWerx - Senior AI/ML Engineer (Nov 2023 – Nov 2024) | Manhattan, New York
 - Architected Analyze-Plan-Execute agentic framework for patient notes; cut documentation time from 7 to 2 minutes per note
@@ -74,7 +76,7 @@ STP - Data Scientist (May 2018 – May 2022) | Santiago, Chile
 TECHNICAL SKILLS:
 Certifications: Google Cloud Professional Machine Learning Engineer (May 2024 – May 2026)
 Languages: Python, Go, Java
-AI/Agent Frameworks: MCP, Arazzo, OAS 3.0, Claude Code, Google ADK, LangChain, LangGraph, HuggingFace, Transformers, Instructor, Pydantic
+AI/Agent Frameworks: MCP, Arazzo, OAS 3.0, Claude Code, LangChain, LangGraph, HuggingFace, Transformers, Instructor, Pydantic
 ML: PyTorch, PyTorch-Lightning, XGBoost, LGBM, scikit-learn, statsmodels
 Cloud: GCP (Vertex AI, Cloud Run, BigQuery, AlloyDB, Cloud Tasks, GCS, Compute Engine, Kubeflow), AWS (Bedrock, EC2, Lambda, RDS)
 Databases: Snowflake, PostgreSQL, SQLite, Vector DBs (Milvus, Pinecone)
@@ -89,6 +91,11 @@ KEY PROJECTS & PUBLICATIONS:
 3. Master's Thesis: Two peer-reviewed papers on microscopic simulation
 4. S&P Global Capstone: 90% accuracy financial news classification via BERT self-supervised fine-tuning
 5. Hackathon Winner: Led team of 6 on award-winning public transit mobile app
+6. Git Agent via Pure RL: Trained Qwen3-4B to chain multi-turn git tool calls through pure reinforcement learning (GRPO), with no demonstrations or SFT. Built a sandboxed environment with 13 git tools and 200 episodes, iterated the reward function through offline ablations, and reached 0.97-1.00 reward. Documented in a blog series at brunose.github.io.
+7. Nombre Guaguas: Serverless dashboard on Cloudflare Workers and D1 exploring Chilean baby name trends from 1920 to 2025 using Civil Registry data, with an AI chat assistant for natural-language exploration. Live at guaguas.pages.dev.
+
+AVAILABILITY:
+No information. This knowledge base says nothing about whether Bruno is looking for a job, open to new roles, or open to relocation.
 
 EDUCATION:
 New York University - M.S. Data Science (2021–2023), GPA 3.8/4.0; TA at NYU Stern
@@ -139,7 +146,8 @@ Instructions:
 - Keep responses concise (2-3 sentences typically)
 - Highlight specific achievements and technical skills
 - If the question is about Bruno's experience, reference specific projects or companies
-- Don't make up information not in the knowledge base`
+- Don't make up information not in the knowledge base
+- If asked whether Bruno is looking for a job, open to new roles, or open to relocation, say you have no information about that`
           },
           {
             role: 'user',

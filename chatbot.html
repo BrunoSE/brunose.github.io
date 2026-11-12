@@ -130,7 +130,7 @@ The most significant thing Bruno has done is build the company's first LLM evalu
 
 Bruno pushed leadership to prioritize measurement infrastructure over feature velocity, making a data-driven case that without ground truth, improvements were unverifiable. He then spearheaded a cross-functional effort bringing together product managers and customer success teams to gather real user queries from support tickets and user sessions, and worked with domain experts to label correct SQL and expected outputs.
 
-He built a custom LLM-as-judge evaluation system with iterative calibration using human annotators. The result: 70% agreement with domain expert annotators (up from 30%). The framework now runs weekly across 4 production AI applications, transforming the team's development process from guesswork to reliable quality signals.
+He built a custom LLM-as-judge evaluation system with iterative calibration using human annotators. The result: the calibrated judge reached 70% agreement with domain-expert labels (up from 30%), measured on a labelled dataset of 100 real workflows. The full evaluation set covers those 100 examples plus another 100 synthetic variations. The framework now runs weekly across 4 production AI applications, transforming the team's development process from guesswork to reliable quality signals.
 
 **AI Agent / Data Intermediary System**
 Bruno engineered an in-house Go/Python AI agent that allows non-technical business users to run complex data queries against Snowflake using natural language. The agent uses Claude via AWS Bedrock and features a modular primitive architecture:
@@ -140,13 +140,14 @@ Bruno engineered an in-house Go/Python AI agent that allows non-technical busine
 - Query Composition: building the actual SQL/Snowflake queries
 - Answer Synthesis: generating final responses with stated assumptions
 
-Users can iterate: they say things like "exclude promos" or "also include November" and the agent translates that into the right API calls. Bruno reduced response latency from 5 minutes to 1 minute (5x improvement) through context engineering and architectural redesign.
+Users can iterate: they say things like "exclude promos" or "also include November" and the agent translates that into the right API calls. Bruno reduced response latency from 5 minutes to 1 minute (5x improvement) through context engineering and architectural redesign. Multiple internal and client-facing teams used the agent.
 
 **Infrastructure & Standards Work**
 - Designed standards-based agent infrastructure using Model Context Protocol (MCP) with Arazzo and OpenAPI 3.0 specifications
 - Led load testing of MCP server using K6 for capacity planning, achieving 50% server cost reduction through rightsizing
 - Designed automated AI report processing pipeline using AWS Bedrock, Temporal workflow orchestration, and Kafka event streaming
 - Developed 5 Go microservices with gRPC and REST APIs powering the company's AI-driven analytics platform
+- Worked with the Claude Code SDK at VideoAmp
 
 **MCP Servers Re-design — Progressive Discovery Pattern**
 Led and implemented a re-design of the company's MCP servers, adopting a Progressive Discovery pattern via tool-search meta-tools. Instead of exposing all tools upfront, agents discover the right tools on demand through search. Results showed improved eval scores and a 93% context length reduction for Agents connecting to 70+ tools over MCP — a major win for both cost and reliability at scale.
@@ -203,7 +204,7 @@ STP is a public transit company. Bruno spent 4 years here building data products
 
 **Programming Languages:** Python (primary), Go, Java, R, MATLAB, Bash
 
-**AI/ML Frameworks:** LangChain, LangGraph, Google ADK, HuggingFace Transformers, PyTorch, PyTorch-Lightning, Instructor, Pydantic
+**AI/ML Frameworks:** LangChain, LangGraph, HuggingFace Transformers, PyTorch, PyTorch-Lightning, Instructor, Pydantic
 
 **Agent & API Standards:** Model Context Protocol (MCP), Arazzo, OpenAPI 3.0 (OAS 3.0), Claude Code SDK, OpenAI API
 
@@ -272,6 +273,10 @@ At CloudWerx, patient context for AI agents was blocked on a legacy EHR integrat
 
 ## NOTABLE PROJECTS
 
+**Git Agent via Pure RL:** Trained Qwen3-4B to chain multi-turn git tool calls through pure reinforcement learning (GRPO), with no demonstrations or SFT. Built a sandboxed environment with 13 git tools and 200 episodes, iterated the reward function through offline ablations, and reached 0.97-1.00 reward. Documented in a blog series at brunose.github.io.
+
+**Nombre Guaguas:** Serverless dashboard on Cloudflare Workers and D1 exploring Chilean baby name trends from 1920 to 2025 using Civil Registry data, with an AI chat assistant for natural-language exploration. Live at guaguas.pages.dev.
+
 **Anky:** Production RAG system with a fine-tuned LLM using SFT/DPO via llama.cpp, trained on social network data for personalized content generation.
 
 **Deep Learning Competition:** Implemented next-frame video prediction using Transformer and ResNet CNN architectures in a Joint-Embedding Predictive Architecture (JEPA) network.
@@ -301,8 +306,8 @@ Final grade: 6.6/7.0 (top 10% of cohort). Graduated with highest distinction. Ou
 **Q: What is Bruno's total years of experience?**
 A: 8 years of professional experience in AI/ML and data science, starting at STP in 2018.
 
-**Q: Is Bruno open to relocation?**
-A: Bruno is based in New York, NY and is not looking to relocate. He is open to in-person, hybrid, and remote roles.
+**Q: Is Bruno looking for a job, open to new roles, or open to relocation?**
+A: This knowledge base has no information about Bruno's availability, job search, or relocation preferences. Do not guess. Suggest contacting Bruno directly.
 
 **Q: What is Bruno's visa/work authorization status?**
 A: Please contact Bruno directly at brunostefoni12@gmail.com for immigration/work authorization questions.
@@ -314,7 +319,7 @@ A: Finance/principal trading (DRW Holdings), adtech/measurement (VideoAmp), heal
 A: Production LLM systems and evaluation frameworks. Bruno specializes in taking AI research from prototype to reliable, measurable production systems — including building the infrastructure (CI/CD, evaluation pipelines, observability) that makes that possible.
 
 **Q: Can Bruno work in a polyglot codebase?**
-A: Yes. Bruno works daily in a Go/Python polyglot environment, developing Go microservices with gRPC and Python ML/AI services. He is comfortable operating across languages and adapting to existing codebases.
+A: Yes. Python is Bruno's primary language. At VideoAmp he worked in a codebase that was roughly 90% Python and 10% Go, contributing to Go microservices with gRPC alongside Python ML/AI services. He does not claim deep Go expertise.
 
 **Q: Does Bruno have MLOps experience?**
 A: Yes. He implemented a Kubeflow MLOps CI/CD pipeline at CloudWerx with automated model deployment and monitoring, built LLM evaluation pipelines (running weekly across 4 production apps), and has worked with Temporal, Kafka, Cloud Run, Vertex AI, and Docker for production ML infrastructure.
@@ -414,7 +419,8 @@ Instructions:
 - Keep responses concise (2-3 sentences typically)
 - Highlight specific achievements and technical skills
 - If the question is about Bruno's experience, reference specific projects or companies
-- Don't make up information not in the knowledge base`
+- Don't make up information not in the knowledge base
+- If asked whether Bruno is looking for a job, open to new roles, or open to relocation, say you have no information about that`
                         },
                         {
                             role: 'user',
