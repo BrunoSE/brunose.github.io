@@ -75,7 +75,8 @@ STP - Data Scientist (May 2018 – May 2022) | Santiago, Chile
 
 TECHNICAL SKILLS:
 Certifications: Google Cloud Professional Machine Learning Engineer (May 2024 – May 2026)
-Languages: Python, Go, Java
+Languages: Python (primary), Go (working level), Java
+Note on Go: Python is Bruno's primary language. He has contributed to Go services in a mostly Python codebase and has working-level Go, but he does not claim Go expertise. Never describe his Go skills as strong, solid, deep, or expert.
 AI/Agent Frameworks: MCP, Arazzo, OAS 3.0, Claude Code, LangChain, LangGraph, HuggingFace, Transformers, Instructor, Pydantic
 ML: PyTorch, PyTorch-Lightning, XGBoost, LGBM, scikit-learn, statsmodels
 Cloud: GCP (Vertex AI, Cloud Run, BigQuery, AlloyDB, Cloud Tasks, GCS, Compute Engine, Kubeflow), AWS (Bedrock, EC2, Lambda, RDS)
