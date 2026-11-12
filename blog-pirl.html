@@ -11,388 +11,28 @@
     <meta property="og:title" content="Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story">
     <meta property="og:description" content="Training Qwen3-4B to chain multi-turn git tool calls using pure reinforcement learning with no demonstrations. A debugging story across 6 reward function versions.">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <style>
-
-
-:root {
-    --stone-dark: #1a1612;
-    --stone: #2a241c;
-    --wood: #3b2715;
-    --gold: #c9a227;
-    --gold-bright: #e8c84a;
-    --gold-dim: #8a7018;
-    --gold-deep: #6b5410;
-    --parchment: #d4c4a0;
-    --parchment-hi: #e8dcb8;
-    --parchment-lo: #b8a478;
-    --ink: #1a1208;
-    --ink-soft: #3d2e1a;
-    --ink-faded: #5c4a32;
-    --font-title: 'Cinzel', Georgia, serif;
-    --font-body: 'Source Serif 4', Georgia, serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-    font-family: var(--font-body);
-    background: var(--stone-dark);
-    color: var(--ink);
-    line-height: 1.65;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-}
-.hall {
-    min-height: 100vh;
-    position: relative;
-    background:
-        radial-gradient(ellipse 30% 50% at 0% 40%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 50% at 100% 55%, rgba(201, 162, 39, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 80% 30% at 50% 0%, rgba(90, 70, 40, 0.22) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, transparent 0px, transparent 47px, rgba(0,0,0,0.12) 47px, rgba(0,0,0,0.12) 50px),
-        repeating-linear-gradient(90deg, transparent 0px, transparent 95px, rgba(0,0,0,0.07) 95px, rgba(0,0,0,0.07) 98px),
-        linear-gradient(180deg, #252018 0%, #1a1612 40%, #12100c 100%);
-    padding-bottom: 2.5rem;
-}
-.hall::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 30%, rgba(0,0,0,0.5) 100%);
-    z-index: 40;
-}
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: linear-gradient(180deg, #4a3820 0%, #2e2214 40%, #1e160e 100%);
-    border-bottom: 3px solid var(--gold-dim);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201, 162, 39, 0.25);
-}
-.topbar::before {
-    content: '';
-    position: absolute;
-    bottom: -5px; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
-    opacity: 0.55;
-}
-.topbar-inner {
-    max-width: 960px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.65rem 1.25rem;
-}
-.brand {
-    font-family: var(--font-title);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gold-bright);
-    text-decoration: none;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(201, 162, 39, 0.35), 0 2px 2px rgba(0,0,0,0.8);
-}
-.brand:hover { color: #ffe066; }
-.nav-tabs { display: flex; gap: 0.35rem; }
-.nav-tab {
-    font-family: var(--font-title);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #a89060;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.45rem 0.95rem;
-    background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
-    border: 1px solid #5a4420;
-    box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.12), 0 2px 4px rgba(0,0,0,0.4);
-    transition: all 0.15s ease;
-}
-.nav-tab:hover {
-    color: var(--gold-bright);
-    border-color: var(--gold-dim);
-    background: linear-gradient(180deg, #4a3820 0%, #3a2c18 100%);
-}
-.nav-tab.active {
-    color: var(--gold-bright);
-    border-color: var(--gold);
-    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
-    box-shadow: inset 0 1px 0 rgba(232, 200, 74, 0.25), 0 0 12px rgba(201, 162, 39, 0.2);
-    text-shadow: 0 0 8px rgba(201, 162, 39, 0.35);
-}
-.stage {
-    position: relative;
-    z-index: 1;
-    max-width: 920px;
-    margin: 1.5rem auto 0;
-    padding: 0 1rem;
-}
-.panel {
-    position: relative;
-    background:
-        repeating-linear-gradient(90deg, transparent 0px, transparent 5px, rgba(0,0,0,0.06) 5px, rgba(0,0,0,0.06) 6px),
-        linear-gradient(180deg, #5a3c22 0%, #3e2818 25%, #2e1e12 70%, #22160c 100%);
-    border: 4px solid #a07820;
-    box-shadow:
-        0 0 0 2px #1a1008,
-        0 0 0 7px #3a2814,
-        0 0 0 9px #6b5410,
-        0 0 0 10px #1a1008,
-        0 16px 50px rgba(0,0,0,0.75),
-        inset 0 0 80px rgba(0,0,0,0.35),
-        inset 0 2px 0 rgba(232, 200, 74, 0.2);
-}
-.rivet {
-    position: absolute;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #e8c84a, #c9a227 40%, #6b5410 75%, #3a2c08 100%);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255, 230, 120, 0.45);
-    z-index: 6;
-}
-.rivet-tl { top: 6px; left: 6px; }
-.rivet-tr { top: 6px; right: 6px; }
-.rivet-bl { bottom: 6px; left: 6px; }
-.rivet-br { bottom: 6px; right: 6px; }
-.scroll {
-    margin: 16px;
-    padding: 2.25rem 2.25rem 2.5rem;
-    background-color: var(--parchment);
-    background-image:
-        radial-gradient(ellipse 100px 70px at 8% 10%, rgba(100, 70, 30, 0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 80px 60px at 92% 85%, rgba(90, 55, 20, 0.14) 0%, transparent 70%),
-        repeating-linear-gradient(0.5deg, transparent 0, transparent 3px, rgba(80, 50, 20, 0.02) 3px, rgba(80, 50, 20, 0.02) 4px),
-        linear-gradient(175deg, var(--parchment-hi) 0%, var(--parchment) 40%, var(--parchment-lo) 100%);
-    border: 2px solid #8a7040;
-    box-shadow: inset 0 0 40px rgba(80, 50, 15, 0.12), 0 0 0 1px rgba(201, 162, 39, 0.15);
-    position: relative;
-}
-.page-foot {
-    text-align: center;
-    padding: 2rem 1rem 0.5rem;
-    position: relative;
-    z-index: 1;
-}
-.page-foot p {
-    font-family: var(--font-title);
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(160, 130, 60, 0.4);
-}
-@media (max-width: 768px) {
-    .scroll { padding: 1.5rem 1.1rem 1.75rem; margin: 10px; }
-    .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.65rem; letter-spacing: 0.06em; }
-    .brand { font-size: 0.9rem; letter-spacing: 0.08em; }
-    .panel { border-width: 3px; }
-}
-
-.post-meta {
-    display: flex; flex-wrap: wrap; gap: 0.45rem 0.7rem;
-    align-items: center; margin-bottom: 1rem;
-}
-.post-date {
-    font-family: var(--font-title);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--gold-deep);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-.post-tag {
-    padding: 0.12rem 0.55rem;
-    font-family: var(--font-title);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--gold-deep);
-    border: 1px solid rgba(138, 112, 24, 0.4);
-    background: rgba(201, 162, 39, 0.06);
-}
-.post-title {
-    font-family: var(--font-title);
-    font-size: clamp(1.45rem, 3.8vw, 2rem);
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--ink);
-    margin-bottom: 1rem;
-    letter-spacing: 0.02em;
-}
-.post-subtitle {
-    color: var(--ink-soft);
-    font-size: 1.1rem;
-    line-height: 1.7;
-    font-style: italic;
-    border-left: 3px solid var(--gold);
-    padding-left: 1.15rem;
-    margin-bottom: 1.75rem;
-}
-.div-gold {
-    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-    margin: 0.25rem 0 1.75rem;
-}
-.div-gold::before, .div-gold::after {
-    content: ''; flex: 1; height: 2px; max-width: 160px;
-    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
-    opacity: 0.55;
-}
-.div-gold span { color: var(--gold); font-size: 0.7rem; }
-.prose { color: var(--ink-soft); line-height: 1.8; font-size: 1.05rem; }
-.prose h2 {
-    font-family: var(--font-title);
-    font-size: 1.35rem;
-    font-weight: 700;
-    margin: 2.5rem 0 1rem;
-    color: var(--ink);
-    letter-spacing: 0.04em;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid rgba(138, 112, 24, 0.35);
-}
-.prose h3 {
-    font-family: var(--font-title);
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 2rem 0 0.85rem;
-    color: var(--ink);
-    letter-spacing: 0.03em;
-}
-.prose p { margin-bottom: 1.15rem; }
-.prose ul, .prose ol { margin: 0 0 1.15rem 1.4rem; }
-.prose li { margin-bottom: 0.5rem; }
-.prose strong { color: var(--ink); font-weight: 600; }
-.prose em { font-style: italic; }
-.prose a {
-    color: var(--gold-deep);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(138, 112, 24, 0.45);
-}
-.prose a:hover { color: #8a6010; border-bottom-color: var(--gold); }
-.prose code:not(pre code) {
-    font-family: var(--font-mono);
-    font-size: 0.88em;
-    background: rgba(60, 40, 15, 0.12);
-    color: #6b3a10;
-    padding: 2px 6px;
-    border: 1px solid rgba(138, 112, 24, 0.25);
-}
-.prose pre {
-    background: #1a140c;
-    border: 2px solid #6b5410;
-    padding: 1.1rem 1.15rem;
-    overflow-x: auto;
-    margin: 1.35rem 0;
-    box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
-}
-.prose pre code {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    background: none;
-    padding: 0;
-    border: none;
-    color: #d4c4a0;
-}
-.prose table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.35rem 0;
-    font-size: 0.92rem;
-    display: block;
-    overflow-x: auto;
-}
-.prose th {
-    background: rgba(60, 40, 15, 0.15);
-    padding: 0.65rem 0.85rem;
-    text-align: left;
-    border: 1px solid rgba(138, 112, 24, 0.4);
-    font-family: var(--font-title);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--ink);
-    white-space: nowrap;
-}
-.prose td {
-    padding: 0.65rem 0.85rem;
-    border: 1px solid rgba(138, 112, 24, 0.3);
-    color: var(--ink-soft);
-}
-.prose tr:nth-child(even) td { background: rgba(60, 40, 15, 0.06); }
-.prose hr {
-    border: none;
-    border-top: 1px solid rgba(138, 112, 24, 0.35);
-    margin: 2.5rem 0;
-}
-.prose blockquote {
-    border-left: 3px solid var(--gold);
-    padding: 0.9rem 1.2rem;
-    margin: 1.35rem 0;
-    background: rgba(60, 40, 15, 0.08);
-}
-.prose blockquote p {
-    color: var(--ink);
-    font-style: italic;
-    margin-bottom: 0;
-}
-.mermaid {
-    background: rgba(60, 40, 15, 0.1);
-    border: 2px solid #8a7040;
-    padding: 1.25rem;
-    margin: 1.35rem 0;
-    overflow-x: auto;
-    text-align: center;
-}
-.back-link {
-    margin-top: 2.25rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(138, 112, 24, 0.3);
-}
-.back-link a {
-    font-family: var(--font-title);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gold-deep);
-    text-decoration: none;
-}
-.back-link a:hover { color: var(--gold); }
-@media (max-width: 768px) {
-    .post-title { font-size: 1.45rem; }
-}
-
-    
-    </style>
+    <link rel="stylesheet" href="/assets/retro.css">
 </head>
 <body>
-    <div class="hall">
-        <header class="topbar">
-            <div class="topbar-inner">
-                <a href="/" class="brand">Bruno Stefoni</a>
-                <nav class="nav-tabs">
-                    <a href="/" class="nav-tab">Home</a>
-                    <a href="/blog.html" class="nav-tab active">Blog</a>
-                    <a href="/chatbot.html" class="nav-tab">AI Chatbot</a>
-                </nav>
-            </div>
+    <div class="page">
+        <header class="masthead small">
+            <a href="/" class="wordart">Bruno's Homepage</a>
         </header>
 
-        <main class="stage">
-            <div class="panel">
-                <span class="rivet rivet-tl" aria-hidden="true"></span>
-                <span class="rivet rivet-tr" aria-hidden="true"></span>
-                <span class="rivet rivet-bl" aria-hidden="true"></span>
-                <span class="rivet rivet-br" aria-hidden="true"></span>
-                <div class="scroll">
+        <nav class="navbar" aria-label="Main">
+            <a href="/" class="btn98">Home</a>
+            <a href="/blog.html" class="btn98 active">Blog</a>
+            <a href="/chatbot.html" class="btn98">AI Chatbot</a>
+        </nav>
+
+        <main>
+            <section class="win">
+                <div class="win-bar">
+                    <span class="win-title">pirl.txt - Notepad</span>
+                    <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                </div>
+                <div class="win-body">
                     <div class="post-hero">
                                     <div class="post-meta">
                                         <span class="post-date">March 10, 2026</span>
@@ -406,7 +46,7 @@ body {
                                     <blockquote><p><em>Version note.</em> This post describes a 100-episode dataset (L1: 20, L2: 21, L3: 28, L4: 31). The environment has since grown to <strong>v0.8.0</strong> with 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62). The debugging narrative is kept as-run.</p></blockquote>
                                 </div>
 
-                                <div class="div-gold"><span>◆</span></div>
+                                <hr class="rule">
 
                                 <article class="prose">
 
@@ -474,11 +114,11 @@ body {
                                     <p>Our first real training run looked promising for about 30 steps, then collapsed.</p>
 
                                     <pre><code>Step 1:   Reward 0.96
-                    Step 30:  Reward 0.99
-                    Step 50:  Reward 0.0312
-                    Step 51:  Reward 0.0312
-                    ...
-                    Step 68:  Reward 0.0312</code></pre>
+Step 30:  Reward 0.99
+Step 50:  Reward 0.0312
+Step 51:  Reward 0.0312
+...
+Step 68:  Reward 0.0312</code></pre>
 
                                     <p><strong>What happened</strong>: The reward function was scoring tool <em>responses</em>, not the model's final answer. Since git commands return deterministic output, even random tool calls produced reward ~0.96. The model quickly hit 0.99+ on all 16 rollouts within each group.</p>
 
@@ -512,9 +152,9 @@ body {
                                     <p><strong>Result</strong>: The reward flatlined at 0.68 for 265 steps. Then crashed.</p>
 
                                     <pre><code>Step 1:   Reward 0.68
-                    Step 100: Reward 0.68
-                    Step 200: Reward 0.68
-                    Step 265: Buffer crash — "No environments left with examples"</code></pre>
+Step 100: Reward 0.68
+Step 200: Reward 0.68
+Step 265: Buffer crash — "No environments left with examples"</code></pre>
 
                                     <p><strong>Diagnosing the plateau</strong>: We decoded the reward value. With the tool bonus formula, a reward of 0.68 means:</p>
 
@@ -555,12 +195,12 @@ body {
                                     <p><strong>Result</strong>:</p>
 
                                     <pre><code>Step 1:   Reward 0.68
-                    Step 50:  Reward 0.85
-                    Step 100: Reward 0.95
-                    Step 150: Reward 0.99
-                    Step 200: Reward 1.00
-                    Step 250: Reward 0.99
-                    Step 300: Reward 0.99</code></pre>
+Step 50:  Reward 0.85
+Step 100: Reward 0.95
+Step 150: Reward 0.99
+Step 200: Reward 1.00
+Step 250: Reward 0.99
+Step 300: Reward 0.99</code></pre>
 
                                     <p>The model went from 0.68 to near-perfect in ~150 steps, then sustained 0.97&ndash;1.00 for the remaining 150 steps. Total training time: approximately 3 hours.</p>
 
@@ -621,11 +261,13 @@ body {
                                     <a href="/blog.html">&larr; Back to Blog</a>
                                 </div>
                 </div>
-            </div>
+            </section>
         </main>
 
-        <footer class="page-foot">
-            <p>&copy; 2026 Bruno Stefoni · Victory</p>
+        <footer>
+            <div class="foot">
+                <p>&copy; 2026 Bruno Stefoni &middot; <a href="/">Back to the homepage</a></p>
+            </div>
         </footer>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

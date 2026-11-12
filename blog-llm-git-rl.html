@@ -11,387 +11,29 @@
     <meta property="og:title" content="Teaching an LLM to Use Git Through Pure Reinforcement Learning">
     <meta property="og:description" content="We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 
-    <style>
-
-:root {
-    --stone-dark: #1a1612;
-    --stone: #2a241c;
-    --wood: #3b2715;
-    --gold: #c9a227;
-    --gold-bright: #e8c84a;
-    --gold-dim: #8a7018;
-    --gold-deep: #6b5410;
-    --parchment: #d4c4a0;
-    --parchment-hi: #e8dcb8;
-    --parchment-lo: #b8a478;
-    --ink: #1a1208;
-    --ink-soft: #3d2e1a;
-    --ink-faded: #5c4a32;
-    --font-title: 'Cinzel', Georgia, serif;
-    --font-body: 'Source Serif 4', Georgia, serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-    font-family: var(--font-body);
-    background: var(--stone-dark);
-    color: var(--ink);
-    line-height: 1.65;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-}
-.hall {
-    min-height: 100vh;
-    position: relative;
-    background:
-        radial-gradient(ellipse 30% 50% at 0% 40%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 50% at 100% 55%, rgba(201, 162, 39, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 80% 30% at 50% 0%, rgba(90, 70, 40, 0.22) 0%, transparent 55%),
-        repeating-linear-gradient(0deg, transparent 0px, transparent 47px, rgba(0,0,0,0.12) 47px, rgba(0,0,0,0.12) 50px),
-        repeating-linear-gradient(90deg, transparent 0px, transparent 95px, rgba(0,0,0,0.07) 95px, rgba(0,0,0,0.07) 98px),
-        linear-gradient(180deg, #252018 0%, #1a1612 40%, #12100c 100%);
-    padding-bottom: 2.5rem;
-}
-.hall::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 30%, rgba(0,0,0,0.5) 100%);
-    z-index: 40;
-}
-.topbar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: linear-gradient(180deg, #4a3820 0%, #2e2214 40%, #1e160e 100%);
-    border-bottom: 3px solid var(--gold-dim);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.7), inset 0 1px 0 rgba(201, 162, 39, 0.25);
-}
-.topbar::before {
-    content: '';
-    position: absolute;
-    bottom: -5px; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
-    opacity: 0.55;
-}
-.topbar-inner {
-    max-width: 960px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.65rem 1.25rem;
-}
-.brand {
-    font-family: var(--font-title);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--gold-bright);
-    text-decoration: none;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(201, 162, 39, 0.35), 0 2px 2px rgba(0,0,0,0.8);
-}
-.brand:hover { color: #ffe066; }
-.nav-tabs { display: flex; gap: 0.35rem; }
-.nav-tab {
-    font-family: var(--font-title);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #a89060;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.45rem 0.95rem;
-    background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
-    border: 1px solid #5a4420;
-    box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.12), 0 2px 4px rgba(0,0,0,0.4);
-    transition: all 0.15s ease;
-}
-.nav-tab:hover {
-    color: var(--gold-bright);
-    border-color: var(--gold-dim);
-    background: linear-gradient(180deg, #4a3820 0%, #3a2c18 100%);
-}
-.nav-tab.active {
-    color: var(--gold-bright);
-    border-color: var(--gold);
-    background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
-    box-shadow: inset 0 1px 0 rgba(232, 200, 74, 0.25), 0 0 12px rgba(201, 162, 39, 0.2);
-    text-shadow: 0 0 8px rgba(201, 162, 39, 0.35);
-}
-.stage {
-    position: relative;
-    z-index: 1;
-    max-width: 920px;
-    margin: 1.5rem auto 0;
-    padding: 0 1rem;
-}
-.panel {
-    position: relative;
-    background:
-        repeating-linear-gradient(90deg, transparent 0px, transparent 5px, rgba(0,0,0,0.06) 5px, rgba(0,0,0,0.06) 6px),
-        linear-gradient(180deg, #5a3c22 0%, #3e2818 25%, #2e1e12 70%, #22160c 100%);
-    border: 4px solid #a07820;
-    box-shadow:
-        0 0 0 2px #1a1008,
-        0 0 0 7px #3a2814,
-        0 0 0 9px #6b5410,
-        0 0 0 10px #1a1008,
-        0 16px 50px rgba(0,0,0,0.75),
-        inset 0 0 80px rgba(0,0,0,0.35),
-        inset 0 2px 0 rgba(232, 200, 74, 0.2);
-}
-.rivet {
-    position: absolute;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #e8c84a, #c9a227 40%, #6b5410 75%, #3a2c08 100%);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.7), inset 0 1px 2px rgba(255, 230, 120, 0.45);
-    z-index: 6;
-}
-.rivet-tl { top: 6px; left: 6px; }
-.rivet-tr { top: 6px; right: 6px; }
-.rivet-bl { bottom: 6px; left: 6px; }
-.rivet-br { bottom: 6px; right: 6px; }
-.scroll {
-    margin: 16px;
-    padding: 2.25rem 2.25rem 2.5rem;
-    background-color: var(--parchment);
-    background-image:
-        radial-gradient(ellipse 100px 70px at 8% 10%, rgba(100, 70, 30, 0.12) 0%, transparent 70%),
-        radial-gradient(ellipse 80px 60px at 92% 85%, rgba(90, 55, 20, 0.14) 0%, transparent 70%),
-        repeating-linear-gradient(0.5deg, transparent 0, transparent 3px, rgba(80, 50, 20, 0.02) 3px, rgba(80, 50, 20, 0.02) 4px),
-        linear-gradient(175deg, var(--parchment-hi) 0%, var(--parchment) 40%, var(--parchment-lo) 100%);
-    border: 2px solid #8a7040;
-    box-shadow: inset 0 0 40px rgba(80, 50, 15, 0.12), 0 0 0 1px rgba(201, 162, 39, 0.15);
-    position: relative;
-}
-.page-foot {
-    text-align: center;
-    padding: 2rem 1rem 0.5rem;
-    position: relative;
-    z-index: 1;
-}
-.page-foot p {
-    font-family: var(--font-title);
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(160, 130, 60, 0.4);
-}
-@media (max-width: 768px) {
-    .scroll { padding: 1.5rem 1.1rem 1.75rem; margin: 10px; }
-    .nav-tab { padding: 0.4rem 0.5rem; font-size: 0.65rem; letter-spacing: 0.06em; }
-    .brand { font-size: 0.9rem; letter-spacing: 0.08em; }
-    .panel { border-width: 3px; }
-}
-
-.post-meta {
-    display: flex; flex-wrap: wrap; gap: 0.45rem 0.7rem;
-    align-items: center; margin-bottom: 1rem;
-}
-.post-date {
-    font-family: var(--font-title);
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--gold-deep);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-}
-.post-tag {
-    padding: 0.12rem 0.55rem;
-    font-family: var(--font-title);
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--gold-deep);
-    border: 1px solid rgba(138, 112, 24, 0.4);
-    background: rgba(201, 162, 39, 0.06);
-}
-.post-title {
-    font-family: var(--font-title);
-    font-size: clamp(1.45rem, 3.8vw, 2rem);
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--ink);
-    margin-bottom: 1rem;
-    letter-spacing: 0.02em;
-}
-.post-subtitle {
-    color: var(--ink-soft);
-    font-size: 1.1rem;
-    line-height: 1.7;
-    font-style: italic;
-    border-left: 3px solid var(--gold);
-    padding-left: 1.15rem;
-    margin-bottom: 1.75rem;
-}
-.div-gold {
-    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-    margin: 0.25rem 0 1.75rem;
-}
-.div-gold::before, .div-gold::after {
-    content: ''; flex: 1; height: 2px; max-width: 160px;
-    background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
-    opacity: 0.55;
-}
-.div-gold span { color: var(--gold); font-size: 0.7rem; }
-.prose { color: var(--ink-soft); line-height: 1.8; font-size: 1.05rem; }
-.prose h2 {
-    font-family: var(--font-title);
-    font-size: 1.35rem;
-    font-weight: 700;
-    margin: 2.5rem 0 1rem;
-    color: var(--ink);
-    letter-spacing: 0.04em;
-    padding-bottom: 0.4rem;
-    border-bottom: 1px solid rgba(138, 112, 24, 0.35);
-}
-.prose h3 {
-    font-family: var(--font-title);
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 2rem 0 0.85rem;
-    color: var(--ink);
-    letter-spacing: 0.03em;
-}
-.prose p { margin-bottom: 1.15rem; }
-.prose ul, .prose ol { margin: 0 0 1.15rem 1.4rem; }
-.prose li { margin-bottom: 0.5rem; }
-.prose strong { color: var(--ink); font-weight: 600; }
-.prose em { font-style: italic; }
-.prose a {
-    color: var(--gold-deep);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(138, 112, 24, 0.45);
-}
-.prose a:hover { color: #8a6010; border-bottom-color: var(--gold); }
-.prose code:not(pre code) {
-    font-family: var(--font-mono);
-    font-size: 0.88em;
-    background: rgba(60, 40, 15, 0.12);
-    color: #6b3a10;
-    padding: 2px 6px;
-    border: 1px solid rgba(138, 112, 24, 0.25);
-}
-.prose pre {
-    background: #1a140c;
-    border: 2px solid #6b5410;
-    padding: 1.1rem 1.15rem;
-    overflow-x: auto;
-    margin: 1.35rem 0;
-    box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
-}
-.prose pre code {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    background: none;
-    padding: 0;
-    border: none;
-    color: #d4c4a0;
-}
-.prose table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.35rem 0;
-    font-size: 0.92rem;
-    display: block;
-    overflow-x: auto;
-}
-.prose th {
-    background: rgba(60, 40, 15, 0.15);
-    padding: 0.65rem 0.85rem;
-    text-align: left;
-    border: 1px solid rgba(138, 112, 24, 0.4);
-    font-family: var(--font-title);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    color: var(--ink);
-    white-space: nowrap;
-}
-.prose td {
-    padding: 0.65rem 0.85rem;
-    border: 1px solid rgba(138, 112, 24, 0.3);
-    color: var(--ink-soft);
-}
-.prose tr:nth-child(even) td { background: rgba(60, 40, 15, 0.06); }
-.prose hr {
-    border: none;
-    border-top: 1px solid rgba(138, 112, 24, 0.35);
-    margin: 2.5rem 0;
-}
-.prose blockquote {
-    border-left: 3px solid var(--gold);
-    padding: 0.9rem 1.2rem;
-    margin: 1.35rem 0;
-    background: rgba(60, 40, 15, 0.08);
-}
-.prose blockquote p {
-    color: var(--ink);
-    font-style: italic;
-    margin-bottom: 0;
-}
-.mermaid {
-    background: rgba(60, 40, 15, 0.1);
-    border: 2px solid #8a7040;
-    padding: 1.25rem;
-    margin: 1.35rem 0;
-    overflow-x: auto;
-    text-align: center;
-}
-.back-link {
-    margin-top: 2.25rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(138, 112, 24, 0.3);
-}
-.back-link a {
-    font-family: var(--font-title);
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gold-deep);
-    text-decoration: none;
-}
-.back-link a:hover { color: var(--gold); }
-@media (max-width: 768px) {
-    .post-title { font-size: 1.45rem; }
-}
-
-    </style>
+    <link rel="stylesheet" href="/assets/retro.css">
 </head>
 <body>
-    <div class="hall">
-        <header class="topbar">
-            <div class="topbar-inner">
-                <a href="/" class="brand">Bruno Stefoni</a>
-                <nav class="nav-tabs">
-                    <a href="/" class="nav-tab">Home</a>
-                    <a href="/blog.html" class="nav-tab active">Blog</a>
-                    <a href="/chatbot.html" class="nav-tab">AI Chatbot</a>
-                </nav>
-            </div>
+    <div class="page">
+        <header class="masthead small">
+            <a href="/" class="wordart">Bruno's Homepage</a>
         </header>
 
-        <main class="stage">
-            <div class="panel">
-                <span class="rivet rivet-tl" aria-hidden="true"></span>
-                <span class="rivet rivet-tr" aria-hidden="true"></span>
-                <span class="rivet rivet-bl" aria-hidden="true"></span>
-                <span class="rivet rivet-br" aria-hidden="true"></span>
-                <div class="scroll">
+        <nav class="navbar" aria-label="Main">
+            <a href="/" class="btn98">Home</a>
+            <a href="/blog.html" class="btn98 active">Blog</a>
+            <a href="/chatbot.html" class="btn98">AI Chatbot</a>
+        </nav>
+
+        <main>
+            <section class="win">
+                <div class="win-bar">
+                    <span class="win-title">llm-git-rl.txt - Notepad</span>
+                    <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                </div>
+                <div class="win-body">
                     <div class="post-hero">
                                     <div class="post-meta">
                                         <span class="post-date">February 27, 2026</span>
@@ -405,7 +47,7 @@ body {
                                     <blockquote><p><em>Version note.</em> This narrative is from the v0.3.0 era (66 episodes, 25 with dynamic fragments, temperature 0.7). The environment has since grown to <strong>v0.8.0</strong>: 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62), formalized reward presets A0–A6, and pinned training hyperparameters. The story below is kept as-run; for what the numbers taught us, see the follow-ups.</p></blockquote>
                                 </div>
 
-                                 <div class="div-gold"><span>◆</span></div>
+                                 <hr class="rule">
 
                                 <article class="prose">
 
@@ -414,8 +56,8 @@ body {
                                     <p>Three hours into our first training run:</p>
 
                                     <pre><code>Step 0 → Reward: 0.960
-                    Step 1 → Reward: 0.971
-                    Step 2 → Reward: 0.983</code></pre>
+Step 1 → Reward: 0.971
+Step 2 → Reward: 0.983</code></pre>
 
                                     <p>We'd solved multi-turn Git tool orchestration in two gradient steps. Qwen3-4B, fresh out of the box, was scoring 0.96 with zero RL training.</p>
 
@@ -436,31 +78,31 @@ body {
                                     <p>The model has access to 13 Git tools. Critically, <code>repo_path</code> is hidden — the environment injects it automatically on every call, so the model sees clean schemas:</p>
 
                                     <pre><code class="language-json">{
-                      "type": "function",
-                      "function": {
-                        "name": "git_status",
-                        "description": "Show the working tree status of the repository.",
-                        "parameters": { "type": "object", "properties": {}, "required": [] }
-                      }
-                    }</code></pre>
+  "type": "function",
+  "function": {
+    "name": "git_status",
+    "description": "Show the working tree status of the repository.",
+    "parameters": { "type": "object", "properties": {}, "required": [] }
+  }
+}</code></pre>
 
                                     <pre><code class="language-json">{
-                      "type": "function",
-                      "function": {
-                        "name": "git_show",
-                        "description": "Show the contents and diff of a commit.",
-                        "parameters": {
-                          "type": "object",
-                          "properties": {
-                            "revision": {
-                              "type": "string",
-                              "description": "Commit hash or reference to show (e.g. HEAD, abc1234)"
-                            }
-                          },
-                          "required": ["revision"]
-                        }
-                      }
-                    }</code></pre>
+  "type": "function",
+  "function": {
+    "name": "git_show",
+    "description": "Show the contents and diff of a commit.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "revision": {
+          "type": "string",
+          "description": "Commit hash or reference to show (e.g. HEAD, abc1234)"
+        }
+      },
+      "required": ["revision"]
+    }
+  }
+}</code></pre>
 
                                     <table>
                                         <thead>
@@ -558,24 +200,24 @@ body {
                                     <p>Three commands cover the cycle from code to trained model:</p>
 
                                     <pre><code class="language-bash">prime env push                                    # publish to Hub as a versioned Python package
-                    prime rl run configs/lab/git_orchestration.toml  # launch on Prime's GPU cluster
-                    prime rl logs &lt;run-id&gt; -f                         # stream logs</code></pre>
+prime rl run configs/lab/git_orchestration.toml  # launch on Prime's GPU cluster
+prime rl logs &lt;run-id&gt; -f                         # stream logs</code></pre>
 
                                     <p>The environment is published as a versioned package (<code>bstefoni/git-orchestration@0.3.0</code>). The training cluster installs that exact version, so fixing a reward bug mid-run means bumping the version and relaunching — old runs aren't contaminated.</p>
 
                                     <p>The config is minimal:</p>
 
                                     <pre><code class="language-toml">model = "Qwen/Qwen3-4B-Instruct-2507"
-                    max_steps = 200
-                    batch_size = 256
-                    rollouts_per_example = 16
+max_steps = 200
+batch_size = 256
+rollouts_per_example = 16
 
-                    [sampling]
-                    max_tokens = 1024
-                    temperature = 0.7
+[sampling]
+max_tokens = 1024
+temperature = 0.7
 
-                    [[env]]
-                    id = "bstefoni/git-orchestration"</code></pre>
+[[env]]
+id = "bstefoni/git-orchestration"</code></pre>
 
                                     <hr>
 
@@ -588,12 +230,12 @@ body {
                                     <p>For <strong>read episodes</strong> (model must report information from tool output), we checked whether expected text fragments appeared anywhere in the completion:</p>
 
                                     <pre><code class="language-python"># BROKEN: checks all messages including tool responses
-                    for msg in completion:
-                        if msg["role"] in ("assistant", "tool"):
-                            text += str(msg.get("content") or "")
+for msg in completion:
+    if msg["role"] in ("assistant", "tool"):
+        text += str(msg.get("content") or "")
 
-                    matches = sum(1 for f in fragments if f.lower() in text.lower())
-                    reward = matches / len(fragments)</code></pre>
+matches = sum(1 for f in fragments if f.lower() in text.lower())
+reward = matches / len(fragments)</code></pre>
 
                                     <p>If the expected fragment is <code>"nothing to commit"</code> and the model calls <code>git_status</code>, the <em>tool response</em> contains exactly that string. The model gets full reward for making a tool call, regardless of whether its final answer made any sense.</p>
 
@@ -604,11 +246,11 @@ body {
                                     <p>Only check the model's <strong>last assistant message</strong> — the one with no tool calls:</p>
 
                                     <pre><code class="language-python">def _extract_final_assistant_text(completion):
-                        for msg in reversed(completion):
-                            if msg.get("role") == "assistant":
-                                if not msg.get("tool_calls"):  # terminal message
-                                    return str(msg.get("content") or "")
-                        return ""</code></pre>
+for msg in reversed(completion):
+    if msg.get("role") == "assistant":
+        if not msg.get("tool_calls"):  # terminal message
+            return str(msg.get("content") or "")
+return ""</code></pre>
 
                                     <p>Now the model must synthesize tool output into a final answer. Calling <code>git_status</code> and echoing the output doesn't help — it needs to actually write "the working tree is clean, nothing to commit."</p>
 
@@ -617,18 +259,18 @@ body {
                                     <p>The second weakness: if fragments are static strings like <code>"nothing to commit"</code>, the model can learn them as a lookup table. The v0.2.0+ episodes use <strong>dynamic fragments</strong> — placeholders resolved against the actual repo at episode start:</p>
 
                                     <pre><code class="language-python"># Episode template
-                    {
-                        "question": "What is the abbreviated commit hash of the most recent commit? "
-                                    "Include the exact hash in your answer.",
-                        "expected_output_contains": ["$head_commit_hash"],  # resolved at runtime
-                    }</code></pre>
+{
+    "question": "What is the abbreviated commit hash of the most recent commit? "
+                "Include the exact hash in your answer.",
+    "expected_output_contains": ["$head_commit_hash"],  # resolved at runtime
+}</code></pre>
 
                                     <p>At <code>setup_state()</code>, the placeholder becomes the real value:</p>
 
                                     <pre><code class="language-python">for frag in expected["expected_output_contains"]:
-                        if frag.startswith("$"):
-                            val = snapshot.get(frag[1:])  # e.g., "d17aac75"
-                            resolved.append(str(val))</code></pre>
+if frag.startswith("$"):
+    val = snapshot.get(frag[1:])  # e.g., "d17aac75"
+    resolved.append(str(val))</code></pre>
 
                                     <div class="mermaid">sequenceDiagram
                         participant E as setup_state()
@@ -657,37 +299,37 @@ body {
                                     <p>Write episodes don't check the model's text at all. Reward comes from <strong>repo state after the episode ends</strong>:</p>
 
                                     <pre><code class="language-python">def _score_write_episode(actual_state, expected_state):
-                        conditions_checked = 0
-                        conditions_met = 0
+conditions_checked = 0
+conditions_met = 0
 
-                        if "expected_branches_include" in expected_state:
-                            expected = set(expected_state["expected_branches_include"])
-                            actual = set(actual_state["branches"])
-                            conditions_checked += len(expected)
-                            conditions_met += len(expected &amp; actual)
+if "expected_branches_include" in expected_state:
+    expected = set(expected_state["expected_branches_include"])
+    actual = set(actual_state["branches"])
+    conditions_checked += len(expected)
+    conditions_met += len(expected &amp; actual)
 
-                        if "expected_head_branch" in expected_state:
-                            conditions_checked += 1
-                            if actual_state["head_branch"] == expected_state["expected_head_branch"]:
-                                conditions_met += 1
+if "expected_head_branch" in expected_state:
+    conditions_checked += 1
+    if actual_state["head_branch"] == expected_state["expected_head_branch"]:
+        conditions_met += 1
 
-                        if "expected_is_clean" in expected_state:
-                            conditions_checked += 1
-                            if actual_state["is_clean"] == expected_state["expected_is_clean"]:
-                                conditions_met += 1
+if "expected_is_clean" in expected_state:
+    conditions_checked += 1
+    if actual_state["is_clean"] == expected_state["expected_is_clean"]:
+        conditions_met += 1
 
-                        if "expected_head_commit_message_contains" in expected_state:
-                            conditions_checked += 1
-                            head_msg = (actual_state.get("head_commit_message") or "").lower()
-                            if expected_state["expected_head_commit_message_contains"].lower() in head_msg:
-                                conditions_met += 1
+if "expected_head_commit_message_contains" in expected_state:
+    conditions_checked += 1
+    head_msg = (actual_state.get("head_commit_message") or "").lower()
+    if expected_state["expected_head_commit_message_contains"].lower() in head_msg:
+        conditions_met += 1
 
-                        if "initial_commit_count" in expected_state:
-                            conditions_checked += 1
-                            if actual_state["commit_count"] > expected_state["initial_commit_count"]:
-                                conditions_met += 1
+if "initial_commit_count" in expected_state:
+    conditions_checked += 1
+    if actual_state["commit_count"] > expected_state["initial_commit_count"]:
+        conditions_met += 1
 
-                        return conditions_met / conditions_checked</code></pre>
+return conditions_met / conditions_checked</code></pre>
 
                                     <p>Reward is partial — an episode like "create branch feature-x, switch to it, stage everything, commit" scores 0.5 if the model creates and switches but fails to commit. Zero reward on a near-miss kills the learning signal.</p>
 
@@ -719,18 +361,18 @@ body {
                                     <p>The full reward curve for run <code>sheni3zblfgl2376amy1aa99</code>:</p>
 
                                     <pre><code>Steps 123–149:  0.66 → climbing → 0.95–1.00  (saturation zone)
-                                    steps 135, 138, 141 hit exactly 1.0000
+                steps 135, 138, 141 hit exactly 1.0000
 
-                    Steps 150–151:  0.70 → 0.52                  (pre-collapse)
-                    Step  152:      0.0000                         ← cliff
-                    Steps 153–170:  stuck at ~0.0312              (dead zone, 19 steps)
+Steps 150–151:  0.70 → 0.52                  (pre-collapse)
+Step  152:      0.0000                         ← cliff
+Steps 153–170:  stuck at ~0.0312              (dead zone, 19 steps)
 
-                    Step  171:      0.70                           ← sudden recovery
-                    Steps 172–175:  0.66 → 0.75 → 0.81 → 0.97
-                    Steps 176–189:  0.83–0.99                     (second plateau)
+Step  171:      0.70                           ← sudden recovery
+Steps 172–175:  0.66 → 0.75 → 0.81 → 0.97
+Steps 176–189:  0.83–0.99                     (second plateau)
 
-                    Steps 190–191:  0.61 → 0.42                  (mini-collapse)
-                    Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
+Steps 190–191:  0.61 → 0.42                  (mini-collapse)
+Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
 
                                     <h3>What Caused the Collapse</h3>
 
@@ -803,11 +445,13 @@ body {
                                     <a href="/blog.html">← Back to Blog</a>
                                 </div>
                 </div>
-            </div>
+            </section>
         </main>
 
-        <footer class="page-foot">
-            <p>&copy; 2026 Bruno Stefoni · Victory</p>
+        <footer>
+            <div class="foot">
+                <p>&copy; 2026 Bruno Stefoni &middot; <a href="/">Back to the homepage</a></p>
+            </div>
         </footer>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -819,16 +463,16 @@ body {
             theme: 'base',
             themeVariables: {
                 darkMode: false,
-                background: '#d4c4a0',
-                primaryColor: '#e8dcb8',
-                primaryTextColor: '#1a1208',
-                primaryBorderColor: '#8a7040',
-                lineColor: '#6b5410',
-                secondaryColor: '#c9b888',
-                tertiaryColor: '#b8a478',
-                edgeLabelBackground: '#e8dcb8',
-                clusterBkg: '#e8dcb8',
-                fontFamily: 'Source Serif 4, Georgia, serif'
+                background: '#ffffff',
+                primaryColor: '#ffffcc',
+                primaryTextColor: '#111111',
+                primaryBorderColor: '#000080',
+                lineColor: '#000080',
+                secondaryColor: '#c0c0c0',
+                tertiaryColor: '#e8e8e8',
+                edgeLabelBackground: '#ffffff',
+                clusterBkg: '#f0f0f0',
+                fontFamily: 'Verdana, Geneva, Tahoma, sans-serif'
             }
         });
     </script>

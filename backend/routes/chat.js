@@ -33,7 +33,7 @@ const validateApiKey = (req, res, next) => {
 // Bruno's knowledge base (same as frontend)
 const BRUNO_KNOWLEDGE = `
 Bruno Stefoni - AI/ML Engineer
-Location: New York, NY | Email: brunostefoni12@gmail.com | Phone: +1 646 203 7124
+Location: New York, NY | Email: brunostefoni12@gmail.com
 LinkedIn: https://www.linkedin.com/in/bruno-stefoni-escudero/ | GitHub: https://github.com/BrunoSE | Website: https://brunose.github.io/
 
 PROFESSIONAL SUMMARY:

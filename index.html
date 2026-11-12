@@ -4,1442 +4,243 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Bruno Stefoni | AI Engineer | LLM Agents & RAG Systems</title>
-    <meta name="description" content="Bruno Stefoni is an AI Engineer specializing in LLM agents, MCP server infra, and production ML deployments. GCP ML Engineer certified with expertise in agentic systems.">
-    <meta name="keywords" content="AI Engineer, ML Engineer, LLM, RAG, AI Chatbots, Machine Learning, Bruno Stefoni, Agentic Systems">
+    <title>Bruno Stefoni | AI Engineer | LLM Agents & Evaluation</title>
+    <meta name="description" content="Bruno Stefoni is an AI Engineer in New York building LLM agents, evaluation frameworks, and MCP infrastructure for production AI systems.">
+    <meta name="keywords" content="AI Engineer, ML Engineer, LLM, RAG, LLM Evaluation, MCP, Machine Learning, Bruno Stefoni, Agentic Systems">
     <meta name="author" content="Bruno Stefoni">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://brunose.github.io/">
     <meta property="og:title" content="Bruno Stefoni | AI Engineer">
-    <meta property="og:description" content="AI Engineer specializing in LLM agents, MCP server infra, and production AI/ML deployments.">
+    <meta property="og:description" content="AI Engineer building LLM agents, evaluation frameworks, and MCP infrastructure for production AI systems.">
     <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Bruno Stefoni | AI Engineer">
-    <meta name="twitter:description" content="AI Engineer specializing in LLM agents, MCP server infra, and production AI/ML deployments.">
+    <meta name="twitter:description" content="AI Engineer building LLM agents, evaluation frameworks, and MCP infrastructure for production AI systems.">
     <meta name="twitter:image" content="https://brunose.github.io/assets/preview.png">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=MedievalSharp&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --stone-dark: #1a1612;
-            --stone: #2a241c;
-            --stone-mid: #3d3428;
-            --stone-light: #4a3f30;
-            --wood: #3b2715;
-            --wood-mid: #5c3a1e;
-            --wood-light: #7a5028;
-            --wood-hi: #9a6a38;
-            --gold: #c9a227;
-            --gold-bright: #e8c84a;
-            --gold-dim: #8a7018;
-            --gold-deep: #6b5410;
-            --parchment: #d4c4a0;
-            --parchment-hi: #e8dcb8;
-            --parchment-lo: #b8a478;
-            --ink: #1a1208;
-            --ink-soft: #3d2e1a;
-            --ink-faded: #5c4a32;
-            --alliance: #3a5a8c;
-            --alliance-glow: #5a8ac8;
-            --health: #2d6b2d;
-            --mana: #2a4a8a;
-            --font-title: 'Cinzel', Georgia, serif;
-            --font-display: 'MedievalSharp', 'Cinzel', Georgia, serif;
-            --font-body: 'Source Serif 4', Georgia, serif;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: var(--font-body);
-            background: var(--stone-dark);
-            color: var(--ink);
-            line-height: 1.65;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* ═══ CASTLE HALL BACKGROUND ═══ */
-        .hall {
-            min-height: 100vh;
-            position: relative;
-            background:
-                /* torch glow left */
-                radial-gradient(ellipse 30% 50% at 0% 40%, rgba(201, 162, 39, 0.12) 0%, transparent 60%),
-                /* torch glow right */
-                radial-gradient(ellipse 30% 50% at 100% 55%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
-                /* top light from high windows */
-                radial-gradient(ellipse 80% 30% at 50% 0%, rgba(90, 70, 40, 0.25) 0%, transparent 55%),
-                /* stone blocks suggestion */
-                repeating-linear-gradient(
-                    0deg,
-                    transparent 0px,
-                    transparent 47px,
-                    rgba(0,0,0,0.15) 47px,
-                    rgba(0,0,0,0.15) 50px
-                ),
-                repeating-linear-gradient(
-                    90deg,
-                    transparent 0px,
-                    transparent 95px,
-                    rgba(0,0,0,0.08) 95px,
-                    rgba(0,0,0,0.08) 98px
-                ),
-                linear-gradient(180deg, #252018 0%, #1a1612 40%, #12100c 100%);
-            padding: 0 0 3rem;
-        }
-
-        /* mortar noise */
-        .hall::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            opacity: 0.04;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-            z-index: 0;
-        }
-
-        /* vignette */
-        .hall::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 30%, rgba(0,0,0,0.55) 100%);
-            z-index: 40;
-        }
-
-        /* ═══ TOP BAR (like WC3 menu bar) ═══ */
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background:
-                linear-gradient(180deg, #4a3820 0%, #2e2214 40%, #1e160e 100%);
-            border-bottom: 3px solid var(--gold-dim);
-            box-shadow:
-                0 4px 20px rgba(0,0,0,0.7),
-                inset 0 1px 0 rgba(201, 162, 39, 0.25),
-                inset 0 -1px 0 rgba(0,0,0,0.5);
-            padding: 0;
-        }
-
-        .topbar-inner {
-            max-width: 960px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.65rem 1.25rem;
-            position: relative;
-        }
-
-        /* gold edge trim */
-        .topbar::before {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                var(--gold-dim) 10%,
-                var(--gold) 50%,
-                var(--gold-dim) 90%,
-                transparent 100%);
-            opacity: 0.6;
-        }
-
-        .brand {
-            font-family: var(--font-title);
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--gold-bright);
-            text-decoration: none;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            text-shadow:
-                0 0 12px rgba(201, 162, 39, 0.4),
-                0 2px 2px rgba(0,0,0,0.8);
-            transition: color 0.2s, text-shadow 0.2s;
-        }
-
-        .brand:hover {
-            color: #ffe066;
-            text-shadow: 0 0 20px rgba(232, 200, 74, 0.6), 0 2px 2px rgba(0,0,0,0.8);
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 0.35rem;
-        }
-
-        .nav-tab {
-            font-family: var(--font-title);
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: #a89060;
-            text-decoration: none;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 0.45rem 0.95rem;
-            background:
-                linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
-            border: 1px solid #5a4420;
-            box-shadow:
-                inset 0 1px 0 rgba(201, 162, 39, 0.12),
-                0 2px 4px rgba(0,0,0,0.4);
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .nav-tab:hover {
-            color: var(--gold-bright);
-            border-color: var(--gold-dim);
-            background: linear-gradient(180deg, #4a3820 0%, #3a2c18 100%);
-        }
-
-        .nav-tab.active {
-            color: var(--gold-bright);
-            border-color: var(--gold);
-            background: linear-gradient(180deg, #5a4428 0%, #3a2c14 100%);
-            box-shadow:
-                inset 0 1px 0 rgba(232, 200, 74, 0.25),
-                0 0 12px rgba(201, 162, 39, 0.2),
-                0 2px 4px rgba(0,0,0,0.4);
-            text-shadow: 0 0 8px rgba(201, 162, 39, 0.4);
-        }
-
-        /* ═══ MAIN STAGE ═══ */
-        .stage {
-            position: relative;
-            z-index: 1;
-            max-width: 920px;
-            margin: 1.75rem auto 0;
-            padding: 0 1rem;
-        }
-
-        /* ═══ WOODEN FRAME PANEL (classic WC UI) ═══ */
-        .panel {
-            position: relative;
-            background:
-                repeating-linear-gradient(
-                    90deg,
-                    transparent 0px,
-                    transparent 5px,
-                    rgba(0,0,0,0.06) 5px,
-                    rgba(0,0,0,0.06) 6px
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent 0px,
-                    transparent 28px,
-                    rgba(255,200,80,0.02) 28px,
-                    rgba(255,200,80,0.02) 29px
-                ),
-                linear-gradient(180deg, #5a3c22 0%, #3e2818 25%, #2e1e12 70%, #22160c 100%);
-            border: 4px solid #a07820;
-            box-shadow:
-                0 0 0 2px #1a1008,
-                0 0 0 7px #3a2814,
-                0 0 0 9px #6b5410,
-                0 0 0 10px #1a1008,
-                0 16px 50px rgba(0,0,0,0.75),
-                inset 0 0 80px rgba(0,0,0,0.35),
-                inset 0 2px 0 rgba(232, 200, 74, 0.2),
-                inset 0 -2px 0 rgba(0,0,0,0.3);
-        }
-
-        /* rivets */
-        .rivet {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background:
-                radial-gradient(circle at 35% 30%, #e8c84a, #c9a227 40%, #6b5410 75%, #3a2c08 100%);
-            box-shadow:
-                0 1px 3px rgba(0,0,0,0.7),
-                inset 0 1px 2px rgba(255, 230, 120, 0.45),
-                0 0 0 1px rgba(0,0,0,0.4);
-            z-index: 6;
-        }
-        .rivet-tl { top: 6px; left: 6px; }
-        .rivet-tr { top: 6px; right: 6px; }
-        .rivet-bl { bottom: 6px; left: 6px; }
-        .rivet-br { bottom: 6px; right: 6px; }
-
-        /* ═══ PARCHMENT INNER ═══ */
-        .scroll {
-            margin: 16px;
-            padding: 2.5rem 2.5rem 2.75rem;
-            background-color: var(--parchment);
-            background-image:
-                /* age */
-                radial-gradient(ellipse 100px 70px at 8% 10%, rgba(100, 70, 30, 0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 80px 60px at 92% 85%, rgba(90, 55, 20, 0.14) 0%, transparent 70%),
-                radial-gradient(ellipse 60px 40px at 70% 20%, rgba(80, 50, 20, 0.08) 0%, transparent 70%),
-                /* fiber */
-                repeating-linear-gradient(
-                    0.5deg,
-                    transparent 0, transparent 3px,
-                    rgba(80, 50, 20, 0.02) 3px, rgba(80, 50, 20, 0.02) 4px
-                ),
-                linear-gradient(175deg, var(--parchment-hi) 0%, var(--parchment) 40%, var(--parchment-lo) 100%);
-            border: 2px solid #8a7040;
-            box-shadow:
-                inset 0 0 40px rgba(80, 50, 15, 0.12),
-                0 0 0 1px rgba(201, 162, 39, 0.15);
-            position: relative;
-        }
-
-        /* map grid subtle */
-        .scroll::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            opacity: 0.03;
-            background-image:
-                linear-gradient(rgba(60,40,10,1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(60,40,10,1) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .scroll > * { position: relative; z-index: 1; }
-
-        /* ═══ HERO ═══ */
-        .faction-banner {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .banner-crest {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px;
-            height: 56px;
-            border-radius: 4px;
-            background:
-                linear-gradient(160deg, #5a4428 0%, #2a1e10 50%, #1a1408 100%);
-            border: 3px solid var(--gold);
-            box-shadow:
-                0 0 0 2px #1a1008,
-                0 0 0 4px #3a2c14,
-                0 0 18px rgba(201, 162, 39, 0.35),
-                inset 0 2px 4px rgba(232, 200, 74, 0.2);
-            margin-bottom: 0.75rem;
-            font-family: var(--font-title);
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--gold-bright);
-            text-shadow: 0 0 10px rgba(201, 162, 39, 0.5), 0 2px 2px rgba(0,0,0,0.8);
-            letter-spacing: 0;
-        }
-
-        .banner-label {
-            display: block;
-            font-family: var(--font-title);
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--gold-deep);
-            letter-spacing: 0.28em;
-            text-transform: uppercase;
-        }
-
-        .hero-meta {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 0.5rem 1.75rem;
-            margin-bottom: 1.15rem;
-            font-family: var(--font-title);
-            font-size: clamp(0.95rem, 2.2vw, 1.15rem);
-            font-weight: 700;
-            color: var(--ink-soft);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        .hero-meta span {
-            position: relative;
-        }
-
-        .hero-meta span:not(:last-child)::after {
-            content: '·';
-            position: absolute;
-            right: -1.1rem;
-            color: var(--gold);
-            font-weight: 800;
-        }
-
-        h1 {
-            font-family: var(--font-title);
-            font-size: clamp(1.55rem, 3.8vw, 2.15rem);
-            font-weight: 700;
-            line-height: 1.25;
-            color: var(--ink);
-            text-align: center;
-            margin-bottom: 1.15rem;
-            letter-spacing: 0.03em;
-            text-shadow: 0 1px 0 rgba(255, 245, 210, 0.4);
-        }
-
-        h1 .gold-line {
-            display: block;
-            color: #8a6010;
-            margin-top: 0.15rem;
-            text-shadow:
-                0 1px 0 rgba(255, 240, 180, 0.55),
-                0 0 20px rgba(201, 162, 39, 0.2);
-        }
-
-        .lead {
-            font-size: 1.15rem;
-            color: var(--ink-soft);
-            text-align: center;
-            max-width: 36em;
-            margin: 0 auto 1.75rem;
-            line-height: 1.75;
-        }
-
-        /* ═══ WC-STYLE BUTTONS ═══ */
-        .cta-row {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.75rem;
-        }
-
-        .btn-wc {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.6rem;
-            font-family: var(--font-title);
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: var(--gold-bright);
-            background:
-                linear-gradient(180deg, #5a4428 0%, #3a2c14 45%, #2a1e0c 100%);
-            border: 2px solid var(--gold);
-            box-shadow:
-                0 0 0 1px #1a1008,
-                0 4px 0 #1a1008,
-                0 6px 16px rgba(0,0,0,0.5),
-                inset 0 1px 0 rgba(232, 200, 74, 0.3),
-                inset 0 -2px 4px rgba(0,0,0,0.3);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(201, 162, 39, 0.3);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-
-        .btn-wc:hover {
-            color: #ffe066;
-            background: linear-gradient(180deg, #6a5430 0%, #4a3c1c 45%, #3a2c14 100%);
-            border-color: var(--gold-bright);
-            box-shadow:
-                0 0 0 1px #1a1008,
-                0 4px 0 #1a1008,
-                0 6px 20px rgba(0,0,0,0.5),
-                0 0 24px rgba(201, 162, 39, 0.3),
-                inset 0 1px 0 rgba(232, 200, 74, 0.4);
-            transform: translateY(-1px);
-        }
-
-        .btn-wc:active {
-            transform: translateY(2px);
-            box-shadow:
-                0 0 0 1px #1a1008,
-                0 1px 0 #1a1008,
-                0 2px 8px rgba(0,0,0,0.5),
-                inset 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .btn-wc-ghost {
-            color: #a89060;
-            background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
-            border-color: #6a5428;
-            box-shadow:
-                0 0 0 1px #1a1008,
-                0 3px 0 #1a1008,
-                0 4px 12px rgba(0,0,0,0.4),
-                inset 0 1px 0 rgba(201, 162, 39, 0.1);
-            text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-        }
-
-        .btn-wc-ghost:hover {
-            color: var(--gold-bright);
-            border-color: var(--gold-dim);
-        }
-
-        /* ═══ SOCIAL AS UNIT BUTTONS ═══ */
-        .unit-bar {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .unit-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 88px;
-            padding: 0.45rem 0.75rem;
-            font-family: var(--font-title);
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: #c0a870;
-            background:
-                linear-gradient(180deg, #3a3020 0%, #2a2214 100%);
-            border: 1px solid #6a5428;
-            box-shadow:
-                inset 0 1px 0 rgba(201, 162, 39, 0.1),
-                0 2px 4px rgba(0,0,0,0.4);
-            transition: all 0.15s ease;
-        }
-
-        .unit-btn:hover {
-            color: var(--gold-bright);
-            border-color: var(--gold);
-            background: linear-gradient(180deg, #4a3c24 0%, #3a2c18 100%);
-            box-shadow:
-                inset 0 1px 0 rgba(232, 200, 74, 0.2),
-                0 0 12px rgba(201, 162, 39, 0.2),
-                0 2px 4px rgba(0,0,0,0.4);
-        }
-
-        /* ═══ DIVIDER ═══ */
-        .div-gold {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.75rem;
-            margin: 2.25rem 0 1.85rem;
-        }
-
-        .div-gold::before,
-        .div-gold::after {
-            content: '';
-            flex: 1;
-            height: 2px;
-            max-width: 200px;
-            background: linear-gradient(90deg, transparent, var(--gold-dim), var(--gold), var(--gold-dim), transparent);
-            opacity: 0.55;
-        }
-
-        .div-gold span {
-            color: var(--gold);
-            font-size: 0.7rem;
-            text-shadow: 0 0 8px rgba(201, 162, 39, 0.4);
-        }
-
-        /* ═══ SECTIONS ═══ */
-        .sec-head {
-            margin-bottom: 1.15rem;
-            display: flex;
-            align-items: baseline;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .sec-num {
-            font-family: var(--font-title);
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--gold-deep);
-            letter-spacing: 0.15em;
-            background: linear-gradient(180deg, #e8dcb8, #c4a878);
-            border: 1px solid var(--gold-dim);
-            padding: 0.2rem 0.5rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-        }
-
-        .sec-title {
-            font-family: var(--font-title);
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--ink);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .sec-sub {
-            width: 100%;
-            font-style: italic;
-            font-size: 1.05rem;
-            color: var(--ink-faded);
-            margin-top: 0.15rem;
-        }
-
-        /* ═══ STAT BARS (resource / attribute style) ═══ */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.65rem;
-        }
-
-        .stat-box {
-            background:
-                linear-gradient(180deg, rgba(60, 45, 25, 0.15) 0%, rgba(40, 30, 15, 0.1) 100%);
-            border: 2px solid #8a7040;
-            box-shadow:
-                inset 0 0 20px rgba(80, 50, 15, 0.08),
-                0 2px 4px rgba(0,0,0,0.08);
-            padding: 1rem 0.5rem 0.9rem;
-            text-align: center;
-            position: relative;
-        }
-
-        .stat-box::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            opacity: 0.5;
-        }
-
-        .stat-val {
-            font-family: var(--font-title);
-            font-size: 1.85rem;
-            font-weight: 800;
-            color: var(--gold-deep);
-            line-height: 1.1;
-            margin-bottom: 0.35rem;
-            text-shadow: 0 1px 0 rgba(255, 245, 210, 0.5);
-        }
-
-        .stat-label {
-            font-family: var(--font-title);
-            font-size: 0.62rem;
-            font-weight: 600;
-            color: var(--ink-faded);
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            line-height: 1.4;
-        }
-
-        /* HP-style bar under stat */
-        .stat-bar {
-            height: 5px;
-            margin-top: 0.6rem;
-            background: #2a1e10;
-            border: 1px solid #5a4420;
-            overflow: hidden;
-        }
-
-        .stat-bar-fill {
-            height: 100%;
-            background: linear-gradient(180deg, #6aba4a 0%, #3a8a2a 50%, #2a6a1a 100%);
-            box-shadow: 0 0 6px rgba(80, 180, 50, 0.4);
-        }
-
-        .stat-bar-fill.gold-fill {
-            background: linear-gradient(180deg, #e8c84a 0%, #c9a227 50%, #8a7018 100%);
-            box-shadow: 0 0 6px rgba(201, 162, 39, 0.4);
-        }
-
-        .stat-bar-fill.mana-fill {
-            background: linear-gradient(180deg, #5a8ad0 0%, #3a5aa0 50%, #2a3a70 100%);
-            box-shadow: 0 0 6px rgba(80, 130, 200, 0.4);
-        }
-
-        .stat-bar-fill.xp-fill {
-            background: linear-gradient(180deg, #c070e0 0%, #8a40b0 50%, #5a2880 100%);
-            box-shadow: 0 0 6px rgba(160, 80, 200, 0.35);
-        }
-
-        /* ═══ ABOUT ═══ */
-        .lore {
-            font-size: 1.08rem;
-            color: var(--ink-soft);
-            line-height: 1.8;
-            margin-bottom: 1rem;
-        }
-
-        .lore strong {
-            color: var(--ink);
-            font-weight: 600;
-        }
-
-        .skill-rack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 1.4rem;
-        }
-
-        .skill-chip {
-            padding: 0.3rem 0.7rem;
-            font-family: var(--font-title);
-            font-size: 0.68rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: var(--ink-soft);
-            background: rgba(60, 45, 25, 0.1);
-            border: 1px solid #a08850;
-            transition: all 0.15s ease;
-        }
-
-        .skill-chip:hover {
-            color: var(--gold-deep);
-            border-color: var(--gold);
-            background: rgba(201, 162, 39, 0.1);
-            box-shadow: 0 0 10px rgba(201, 162, 39, 0.15);
-        }
-
-        /* ═══ QUEST LOG / PROJECTS ═══ */
-        .quest-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-        }
-
-        .quest {
-            display: block;
-            text-decoration: none;
-            padding: 1.2rem 0.85rem;
-            border-top: 1px solid rgba(90, 70, 30, 0.25);
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .quest:last-child {
-            border-bottom: 1px solid rgba(90, 70, 30, 0.25);
-        }
-
-        .quest:hover {
-            background: linear-gradient(90deg, rgba(201, 162, 39, 0.08), transparent 70%);
-            padding-left: 1.1rem;
-        }
-
-        .quest-head {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .quest-icon {
-            flex-shrink: 0;
-            width: 32px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-title);
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            background: linear-gradient(180deg, #4a3820, #2a1e10);
-            border: 1px solid var(--gold-dim);
-            box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.15);
-            color: var(--gold-bright);
-        }
-
-        .quest-title {
-            font-family: var(--font-title);
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--ink);
-            letter-spacing: 0.03em;
-            flex: 1;
-        }
-
-        .quest-arrow {
-            color: var(--gold);
-            font-family: var(--font-title);
-            font-size: 0.9rem;
-            opacity: 0.6;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .quest:hover .quest-arrow {
-            opacity: 1;
-            transform: translateX(4px);
-        }
-
-        .quest-desc {
-            font-size: 0.98rem;
-            color: var(--ink-soft);
-            line-height: 1.65;
-            margin-bottom: 0.7rem;
-            padding-left: 2.15rem;
-        }
-
-        .quest-tags {
-            display: flex;
-            gap: 0.35rem;
-            flex-wrap: wrap;
-            padding-left: 2.15rem;
-        }
-
-        .quest-tag {
-            padding: 0.12rem 0.5rem;
-            font-family: var(--font-title);
-            font-size: 0.6rem;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            color: var(--gold-deep);
-            border: 1px solid rgba(138, 112, 24, 0.4);
-            background: rgba(201, 162, 39, 0.06);
-        }
-
-        /* ═══ CHRONICLES / WRITING ═══ */
-        .chronicles {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-        }
-
-        .chronicle {
-            display: block;
-            text-decoration: none;
-            padding: 1.15rem 1.1rem;
-            background: rgba(60, 45, 25, 0.08);
-            border: 2px solid #8a7040;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .chronicle:hover {
-            border-color: var(--gold);
-            background: rgba(201, 162, 39, 0.08);
-            box-shadow: 0 0 16px rgba(201, 162, 39, 0.12);
-        }
-
-        .chronicle-date {
-            font-family: var(--font-title);
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: var(--gold-deep);
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 0.4rem;
-        }
-
-        .chronicle-title {
-            font-family: var(--font-title);
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--ink);
-            line-height: 1.35;
-            margin-bottom: 0.4rem;
-            letter-spacing: 0.02em;
-        }
-
-        .chronicle-ex {
-            font-size: 0.9rem;
-            color: var(--ink-faded);
-            line-height: 1.5;
-        }
-
-        .view-all {
-            display: block;
-            text-align: center;
-            margin-top: 1.25rem;
-            font-family: var(--font-title);
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            color: var(--gold-deep);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .view-all:hover { color: var(--gold); }
-
-        /* ═══ FOOTER PANEL ═══ */
-        .footer-panel {
-            text-align: center;
-            padding-top: 0.5rem;
-        }
-
-        .footer-panel .sec-title {
-            font-size: 1.4rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .footer-panel p {
-            font-style: italic;
-            font-size: 1.08rem;
-            color: var(--ink-faded);
-            margin-bottom: 1.35rem;
-        }
-
-        .footer-panel .cta-row {
-            margin-bottom: 0;
-        }
-
-        /* page footer */
-        .page-foot {
-            text-align: center;
-            padding: 2rem 1rem 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .page-foot p {
-            font-family: var(--font-title);
-            font-size: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: rgba(160, 130, 60, 0.4);
-        }
-
-        /* torch flickers */
-        .torch {
-            position: fixed;
-            top: 30%;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: #e8a020;
-            box-shadow:
-                0 0 20px 8px rgba(232, 160, 32, 0.35),
-                0 0 40px 16px rgba(201, 100, 20, 0.15);
-            z-index: 0;
-            animation: flicker 3s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .torch-l { left: 2%; }
-        .torch-r { right: 2%; animation-delay: 1.2s; top: 45%; }
-
-        @keyframes flicker {
-            0%, 100% { opacity: 0.7; transform: scale(1); }
-            25% { opacity: 1; transform: scale(1.15); }
-            50% { opacity: 0.6; transform: scale(0.95); }
-            75% { opacity: 0.9; transform: scale(1.1); }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .scroll { padding: 1.75rem 1.2rem 2rem; margin: 10px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .chronicles { grid-template-columns: 1fr; }
-            .cta-row { flex-direction: column; align-items: stretch; }
-            .quest-desc, .quest-tags { padding-left: 0; }
-            .nav-tab { padding: 0.4rem 0.55rem; font-size: 0.65rem; letter-spacing: 0.06em; }
-            .brand { font-size: 0.95rem; letter-spacing: 0.08em; }
-            .torch { display: none; }
-            .panel { border-width: 2px; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .torch { animation: none; }
-            * { transition: none !important; }
-        }
-
-        /* ═══ HUD CONTROLS ═══ */
-        .hud-controls {
-            display: flex;
-            gap: 0.35rem;
-            margin-left: 0.75rem;
-            align-items: center;
-        }
-
-        .hud-btn {
-            font-family: var(--font-title);
-            font-size: 0.62rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #a89060;
-            background: linear-gradient(180deg, #3a2c18 0%, #2a1e10 100%);
-            border: 1px solid #5a4420;
-            padding: 0.4rem 0.65rem;
-            cursor: pointer;
-            box-shadow: inset 0 1px 0 rgba(201, 162, 39, 0.1), 0 2px 4px rgba(0,0,0,0.4);
-            transition: all 0.15s ease;
-            white-space: nowrap;
-        }
-
-        .hud-btn:hover {
-            color: var(--gold-bright);
-            border-color: var(--gold-dim);
-        }
-
-        .hud-btn.on {
-            color: var(--gold-bright);
-            border-color: var(--gold);
-            box-shadow: inset 0 1px 0 rgba(232, 200, 74, 0.25), 0 0 10px rgba(201, 162, 39, 0.2);
-            text-shadow: 0 0 8px rgba(201, 162, 39, 0.35);
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        /* ═══ DARK MAP MODE ═══ */
-        body.dark-map {
-            --parchment: #1e1a14;
-            --parchment-hi: #2a241c;
-            --parchment-lo: #16120e;
-            --ink: #d4c4a0;
-            --ink-soft: #b8a478;
-            --ink-faded: #8a7a58;
-            --gold-deep: #c9a227;
-        }
-
-        body.dark-map .hall {
-            background:
-                radial-gradient(ellipse 40% 40% at 20% 30%, rgba(40, 80, 60, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse 35% 35% at 80% 60%, rgba(30, 50, 80, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse 80% 30% at 50% 0%, rgba(20, 30, 20, 0.3) 0%, transparent 55%),
-                repeating-linear-gradient(0deg, transparent 0px, transparent 47px, rgba(0,0,0,0.25) 47px, rgba(0,0,0,0.25) 50px),
-                repeating-linear-gradient(90deg, transparent 0px, transparent 95px, rgba(0,0,0,0.15) 95px, rgba(0,0,0,0.15) 98px),
-                linear-gradient(180deg, #0c0e0a 0%, #080a08 40%, #050605 100%);
-        }
-
-        body.dark-map .scroll {
-            background-color: #1a1814;
-            background-image:
-                radial-gradient(ellipse 120px 80px at 10% 15%, rgba(40, 80, 50, 0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 100px 70px at 90% 80%, rgba(30, 50, 80, 0.1) 0%, transparent 70%),
-                radial-gradient(ellipse 60px 40px at 50% 50%, rgba(0,0,0,0.2) 0%, transparent 70%),
-                linear-gradient(175deg, #242018 0%, #1a1814 40%, #12100c 100%);
-            border-color: #4a6030;
-            box-shadow:
-                inset 0 0 60px rgba(0,0,0,0.5),
-                0 0 0 1px rgba(80, 120, 60, 0.2),
-                0 0 30px rgba(40, 80, 40, 0.1);
-        }
-
-        body.dark-map .scroll::before {
-            opacity: 0.06;
-            background-image:
-                linear-gradient(rgba(80,120,60,0.8) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(80,120,60,0.8) 1px, transparent 1px);
-            background-size: 36px 36px;
-        }
-
-        body.dark-map .panel {
-            border-color: #5a7040;
-            box-shadow:
-                0 0 0 2px #0a0c08,
-                0 0 0 7px #1a2010,
-                0 0 0 9px #3a5020,
-                0 0 0 10px #0a0c08,
-                0 16px 50px rgba(0,0,0,0.85),
-                inset 0 0 80px rgba(0,0,0,0.45),
-                inset 0 2px 0 rgba(120, 160, 80, 0.15);
-        }
-
-        body.dark-map .btn-wc {
-            color: #c8e090;
-            border-color: #6a9040;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8), 0 0 10px rgba(100, 160, 60, 0.3);
-        }
-
-        body.dark-map .btn-wc:hover {
-            color: #e0f0a0;
-            border-color: #8ab050;
-            box-shadow:
-                0 0 0 1px #0a0c08,
-                0 4px 0 #0a0c08,
-                0 6px 20px rgba(0,0,0,0.5),
-                0 0 24px rgba(100, 160, 60, 0.25),
-                inset 0 1px 0 rgba(160, 200, 100, 0.3);
-        }
-
-        body.dark-map .stat-box,
-        body.dark-map .chronicle,
-        body.dark-map .skill-chip,
-        body.dark-map .unit-btn {
-            border-color: #4a6030;
-            background: rgba(20, 30, 15, 0.4);
-            color: var(--ink-soft);
-        }
-
-        body.dark-map .quest {
-            border-top-color: rgba(80, 120, 60, 0.25);
-        }
-
-        body.dark-map .quest:last-child {
-            border-bottom-color: rgba(80, 120, 60, 0.25);
-        }
-
-        body.dark-map .quest:hover {
-            background: linear-gradient(90deg, rgba(80, 120, 60, 0.12), transparent 70%);
-        }
-
-        body.dark-map .quest-tag,
-        body.dark-map .post-tag,
-        body.dark-map .sec-num {
-            border-color: rgba(100, 140, 60, 0.4);
-            color: #a0c060;
-            background: rgba(40, 60, 20, 0.3);
-        }
-
-        body.dark-map h1 .gold-line {
-            color: #a0c060;
-            text-shadow: 0 0 16px rgba(100, 160, 60, 0.3);
-        }
-
-        body.dark-map .div-gold::before,
-        body.dark-map .div-gold::after {
-            background: linear-gradient(90deg, transparent, #4a6030, #6a9040, #4a6030, transparent);
-        }
-
-        body.dark-map .div-gold span { color: #6a9040; }
-
-        body.dark-map .torch {
-            background: #40a060;
-            box-shadow:
-                0 0 20px 8px rgba(60, 160, 80, 0.25),
-                0 0 40px 16px rgba(40, 100, 60, 0.12);
-        }
-
-        body.dark-map .quest-shot {
-            border-color: #4a6030;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
-        }
-
-        body.dark-map .topbar {
-            background: linear-gradient(180deg, #1a2410 0%, #10180c 40%, #0a1008 100%);
-            border-bottom-color: #3a5020;
-        }
-
-        /* quest screenshot */
-        .quest-shot {
-            display: block;
-            width: 100%;
-            max-height: 200px;
-            object-fit: cover;
-            object-position: top center;
-            margin: 0.65rem 0 0.85rem;
-            border: 2px solid #8a7040;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(201, 162, 39, 0.1);
-            background: #1a140c;
-        }
-
-        .quest-shot-wrap {
-            padding-left: 2.15rem;
-        }
-
-        @media (max-width: 768px) {
-            .quest-shot-wrap { padding-left: 0; }
-            .quest-shot { max-height: 160px; }
-            .hud-btn { font-size: 0.55rem; padding: 0.35rem 0.45rem; letter-spacing: 0.04em; }
-            .hud-controls { margin-left: 0.35rem; }
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/retro.css">
 </head>
 <body>
-    <div class="hall">
-        <div class="torch torch-l" aria-hidden="true"></div>
-        <div class="torch torch-r" aria-hidden="true"></div>
+    <div class="page">
+        <div class="ticker" aria-hidden="true">
+            <span>*** Welcome to my corner of the information superhighway *** Now with 100% more LLM agents *** Chat with my AI bot, it never sleeps *** New blog posts on GRPO and tool-use rewards *** Best viewed with eyes ***</span>
+        </div>
 
-        <header class="topbar">
-            <div class="topbar-inner">
-                <a href="/" class="brand">Bruno Stefoni</a>
-                <div class="topbar-right">
-                    <nav class="nav-tabs">
-                        <a href="/" class="nav-tab active">Home</a>
-                        <a href="/blog.html" class="nav-tab">Blog</a>
-                        <a href="/chatbot.html" class="nav-tab">AI Chatbot</a>
-                    </nav>
-                    <div class="hud-controls">
-                        <button type="button" class="hud-btn" id="mapToggle" aria-pressed="false" title="Toggle dark map">Map: Day</button>
-                    </div>
-                </div>
-            </div>
+        <header class="masthead">
+            <p class="welcome">~*~ welcome to ~*~</p>
+            <a href="/" class="wordart">Bruno's Homepage</a>
+            <p class="tagline"><b>AI Engineer</b> &middot; New York &middot; Bruno Stefoni on the World Wide Web</p>
         </header>
 
-        <main class="stage">
-            <div class="panel">
-                <span class="rivet rivet-tl" aria-hidden="true"></span>
-                <span class="rivet rivet-tr" aria-hidden="true"></span>
-                <span class="rivet rivet-bl" aria-hidden="true"></span>
-                <span class="rivet rivet-br" aria-hidden="true"></span>
+        <nav class="navbar" aria-label="Main">
+            <a href="/" class="btn98 active" aria-current="page">Home</a>
+            <a href="/blog.html" class="btn98">Blog</a>
+            <a href="/chatbot.html" class="btn98">AI Chatbot</a>
+        </nav>
 
-                <div class="scroll">
-                    <div class="faction-banner">
-                        <div class="banner-crest" aria-hidden="true">B</div>
-                        <span class="banner-label">Campaign Log</span>
+        <div class="cols">
+            <main>
+                <section class="win">
+                    <div class="win-bar">
+                        <span class="win-title">welcome.txt - Notepad</span>
+                        <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
                     </div>
-
-                    <div class="hero-meta">
-                        <span>AI Engineer</span>
-                        <span>New York</span>
-                        <span>GCP ML Certified</span>
+                    <div class="win-body">
+                        <h1 class="hero-line">Building AI systems that are <em>measurable</em> &amp; <em>reliable</em></h1>
+                        <p class="lead">
+                            Hi, I'm Bruno. I'm an AI engineer with 8 years of experience in data and machine
+                            learning, the last four working with language models. I build LLM agents, evaluation
+                            frameworks, and the infrastructure that lets you measure, ship, and trust them.
+                        </p>
+                        <p class="now">
+                            <b>Now:</b> AI Engineer at a trading firm in New York.
+                        </p>
+                        <p class="center">
+                            <a href="/chatbot.html" class="btn98 big">Chat with my AI bot</a>
+                        </p>
                     </div>
+                </section>
 
-                    <h1>
-                        Building AI systems
-                        <span class="gold-line">measurable &amp; reliable</span>
-                    </h1>
-
-                    <p class="lead">
-                        Senior AI Engineer with 8 years of experience, including 4 years working
-                        with language models. I build LLM agents, evaluation frameworks, and
-                        production ML infrastructure you can measure, ship, and trust.
-                    </p>
-
-                    <div class="cta-row">
-                        <a href="/chatbot.html" class="btn-wc">Try My AI Chatbot</a>
+                <section class="win">
+                    <div class="win-bar">
+                        <span class="win-title">stats.exe</span>
+                        <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
                     </div>
-
-                    <div class="unit-bar">
-                        <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" rel="noopener noreferrer" class="unit-btn">LinkedIn</a>
-                        <a href="https://x.com/brunostefoni" target="_blank" rel="noopener noreferrer" class="unit-btn">X</a>
-                        <a href="https://github.com/BrunoSE" target="_blank" rel="noopener noreferrer" class="unit-btn">GitHub</a>
-                        <a href="https://scholar.google.com/citations?user=clOK1mEAAAAJ" target="_blank" rel="noopener noreferrer" class="unit-btn">Scholar</a>
-                    </div>
-
-                    <div class="div-gold"><span>◆</span></div>
-
-                    <!-- Stats -->
-                    <section>
-                        <div class="sec-head">
-                            <span class="sec-num">01</span>
-                            <h2 class="sec-title">Attributes</h2>
-                            <p class="sec-sub">Stats from production systems</p>
+                    <div class="win-body">
+                        <h2 class="h-fun">Numbers from production</h2>
+                        <p class="sub">Results from systems I built and shipped</p>
+                        <div class="stats">
+                            <div class="stat"><b>93%</b><span>less context for agents on 70+ MCP tools</span></div>
+                            <div class="stat"><b>5&times;</b><span>faster agent: 5 min down to 1 min</span></div>
+                            <div class="stat"><b>70%</b><span>LLM-judge agreement with experts, up from 30%</span></div>
+                            <div class="stat"><b>50%</b><span>lower MCP server cost</span></div>
                         </div>
-                        <div class="stats-grid">
-                            <div class="stat-box">
-                                <div class="stat-val">93%</div>
-                                <div class="stat-label">Context cut<br>70+ MCP tools</div>
-                                <div class="stat-bar"><div class="stat-bar-fill gold-fill" style="width:93%"></div></div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-val">5×</div>
-                                <div class="stat-label">Agent latency<br>5 min → 1 min</div>
-                                <div class="stat-bar"><div class="stat-bar-fill" style="width:100%"></div></div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-val">70%</div>
-                                <div class="stat-label">LLM-judge<br>agreement</div>
-                                <div class="stat-bar"><div class="stat-bar-fill mana-fill" style="width:70%"></div></div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-val">50%</div>
-                                <div class="stat-label">Server cost<br>reduced</div>
-                                <div class="stat-bar"><div class="stat-bar-fill xp-fill" style="width:50%"></div></div>
-                            </div>
-                        </div>
-                    </section>
+                    </div>
+                </section>
 
-                    <div class="div-gold"><span>◆</span></div>
-
-                    <!-- Lore -->
-                    <section>
-                        <div class="sec-head">
-                            <span class="sec-num">02</span>
-                            <h2 class="sec-title">Lore</h2>
-                            <p class="sec-sub">What I build and how</p>
-                        </div>
-                        <p class="lore">
-                            I architect and deploy production-grade AI systems with a focus on
+                <section class="win">
+                    <div class="win-bar">
+                        <span class="win-title">about_me.txt - Notepad</span>
+                        <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                    </div>
+                    <div class="win-body">
+                        <h2 class="h-fun">About me</h2>
+                        <p class="lead">
+                            I architect and deploy production AI systems with a focus on
                             <strong>LLM agents</strong>, <strong>RAG pipelines</strong>, and
                             <strong>evaluation infrastructure</strong>. Most AI engineers stop at the model.
                             I build the measurement, CI/CD, and observability that make AI trustworthy at scale.
                         </p>
-                        <p class="lore">
-                            In previous roles I drove LLMOps and agent infra end-to-end: eval frameworks,
-                            MCP servers with Progressive Discovery, and Go/Python agents on Bedrock.
-                            I keep applying that stack wherever I ship production AI.
+                        <p class="lead">
+                            It's fairly easy to build a demo that works 80% of the time. The hard part is getting
+                            to 95% and knowing when you're there, which is why so much of my work is evaluation.
                         </p>
-                        <div class="skill-rack">
-                            <div class="skill-chip">LLM Agents</div>
-                            <div class="skill-chip">RAG Systems</div>
-                            <div class="skill-chip">LLM Evaluation</div>
-                            <div class="skill-chip">Python</div>
-                            <div class="skill-chip">Go</div>
-                            <div class="skill-chip">GCP</div>
-                            <div class="skill-chip">AWS Bedrock</div>
-                            <div class="skill-chip">MCP</div>
-                            <div class="skill-chip">LangGraph</div>
-                            <div class="skill-chip">Vector DBs</div>
-                            <div class="skill-chip">Snowflake</div>
-                            <div class="skill-chip">MLOps</div>
+                        <p class="lead">
+                            At VideoAmp I drove LLMOps and agent infrastructure end to end: an LLM-as-judge
+                            evaluation framework, MCP servers with Progressive Discovery, and Go/Python agents
+                            on Bedrock. Before that I led healthcare, cybersecurity, and finance AI projects
+                            at CloudWerx, including an agentic system that cut patient-note writing from 7 minutes
+                            to 2. I hold an MS in Data Science from NYU and engineering degrees from
+                            Universidad de Chile.
+                        </p>
+                        <div class="chips">
+                            <span class="chip">LLM Agents</span>
+                            <span class="chip">RAG Systems</span>
+                            <span class="chip">LLM Evaluation</span>
+                            <span class="chip">Python</span>
+                            <span class="chip">Go</span>
+                            <span class="chip">GCP</span>
+                            <span class="chip">AWS Bedrock</span>
+                            <span class="chip">MCP</span>
+                            <span class="chip">LangGraph</span>
+                            <span class="chip">Vector DBs</span>
+                            <span class="chip">Snowflake</span>
+                            <span class="chip">MLOps</span>
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    <div class="div-gold"><span>◆</span></div>
+                <section class="win">
+                    <div class="win-bar">
+                        <span class="win-title">C:\My Documents\Projects</span>
+                        <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                    </div>
+                    <div class="win-body">
+                        <h2 class="h-fun">Cool projects</h2>
+                        <p class="sub">Side projects that show how I build</p>
 
-                    <!-- Quests -->
-                    <section>
-                        <div class="sec-head">
-                            <span class="sec-num">03</span>
-                            <h2 class="sec-title">Quest Log</h2>
-                            <p class="sec-sub">Side projects that show how I build</p>
+                        <div class="proj">
+                            <a class="proj-title" href="https://guaguas.pages.dev/?lang=en" target="_blank" rel="noopener noreferrer">Nombre Guaguas</a>
+                            <p>
+                                Interactive dashboard exploring a century of Chilean baby name trends (1920-2025),
+                                with an embedded AI agent for natural-language exploration. Fully serverless on
+                                Cloudflare's edge network with data from Chile's Civil Registry.
+                            </p>
+                            <img src="/assets/projects/guaguas.png" alt="Nombre Guaguas dashboard showing Chilean baby name trends" loading="lazy" width="1400" height="900">
+                            <div class="tags">[Cloudflare Workers] [D1] [AI Chat] [Data Viz]</div>
                         </div>
-                        <div class="quest-list">
-                            <a href="https://guaguas.pages.dev/?lang=en" target="_blank" rel="noopener noreferrer" class="quest">
-                                <div class="quest-head">
-                                    <span class="quest-icon">I</span>
-                                    <span class="quest-title">Nombre Guaguas</span>
-                                    <span class="quest-arrow">→</span>
-                                </div>
-                                <p class="quest-desc">
-                                    Interactive dashboard exploring a century of Chilean baby name trends (1920-2025),
-                                    with an embedded AI agent for natural-language exploration. Fully serverless on
-                                    Cloudflare's edge network with data from Chile's Civil Registry.
-                                </p>
-                                <div class="quest-shot-wrap">
-                                    <img
-                                        class="quest-shot"
-                                        src="/assets/projects/guaguas.png"
-                                        alt="Nombre Guaguas dashboard showing Chilean baby name trends"
-                                        loading="lazy"
-                                        width="1400"
-                                        height="900"
-                                    >
-                                </div>
-                                <div class="quest-tags">
-                                    <span class="quest-tag">Cloudflare Workers</span>
-                                    <span class="quest-tag">D1</span>
-                                    <span class="quest-tag">AI Chat</span>
-                                    <span class="quest-tag">Data Viz</span>
-                                </div>
-                            </a>
 
-                            <a href="/chatbot.html" class="quest">
-                                <div class="quest-head">
-                                    <span class="quest-icon">II</span>
-                                    <span class="quest-title">ResumeAI Chatbot</span>
-                                    <span class="quest-arrow">→</span>
-                                </div>
-                                <p class="quest-desc">
-                                    RAG-powered chatbot trained on my experience and projects. Production backend on
-                                    Fly.io with rate limiting, API key auth, and CORS. Ask it anything a recruiter would.
-                                </p>
-                                <div class="quest-tags">
-                                    <span class="quest-tag">RAG</span>
-                                    <span class="quest-tag">Groq</span>
-                                    <span class="quest-tag">Fly.io</span>
-                                    <span class="quest-tag">Node.js</span>
-                                </div>
-                            </a>
-
-                            <a href="/blog-llm-git-rl.html" class="quest">
-                                <div class="quest-head">
-                                    <span class="quest-icon">III</span>
-                                    <span class="quest-title">Git Agent via Pure RL</span>
-                                    <span class="quest-arrow">→</span>
-                                </div>
-                                <p class="quest-desc">
-                                    Trained an LLM to use git through pure reinforcement learning: no demos, no SFT.
-                                    Built the agentic env, fixed a lying reward function, and documented the W-shaped
-                                    reward curve and mid-training collapse.
-                                </p>
-                                <div class="quest-tags">
-                                    <span class="quest-tag">Reinforcement Learning</span>
-                                    <span class="quest-tag">GRPO</span>
-                                    <span class="quest-tag">LLM Agents</span>
-                                    <span class="quest-tag">Tool Use</span>
-                                </div>
-                            </a>
+                        <div class="proj">
+                            <a class="proj-title" href="/chatbot.html">ResumeAI Chatbot</a>
+                            <p>
+                                RAG-powered chatbot that answers questions about my experience and projects.
+                                Production backend on Fly.io with rate limiting, API key auth, and CORS.
+                                Ask it anything a recruiter would.
+                            </p>
+                            <div class="tags">[RAG] [Groq] [Fly.io] [Node.js]</div>
                         </div>
-                    </section>
 
-                    <div class="div-gold"><span>◆</span></div>
-
-                    <!-- Chronicles -->
-                    <section>
-                        <div class="sec-head">
-                            <span class="sec-num">04</span>
-                            <h2 class="sec-title">Chronicles</h2>
-                            <p class="sec-sub">Writing on agents, RL, and production AI</p>
+                        <div class="proj">
+                            <a class="proj-title" href="/blog-llm-git-rl.html">Git Agent via Pure RL</a>
+                            <p>
+                                Trained an LLM to use git through pure reinforcement learning: no demos, no SFT.
+                                Built the agentic env, fixed a lying reward function, and documented the W-shaped
+                                reward curve and mid-training collapse.
+                            </p>
+                            <div class="tags">[Reinforcement Learning] [GRPO] [LLM Agents] [Tool Use]</div>
                         </div>
-                        <div class="chronicles">
-                            <a href="/blog-grpo-infra.html" class="chronicle">
-                                <div class="chronicle-date">July 17, 2026</div>
-                                <div class="chronicle-title">How Multi-Turn Git RL Rollouts Actually Run</div>
-                                <p class="chronicle-ex">Versioned envs, sandboxes, multi-turn tools, and filters: the real GRPO pipeline.</p>
-                            </a>
-                            <a href="/blog-effective-batch.html" class="chronicle">
-                                <div class="chronicle-date">July 17, 2026</div>
-                                <div class="chronicle-title">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</div>
-                                <p class="chronicle-ex">Mean reward can look fine while GRPO is starving. Watch zero-advantage and effective batch.</p>
-                            </a>
-                            <a href="/blog-reward-ablations.html" class="chronicle">
-                                <div class="chronicle-date">July 15, 2026</div>
-                                <div class="chronicle-title">What Offline Ablations Reveal About Agentic Tool-Use Rewards</div>
-                                <p class="chronicle-ex">Scoring tool responses erases the GRPO learning signal. A 0.10 write-tool bonus is the bootstrap.</p>
-                            </a>
-                            <a href="/blog-guaguas.html" class="chronicle">
-                                <div class="chronicle-date">March 5, 2026</div>
-                                <div class="chronicle-title">Nombre Guaguas: A Century of Chilean Baby Names</div>
-                                <p class="chronicle-ex">Serverless dashboard + AI assistant for exploring name trends from Chile's Civil Registry.</p>
-                            </a>
-                            <a href="/blog-llm-git-rl.html" class="chronicle">
-                                <div class="chronicle-date">February 27, 2026</div>
-                                <div class="chronicle-title">Teaching an LLM to Use Git Through Pure RL</div>
-                                <p class="chronicle-ex">Reward hacking, a 20-step collapse, and what it takes to train tool-using agents.</p>
-                            </a>
-                        </div>
-                        <a href="/blog.html" class="view-all">All Chronicles</a>
-                    </section>
+                    </div>
+                </section>
+            </main>
 
-                    <div class="div-gold"><span>◆</span></div>
+            <aside class="sidebar">
+                <section class="win">
+                    <div class="win-bar"><span class="win-title">Hit Counter</span></div>
+                    <div class="win-body center">
+                        <p class="side-note">You have visited</p>
+                        <div class="counter" id="counter" aria-live="off"><b>0</b><b>0</b><b>0</b><b>0</b><b>0</b><b>1</b></div>
+                        <p class="side-note">times. (I can't afford a real hit counter.)</p>
+                    </div>
+                </section>
 
-                    <section class="footer-panel">
-                        <h2 class="sec-title">Join the Campaign</h2>
-                        <p>Based in NYC. Reach out about AI infrastructure, agents, or LLMOps.</p>
-                        <div class="cta-row">
-                            <a href="/chatbot.html" class="btn-wc">Ask the AI</a>
-                            <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" rel="noopener noreferrer" class="btn-wc btn-wc-ghost">LinkedIn</a>
-                        </div>
-                    </section>
-                </div>
+                <section class="win">
+                    <div class="win-bar"><span class="win-title">Find me online</span></div>
+                    <div class="win-body">
+                        <ul class="side-list icons">
+                            <li><a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="#0a66c2" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg><span>LinkedIn</span></a></li>
+                            <li><a href="https://github.com/BrunoSE" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="#181717" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg><span>GitHub</span></a></li>
+                            <li><a href="https://scholar.google.com/citations?user=clOK1mEAAAAJ" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="#4285f4" aria-hidden="true"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></svg><span>Google Scholar</span></a></li>
+                            <li><a href="https://x.com/brunostefoni" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" width="16" height="16" fill="#000000" aria-hidden="true"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg><span>X/Twitter</span></a></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="win">
+                    <div class="win-bar"><span class="win-title">Latest posts</span></div>
+                    <div class="win-body">
+                        <ul class="post-list">
+                            <li><time datetime="2026-07-17">Jul 17, 2026</time><a href="/blog-grpo-infra.html">How Multi-Turn Git RL Rollouts Actually Run</a></li>
+                            <li><time datetime="2026-07-17">Jul 17, 2026</time><a href="/blog-effective-batch.html">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</a></li>
+                            <li><time datetime="2026-07-15">Jul 15, 2026</time><a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a></li>
+                            <li><time datetime="2026-03-10">Mar 10, 2026</time><a href="/blog-pirl.html">Teaching a 4B Model to Chain Git Operations Through Pure RL</a></li>
+                            <li><time datetime="2026-03-05">Mar 5, 2026</time><a href="/blog-guaguas.html">Nombre Guaguas: A Century of Chilean Baby Names</a></li>
+                            <li><time datetime="2026-02-27">Feb 27, 2026</time><a href="/blog-llm-git-rl.html">Teaching an LLM to Use Git Through Pure RL</a></li>
+                        </ul>
+                        <p class="mt side-note"><a href="/blog.html">All posts &raquo;</a></p>
+                    </div>
+                </section>
+
+                <section class="win">
+                    <div class="win-bar"><span class="win-title">Guestbook</span></div>
+                    <div class="win-body">
+                        <p class="side-note">
+                            The guestbook got too much spam, so I replaced it with a chatbot.
+                            <a href="/chatbot.html">Leave it a message</a>, or reach me on
+                            <a href="https://www.linkedin.com/in/bruno-stefoni-escudero/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                            about AI infrastructure, agents, or LLMOps.
+                        </p>
+                    </div>
+                </section>
+            </aside>
+        </div>
+
+        <footer>
+            <div class="construction"><span>THIS PAGE IS ALWAYS UNDER CONSTRUCTION</span></div>
+            <div class="badges" aria-hidden="true">
+                <span class="badge">Best viewed<br>in any browser</span>
+                <span class="badge b2">800&times;600<br>friendly</span>
+                <span class="badge b3">No frameworks<br>were harmed</span>
+                <span class="badge b4">Y2K<br>COMPLIANT</span>
+                <span class="badge b5">Powered<br>by GPUs</span>
             </div>
-        </main>
-
-        <footer class="page-foot">
-            <p>&copy; 2026 Bruno Stefoni · Victory</p>
+            <div class="foot">
+                <p>&copy; 2026 Bruno Stefoni &middot; New York, NY</p>
+            </div>
         </footer>
     </div>
 
     <script>
         (function () {
-            var mapBtn = document.getElementById('mapToggle');
-
+            var visits = 1;
             try {
-                if (localStorage.getItem('bruno-map') === 'dark') {
-                    document.body.classList.add('dark-map');
-                    mapBtn.textContent = 'Map: Night';
-                    mapBtn.classList.add('on');
-                    mapBtn.setAttribute('aria-pressed', 'true');
-                }
+                visits = (parseInt(localStorage.getItem('bruno-visits'), 10) || 0) + 1;
+                localStorage.setItem('bruno-visits', String(visits));
             } catch (e) {}
-
-            mapBtn.addEventListener('click', function () {
-                var dark = document.body.classList.toggle('dark-map');
-                mapBtn.textContent = dark ? 'Map: Night' : 'Map: Day';
-                mapBtn.classList.toggle('on', dark);
-                mapBtn.setAttribute('aria-pressed', dark ? 'true' : 'false');
-                try { localStorage.setItem('bruno-map', dark ? 'dark' : 'day'); } catch (e) {}
-            });
+            var digits = String(Math.min(visits, 999999)).padStart(6, '0').split('');
+            var cells = document.querySelectorAll('#counter b');
+            for (var i = 0; i < cells.length; i++) { cells[i].textContent = digits[i]; }
         })();
     </script>
 </body>
