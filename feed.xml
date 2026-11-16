@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-maintained: add a new <item> at the top for each post and update lastBuildDate. -->
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+    <title>Bruno Stefoni's Blog</title>
+    <link>https://brunose.github.io/blog.html</link>
+    <atom:link href="https://brunose.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <description>Technical writing on agents, reinforcement learning, and production AI.</description>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 17 Jul 2026 12:00:00 GMT</lastBuildDate>
+
+    <item>
+        <title>How Multi-Turn Git RL Rollouts Actually Run</title>
+        <link>https://brunose.github.io/blog-grpo-infra.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-grpo-infra.html</guid>
+        <pubDate>Fri, 17 Jul 2026 12:00:00 GMT</pubDate>
+        <description>Sandboxes, hidden repo paths, group rewards, and filters: the pipeline behind effective-batch GRPO debugging.</description>
+    </item>
+
+    <item>
+        <title>Effective Batch Is the Real KPI for GRPO Tool-Use Runs</title>
+        <link>https://brunose.github.io/blog-effective-batch.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-effective-batch.html</guid>
+        <pubDate>Fri, 17 Jul 2026 11:00:00 GMT</pubDate>
+        <description>Mean reward looked fine on every ablation. Zero-advantage rate and effective batch size predicted which run would die.</description>
+    </item>
+
+    <item>
+        <title>What Offline Ablations Reveal About Agentic Tool-Use Rewards</title>
+        <link>https://brunose.github.io/blog-reward-ablations.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-reward-ablations.html</guid>
+        <pubDate>Wed, 15 Jul 2026 12:00:00 GMT</pubDate>
+        <description>Offline ablations across 200 git episodes: scoring tool responses erases the GRPO learning signal, and a small write-tool bonus is decisive.</description>
+    </item>
+
+    <item>
+        <title>Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</title>
+        <link>https://brunose.github.io/blog-pirl.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-pirl.html</guid>
+        <pubDate>Tue, 10 Mar 2026 12:00:00 GMT</pubDate>
+        <description>Training Qwen3-4B to discover multi-turn git tool chains entirely from reward signal: no demonstrations, no SFT. Six reward function versions, four failure modes, and the fix that finally worked.</description>
+    </item>
+
+    <item>
+        <title>Nombre Guaguas: Exploring a Century of Chilean Baby Name Trends</title>
+        <link>https://brunose.github.io/blog-guaguas.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-guaguas.html</guid>
+        <pubDate>Thu, 05 Mar 2026 12:00:00 GMT</pubDate>
+        <description>A fully serverless dashboard that visualizes baby name trends in Chile from 1920 to 2025, with an AI chat assistant for natural language exploration. Built on Cloudflare's edge network with data from Chile's Civil Registry.</description>
+    </item>
+
+    <item>
+        <title>Teaching an LLM to Use Git Through Pure Reinforcement Learning</title>
+        <link>https://brunose.github.io/blog-llm-git-rl.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-llm-git-rl.html</guid>
+        <pubDate>Fri, 27 Feb 2026 12:00:00 GMT</pubDate>
+        <description>We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, trained for 200 steps, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.</description>
+    </item>
+</channel>
+</rss>
