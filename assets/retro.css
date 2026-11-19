@@ -396,13 +396,14 @@ h1, h2, h3 { line-height: 1.25; }
 .prose th { background: var(--title-a); color: #fff; font-family: var(--font-ui); }
 .prose tr:nth-child(even) td { background: #f0f0f0; }
 .prose hr { border: 0; border-top: 2px groove var(--chrome); margin: 24px 0; }
-.prose blockquote {
+.prose blockquote, .post-hero blockquote {
     border-left: 4px solid var(--hot);
     background: #ffffcc;
     padding: 10px 14px;
     margin: 0 0 16px;
 }
-.prose blockquote p:last-child { margin-bottom: 0; }
+.prose blockquote p:last-child, .post-hero blockquote p:last-child { margin-bottom: 0; }
+.post-hero blockquote { margin: 12px 0 0; font-size: 14px; }
 .prose img { display: block; margin: 0 auto 16px; border: 2px inset var(--chrome); }
 .mermaid { margin: 0 0 16px; text-align: center; overflow-x: auto; }
 .back-link { margin-top: 24px; padding-top: 12px; border-top: 2px groove var(--chrome); font-size: 14px; }

@@ -45,6 +45,7 @@
                         </div>
                         <h1 class="post-title">Did RL on Git Tool Use Transfer? We Finally Checked</h1>
                         <p class="post-subtitle">We trained a 2B model with RL on git tool use and tested it on tasks it never saw. It got better on unseen tasks of the kind it trained on, and no better on harder ones. What it learned was mostly a way of answering that our grader likes.</p>
+                        <blockquote><p><em>Update, November 18, 2026.</em> After publishing, we tested the trained model on a different tool server. It did worse than the untrained model. See <a href="#update-tool-server">the update</a> below; two sentences that said this was untested have been changed.</p></blockquote>
                     </div>
 
                     <hr class="rule">
@@ -132,13 +133,37 @@
 
                         <p>We had seen the same thing in July without recognizing what it meant: in two 50-step runs on Qwen3.5-4B, all of the measured gain was in read episodes whose grader wanted git's literal output, and the model copied more tool output over training.</p>
 
+                        <h2 id="update-tool-server">Update: we tested a different tool server</h2>
+
+                        <p><em>Added November 18, 2026, about two hours after publishing.</em></p>
+
+                        <p>After publishing, we evaluated the last saved model of the run (step 44) on tasks with tools it never trained on: four filesystem tools, no git. The tasks are graded on the files left behind or on one exact answer line, so a long answer cannot pass them.</p>
+
+                        <table>
+                            <thead>
+                                <tr><th>Set</th><th>Base model</th><th>After training</th><th>Change</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Filesystem, harder tasks</td><td>0.545</td><td>0.410</td><td>&minus;0.135 [&minus;0.240, &minus;0.028]</td></tr>
+                                <tr><td>Filesystem, basic tasks</td><td>0.785</td><td>0.688</td><td>&minus;0.097 [&minus;0.167, &minus;0.028]</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>The trained model did worse than the untrained one on both sets. The habits it picked up on git came with it: its answers were four to five times longer, it made more tool calls, and more of those calls failed.</p>
+
+                        <p>We chose the comparison on the harder set as the main result before running it. Both sets were sized using the untrained model only.</p>
+
+                        <p>On the git sets, step 44 looks like step 25: held-out success 0.97, L5 with the training tools 0.48 (base model 0.48), L5 with new tools 0.63 (base model 0.67).</p>
+
+                        <p>This is still one run of one small model.</p>
+
                         <h2>So, does it transfer?</h2>
 
                         <ul>
                             <li><strong>To unseen tasks of the same kind: yes</strong>, but what transfers is an answering style that fits the grader.</li>
                             <li><strong>To harder tasks with the same tools: no.</strong></li>
                             <li><strong>To new tools: no.</strong></li>
-                            <li><strong>To a different tool server: not tested.</strong> The filesystem environment built for that has the same kind of grader and was never run.</li>
+                            <li><strong>To a different tool server: no, it got worse.</strong> See <a href="#update-tool-server">the update</a>.</li>
                         </ul>
 
                         <p>The reward did what it was written to do. &ldquo;The final answer contains the expected strings&rdquo; is cheapest to satisfy by writing more, and 25 steps of RL found that.</p>
@@ -146,7 +171,7 @@
                         <h2>What this run cannot tell you</h2>
 
                         <ul>
-                            <li><strong>One run, one seed, 25 steps.</strong> The run was planned for 50 steps. It was paused at step 44 on cost, and the only evaluation of the trained model is at step 25.</li>
+                            <li><strong>One run, one seed, 25 steps.</strong> The run was planned for 50 steps. It was paused at step 44 on cost. The main tables are from step 25; the update evaluates the step-44 model.</li>
                             <li><strong>One small model.</strong> Nothing here is about Qwen3-4B-Instruct-2507, the model in the March post. That model is no longer available on the platform, and its runs were never evaluated on held-out tasks.</li>
                             <li><strong>Full fine-tuning at a low learning rate (1e-6)</strong>, the platform's only mode now. The earlier runs used LoRA at 1e-5.</li>
                             <li><strong>The grader cannot separate a correct concise answer from a long one</strong>, so we cannot say how much of the read gain, if any, is better git use.</li>
