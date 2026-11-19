@@ -48,6 +48,7 @@
                                     <h1 class="post-title">Teaching an LLM to Use Git Through Pure Reinforcement Learning</h1>
                                     <p class="post-subtitle">We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, trained for 200 steps, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.</p>
                                     <blockquote><p><em>Version note.</em> This narrative is from the v0.3.0 era (66 episodes, 25 with dynamic fragments, temperature 0.7). The environment has since grown to <strong>v0.8.0</strong>: 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62), formalized reward presets A0–A6, and pinned training hyperparameters. The story below is kept as-run; for what the numbers taught us, see the follow-ups.</p></blockquote>
+                                    <blockquote><p><em>Update, November 18, 2026.</em> A later run on a smaller model (Qwen3.5-2B) was evaluated on held-out tasks: <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. The trained model improved on unseen tasks of the same kind, mostly on tasks where a longer answer is enough to satisfy the grader, and did not improve on harder tasks or on new git tools. One sentence below, about echoing tool output, was corrected in light of it and is marked.</p></blockquote>
                                 </div>
 
                                  <hr class="rule">
@@ -255,7 +256,7 @@ for msg in reversed(completion):
             return str(msg.get("content") or "")
 return ""</code></pre>
 
-                                    <p>Now the model must synthesize tool output into a final answer. Calling <code>git_status</code> and echoing the output doesn't help — it needs to actually write "the working tree is clean, nothing to commit."</p>
+                                    <p>Now the model must synthesize tool output into a final answer. Calling <code>git_status</code> alone no longer scores. Echoing its output in the final answer still does. <em>(Corrected November 2026. The original said echoing the output does not help; later runs showed the model learns to do exactly that.)</em></p>
 
                                     <h3>Fix 2: Dynamic Fragment Extraction</h3>
 
@@ -423,10 +424,6 @@ Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
                                     <hr>
 
                                     <h2>The Code</h2>
-
-                                    <ul>
-                                        <li><strong>Environment Hub:</strong> <a href="https://app.primeintellect.ai/dashboard/environments/bstefoni/git-orchestration" target="_blank">bstefoni/git-orchestration</a></li>
-                                    </ul>
 
                                     <p>The environment is ~700 lines of Python across 5 files. The hard part was the reward function — designing one where the only path to high reward is actually solving the task, not satisfying a proxy.</p>
 

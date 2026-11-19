@@ -48,6 +48,7 @@
                                     <h1 class="post-title">Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</h1>
                                     <p class="post-subtitle">Training Qwen3-4B to discover multi-turn git tool chains entirely from reward signal &mdash; no demonstrations, no SFT. Six reward function versions, four failure modes, and the fix that finally worked.</p>
                                     <blockquote><p><em>Version note.</em> This post describes a 100-episode dataset (L1: 20, L2: 21, L3: 28, L4: 31). The environment has since grown to <strong>v0.8.0</strong> with 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62). The debugging narrative is kept as-run.</p></blockquote>
+                                    <blockquote><p><em>Update, November 18, 2026.</em> The question in &ldquo;What's Next&rdquo; is now answered for a smaller model (Qwen3.5-2B): <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. That run did not memorize its training tasks and did not improve on harder L5 tasks. It cannot say what the model in this post did, which was never evaluated on held-out tasks. Two sentences below were corrected in light of it and are marked.</p></blockquote>
                                 </div>
 
                                 <hr class="rule">
@@ -56,7 +57,7 @@
 
                                     <p>Training a language model to use tools is usually done with supervised fine-tuning &mdash; you collect demonstrations of correct tool use and train the model to imitate them. We took a different approach: <strong>pure reinforcement learning with no demonstrations</strong>. The model had to discover how to chain git operations (status &rarr; log &rarr; show &rarr; add &rarr; commit) entirely from reward signal.</p>
 
-                                    <p>This is the story of how we got a 4-billion-parameter model (Qwen3-4B-Instruct) from broken to near-perfect on multi-turn git tool use &mdash; and the four things that broke along the way.</p>
+                                    <p>This is the story of how we got a 4-billion-parameter model (Qwen3-4B-Instruct) from a training reward of 0.68 to 0.97&ndash;1.00 on the 100 training episodes &mdash; and the four things that broke along the way. <em>(Corrected November 2026. The original said &ldquo;from broken to near-perfect on multi-turn git tool use&rdquo;, which had no base-model or held-out number behind it.)</em></p>
 
                                     <h2>The Setup</h2>
 
@@ -147,7 +148,7 @@ Step 68:  Reward 0.0312</code></pre>
                                         </li>
                                     </ol>
 
-                                    <p>Key fix: only scoring the final message meant the model had to actually <em>understand and report</em> what it found, not just parrot tool output.</p>
+                                    <p>Key fix: only scoring the final message stopped the model from being paid for a tool call alone. It does not stop it from pasting the tool output into its answer, which later runs showed it learns to do. <em>(Corrected November 2026. The original said the model had to understand and report what it found, not just parrot tool output.)</em></p>
 
                                     <p>We also added <strong>dynamic fragments</strong> &mdash; <code>$head_commit_hash</code>, <code>$commit_count</code>, etc. &mdash; resolved against the actual sandbox at episode setup time. This prevented the model from memorizing static answers.</p>
 
@@ -241,7 +242,7 @@ Step 300: Reward 0.99</code></pre>
                                     <h2>What's Next</h2>
 
                                     <ul>
-                                        <li><strong>Evaluation on held-out L5 tasks</strong>: Merge conflicts, cherry-pick, stash/pop &mdash; git operations the model has never seen. Does it generalize from the tool-use patterns it learned, or did it memorize 100 task templates?</li>
+                                        <li><strong>Evaluation on held-out L5 tasks</strong>: Merge conflicts, cherry-pick, stash/pop &mdash; git operations the model has never seen. Does it generalize from the tool-use patterns it learned, or did it memorize 100 task templates? <em>Update, November 2026: answered for Qwen3.5-2B in <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. Not memorized, and no gain on L5.</em></li>
                                         <li><strong>Scale the model</strong>: Qwen3-8B or 14B with the same curriculum. If 4B hits 1.0, a larger model may generalize better to unseen scenarios.</li>
                                         <li><strong>Harder curricula</strong>: Interactive rebase, conflict resolution, multi-remote workflows &mdash; tasks that require genuine reasoning, not just tool chaining.</li>
                                     </ul>

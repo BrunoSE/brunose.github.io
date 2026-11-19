@@ -154,13 +154,15 @@
                         </div>
 
                         <div class="proj">
-                            <a class="proj-title" href="/blog-llm-git-rl.html">Git Agent via Pure RL</a>
+                            <a class="proj-title" href="/blog-git-rl-transfer.html">Git Agent via Pure RL</a>
                             <p>
-                                Trained an LLM to use git through pure reinforcement learning: no demos, no SFT.
-                                Built the agentic env, fixed a lying reward function, and documented the W-shaped
-                                reward curve and mid-training collapse.
+                                Trained small LLMs to use git tools through reinforcement learning alone, with no
+                                demonstrations, then tested one of them on held-out tasks. The model improved on
+                                unseen tasks of the same kind and not on harder ones, and most of the gain was on
+                                tasks where a longer answer is enough to satisfy the grader. Six posts cover the
+                                environment, the reward design and the evaluation.
                             </p>
-                            <div class="tags">[Reinforcement Learning] [GRPO] [LLM Agents] [Tool Use]</div>
+                            <div class="tags">[Reinforcement Learning] [GRPO] [Evaluation] [Tool Use]</div>
                         </div>
                     </div>
                 </section>
