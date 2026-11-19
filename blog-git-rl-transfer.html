@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Did RL on Git Tool Use Transfer? We Finally Checked | Bruno Stefoni</title>
+    <meta name="description" content="A 2B model trained with RL on git tool use, tested on tasks it never saw. It improved on unseen tasks of the kind it trained on and not on harder ones. What it learned was mostly an answering style the grader likes.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-git-rl-transfer.html">
+    <meta property="og:title" content="Did RL on Git Tool Use Transfer? We Finally Checked">
+    <meta property="og:description" content="A held-out evaluation of RL training on git tool use: no memorization, no gain on harder tasks, and a model that learned to write answers the grader likes.">
+    <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="stylesheet" href="/assets/retro.css">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="alternate" type="application/rss+xml" title="Bruno Stefoni's Blog" href="/feed.xml">
+</head>
+<body>
+    <div class="page">
+        <header class="masthead small">
+            <a href="/" class="wordart">Bruno's Homepage</a>
+        </header>
+
+        <nav class="navbar" aria-label="Main">
+            <a href="/" class="btn98">Home</a>
+            <a href="/blog.html" class="btn98 active">Blog</a>
+            <a href="/chatbot.html" class="btn98">AI Chatbot</a>
+        </nav>
+
+        <main>
+            <section class="win">
+                <div class="win-bar">
+                    <span class="win-title">git-rl-transfer.txt - Notepad</span>
+                    <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                </div>
+                <div class="win-body">
+                    <div class="post-hero">
+                        <div class="post-meta">
+                            <span class="post-date">November 18, 2026</span>
+                            <span class="post-tag">Reinforcement Learning</span>
+                            <span class="post-tag">Evaluation</span>
+                            <span class="post-tag">Tool Use</span>
+                            <span class="post-tag">Reward Design</span>
+                        </div>
+                        <h1 class="post-title">Did RL on Git Tool Use Transfer? We Finally Checked</h1>
+                        <p class="post-subtitle">We trained a 2B model with RL on git tool use and tested it on tasks it never saw. It got better on unseen tasks of the kind it trained on, and no better on harder ones. What it learned was mostly a way of answering that our grader likes.</p>
+                    </div>
+
+                    <hr class="rule">
+
+                    <article class="prose">
+                        <h2>The question we left open</h2>
+
+                        <p>The <a href="/blog-pirl.html">March post</a> ended with a question: after RL training on git tasks, does the model generalize, or did it memorize the task templates? Until now nothing in this project could answer it. The model was trained and scored on the same episodes, and the number we reported was the training reward, which includes a bonus for calling tools.</p>
+
+                        <p>This post reports one run built to answer it.</p>
+
+                        <h2>What we changed to make it answerable</h2>
+
+                        <ul>
+                            <li><strong>A held-out set.</strong> The 200 L1&ndash;L4 episodes are split by task family: 147 for training, 53 held out. Paraphrases of one task always land on the same side.</li>
+                            <li><strong>Harder tasks the model never trains on.</strong> 96 &ldquo;L5&rdquo; tasks in 24 patterns: 64 use the 13 training tools on multi-step problems (commit one file but not another, branch from a specific commit), and 32 need tools that are not in training at all (stash, cherry-pick, merge).</li>
+                            <li><strong>Success instead of reward.</strong> A rollout counts only if its outcome is exactly right. For read tasks we report two gradings: <em>literal</em> looks for git's own output text in the final answer, <em>facts</em> looks for the same facts in any wording.</li>
+                            <li><strong>A smaller model.</strong> The untrained Qwen3.5-4B already solves most of these tasks (about 0.9 on held-out by facts and on L5, in a local test with a quantized copy), which leaves little room to measure a gain. We used Qwen3.5-2B, which leaves room on both the held-out set and L5.</li>
+                        </ul>
+
+                        <p>The base model is measured inside the training run, before the first step, through the same pipeline as the trained model.</p>
+
+                        <h2>What the base model already did</h2>
+
+                        <p>Untrained Qwen3.5-2B, three attempts per task:</p>
+
+                        <table>
+                            <thead>
+                                <tr><th>Set</th><th>Success</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Held-out L1&ndash;L4, literal</td><td>0.57</td></tr>
+                                <tr><td>Held-out L1&ndash;L4, facts</td><td>0.80</td></tr>
+                                <tr><td>Held-out write tasks</td><td>0.88</td></tr>
+                                <tr><td>L5, existing tools</td><td>0.48</td></tr>
+                                <tr><td>L5, new tools</td><td>0.67</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>The model starts well above &ldquo;broken&rdquo;. It already knows which git tool to call and already completes most write tasks. Most of the gap on read tasks is between the two gradings: the model often gives a correct answer in its own words and misses the exact string.</p>
+
+                        <h2>What happened after 25 training steps</h2>
+
+                        <table>
+                            <thead>
+                                <tr><th>Set</th><th>Base model</th><th>After 25 steps</th><th>Change</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Held-out L1&ndash;L4, literal</td><td>0.572</td><td>0.962</td><td>+0.390 [+0.289, +0.497]</td></tr>
+                                <tr><td>Held-out L1&ndash;L4, facts</td><td>0.799</td><td>0.987</td><td>+0.189 [+0.107, +0.277]</td></tr>
+                                <tr><td>Training episodes, literal</td><td>0.676</td><td>0.971</td><td>+0.295 [+0.236, +0.351]</td></tr>
+                                <tr><td>Training episodes, facts</td><td>0.830</td><td>0.980</td><td>+0.150 [+0.104, +0.193]</td></tr>
+                                <tr><td>L5, existing tools</td><td>0.479</td><td>0.490</td><td>+0.010 [&minus;0.125, +0.156]</td></tr>
+                                <tr><td>L5, new tools</td><td>0.667</td><td>0.562</td><td>&minus;0.104 [&minus;0.198, +0.010]</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>Brackets are 95% intervals for the change on the same tasks.</p>
+
+                        <p><strong>It did not memorize.</strong> The held-out episodes improved as much as the training episodes. We checked the run's records: no held-out or L5 task shares an id, a prompt or a family with anything the model trained on. Held-out here means an unseen task in a familiar setting: the same repository templates, the same tools and the same grader.</p>
+
+                        <p><strong>It did not get better at harder git tasks.</strong> L5 with the training tools did not move. L5 with new tools went down, though the interval reaches zero.</p>
+
+                        <h2>What the model actually learned</h2>
+
+                        <p>The held-out number looks like a success. The transcripts say otherwise.</p>
+
+                        <table>
+                            <thead>
+                                <tr><th></th><th>Base model</th><th>After 25 steps</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Final answer, median length</td><td>264 characters</td><td>2,244 characters</td></tr>
+                                <tr><td>Tool calls per task</td><td>3.0</td><td>4.7</td></tr>
+                                <tr><td>Turns with more than one tool call</td><td>8%</td><td>44%</td></tr>
+                                <tr><td>Answers cut off (token or turn limit)</td><td>3%</td><td>31%</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>(Held-out set.) The trained model calls several tools at once and then writes a long answer that repeats what the tools returned. Our read grader only checks that the expected strings or facts appear somewhere in the final answer, so a long answer passes. It also passes when it says wrong things. Asked whether a clean repository has uncommitted changes, one trained answer said no, then added &ldquo;All files have been staged for the next commit&rdquo; and &ldquo;Your changes are ready to be committed&rdquo;. Both gradings gave it full marks.</p>
+
+                        <p>That explains the table. The gain is on read tasks (+0.58 literal on held-out reads), where length is rewarded. Write tasks are graded on the repository's final state, which length cannot satisfy; they went from 0.88 to 0.97. And the habit carries to any read task with this grader, seen or unseen, which is why held-out matches training.</p>
+
+                        <p>On L5 the same habit hurts. The five patterns that end in a commit fell from 0.37 to 0.12. In the failed attempts we read, the model's first move is to call <code>git_status</code>, <code>git_log</code> and <code>git_add .</code> together, before it has seen which files exist. That stages the file the task said to leave alone. We picked this group of patterns after looking at the per-pattern numbers, so treat it as a description, not a tested result.</p>
+
+                        <p>We had seen the same thing in July without recognizing what it meant: in two 50-step runs on Qwen3.5-4B, all of the measured gain was in read episodes whose grader wanted git's literal output, and the model copied more tool output over training.</p>
+
+                        <h2>So, does it transfer?</h2>
+
+                        <ul>
+                            <li><strong>To unseen tasks of the same kind: yes</strong>, but what transfers is an answering style that fits the grader.</li>
+                            <li><strong>To harder tasks with the same tools: no.</strong></li>
+                            <li><strong>To new tools: no.</strong></li>
+                            <li><strong>To a different tool server: not tested.</strong> The filesystem environment built for that has the same kind of grader and was never run.</li>
+                        </ul>
+
+                        <p>The reward did what it was written to do. &ldquo;The final answer contains the expected strings&rdquo; is cheapest to satisfy by writing more, and 25 steps of RL found that.</p>
+
+                        <h2>What this run cannot tell you</h2>
+
+                        <ul>
+                            <li><strong>One run, one seed, 25 steps.</strong> The run was planned for 50 steps. It was paused at step 44 on cost, and the only evaluation of the trained model is at step 25.</li>
+                            <li><strong>One small model.</strong> Nothing here is about Qwen3-4B-Instruct-2507, the model in the March post. That model is no longer available on the platform, and its runs were never evaluated on held-out tasks.</li>
+                            <li><strong>Full fine-tuning at a low learning rate (1e-6)</strong>, the platform's only mode now. The earlier runs used LoRA at 1e-5.</li>
+                            <li><strong>The grader cannot separate a correct concise answer from a long one</strong>, so we cannot say how much of the read gain, if any, is better git use.</li>
+                        </ul>
+
+                        <h2>What it cost, and why</h2>
+
+                        <p>The run cost $48.51 against an estimate of $17 to $21. We skip groups of rollouts that all earn the same reward, because they carry no learning signal. At the start that kept about 55% of groups. As the model converged on its new habit, rollouts within a group became identical: 23% were kept at step 25 and 5% from step 40. A training step went from under a minute to about 25 minutes, almost all of it spent generating rollouts that were thrown away.</p>
+
+                        <p>This is the failure the <a href="/blog-effective-batch.html">effective-batch post</a> describes, seen from the billing side. Success on the training rollouts of the last steps was 0.99.</p>
+
+                        <h2>What we would do differently</h2>
+
+                        <ul>
+                            <li>Grade read answers for what they get wrong, not only for what they contain, or cap the answer length.</li>
+                            <li>Evaluate on held-out and harder tasks from the first run, and report success, not the training reward.</li>
+                            <li>Measure the base model before claiming a gain.</li>
+                            <li>Stop a run when the share of kept groups falls below a set level, instead of paying for it to finish.</li>
+                        </ul>
+
+                        <hr>
+                        <p>Earlier posts in this series:</p>
+                        <ul>
+                            <li><a href="/blog-pirl.html">Teaching a 4B Model to Chain Git Operations Through Pure RL</a> (the March post that asked the question)</li>
+                            <li><a href="/blog-reward-ablations.html">What Offline Ablations Reveal About Agentic Tool-Use Rewards</a></li>
+                            <li><a href="/blog-effective-batch.html">Effective Batch Is the Real KPI for GRPO Tool-Use Runs</a></li>
+                        </ul>
+                    </article>
+
+                    <div class="back-link">
+                        <a href="/blog.html">&larr; Back to Blog</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="foot">
+                <p>&copy; 2026 Bruno Stefoni &middot; <a href="/">Back to the homepage</a></p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

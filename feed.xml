@@ -7,7 +7,15 @@
     <atom:link href="https://brunose.github.io/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Technical writing on agents, reinforcement learning, and production AI.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 17 Jul 2026 12:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 18 Nov 2026 12:00:00 GMT</lastBuildDate>
+
+    <item>
+        <title>Did RL on Git Tool Use Transfer? We Finally Checked</title>
+        <link>https://brunose.github.io/blog-git-rl-transfer.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-git-rl-transfer.html</guid>
+        <pubDate>Wed, 18 Nov 2026 12:00:00 GMT</pubDate>
+        <description>A 2B model trained with RL on git tool use, tested on tasks it never saw. It got better on unseen tasks of the kind it trained on, and no better on harder ones. What it learned was mostly a way of answering that the grader likes.</description>
+    </item>
 
     <item>
         <title>How Multi-Turn Git RL Rollouts Actually Run</title>
