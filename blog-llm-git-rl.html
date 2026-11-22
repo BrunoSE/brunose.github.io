@@ -48,7 +48,7 @@
                                     <h1 class="post-title">Teaching an LLM to Use Git Through Pure Reinforcement Learning</h1>
                                     <p class="post-subtitle">We built an agentic RL environment, watched rewards immediately saturate at 0.96, realized our reward function was lying, fixed it, trained for 200 steps, and got a W-shaped reward curve with a 20-step catastrophic collapse in the middle.</p>
                                     <blockquote><p><em>Version note.</em> This narrative is from the v0.3.0 era (66 episodes, 25 with dynamic fragments, temperature 0.7). The environment has since grown to <strong>v0.8.0</strong>: 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62), formalized reward presets A0–A6, and pinned training hyperparameters. The story below is kept as-run; for what the numbers taught us, see the follow-ups.</p></blockquote>
-                                    <blockquote><p><em>Update, November 18, 2026.</em> A later run on a smaller model (Qwen3.5-2B) was evaluated on held-out tasks: <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. The trained model improved on unseen tasks of the same kind, mostly on tasks where a longer answer is enough to satisfy the grader, and did not improve on harder tasks or on new git tools. Two sentences below are marked: one about echoing tool output, which was corrected, and the hypothesis about unfamiliar MCP servers, which a later test did not support.</p></blockquote>
+                                    <blockquote><p><em>Update, November 2026.</em> A later run on a smaller model (Qwen3.5-2B) was evaluated on held-out tasks: <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. The trained model improved on unseen tasks of the same kind, mostly on tasks where a longer answer is enough to satisfy the grader, and did not improve on harder tasks or on new git tools. Four statements below are marked: one about echoing tool output and one about the run ending in a stable policy, which were corrected; the hypothesis about unfamiliar MCP servers, which a later test did not support; and the closing line about the reward having no proxy path, which the later run showed it still has. A detail of the dead zone was also corrected from the run's stored metrics. Commands and training setup are as they were in February: the CLI command is now <code>prime train</code>, and the platform has retired LoRA training in favour of full fine-tuning.</p></blockquote>
                                 </div>
 
                                  <hr class="rule">
@@ -369,7 +369,7 @@ return conditions_met / conditions_checked</code></pre>
 
 Steps 150–151:  0.70 → 0.52                  (pre-collapse)
 Step  152:      0.0000                         ← cliff
-Steps 153–170:  stuck at ~0.0312              (dead zone, 19 steps)
+Steps 153–170:  stuck at ~0.0312              (dead zone, 18 steps)
 
 Step  171:      0.70                           ← sudden recovery
 Steps 172–175:  0.66 → 0.75 → 0.81 → 0.97
@@ -386,7 +386,7 @@ Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
 
                                     <p>Two clues confirm this is a format collapse, not random noise:</p>
 
-                                    <p><strong>Clue 1 — The 0.0312 number.</strong> <code>0.0312 = 1/32</code>. The dead zone isn't noise — the model is stuck at <em>exactly</em> one unit of partial credit per batch for 19 steps. It's doing something consistent and specific, earning a small fixed reward from one satisfied condition while completely failing at tool calls.</p>
+                                    <p><strong>Clue 1 — The 0.0312 number.</strong> <code>0.0312 = 1/32</code>. The dead zone isn't noise — on 8 of its 18 steps the reward is <em>exactly</em> that, one unit of partial credit per batch, and on the rest it is between 0.000 and 0.094. It's doing something consistent and specific, earning a small fixed reward from one satisfied condition while completely failing at tool calls. <em>(Corrected November 2026. The original said the model was stuck at exactly this value for 19 steps.)</em></p>
 
                                     <p><strong>Clue 2 — Step execution times.</strong> During normal operation, steps take 60–90 seconds. During the dead zone (steps 153–170): 20–35 seconds. The model is generating far fewer tokens — short non-tool-call responses instead of multi-turn sequences.</p>
 
@@ -409,7 +409,7 @@ Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
                                         <li><strong>More episodes</strong>: 200+ would spread signal across more prompts and reduce per-episode saturation speed.</li>
                                     </ul>
 
-                                    <p>The run ends well — steps 192–199 sit at 0.9943–0.9964, the model found a stable policy. The shape is a feature, not a failure: it tells us exactly what to tune.</p>
+                                    <p>The run ends at a high training reward: steps 192–199 sit between 0.954 and 0.996. Eight steps, coming straight after a second collapse, are not enough to call the policy stable, and there is no held-out number. The shape still tells us what to tune. <em>(Corrected November 2026. The original gave the range as 0.9943–0.9964 and said &ldquo;the model found a stable policy. The shape is a feature, not a failure&rdquo;.)</em></p>
 
                                     <hr>
 
@@ -425,7 +425,7 @@ Steps 192–199:  0.95 → 0.9964+               (finishing strong)</code></pre>
 
                                     <h2>The Code</h2>
 
-                                    <p>The environment is ~700 lines of Python across 5 files. The hard part was the reward function — designing one where the only path to high reward is actually solving the task, not satisfying a proxy.</p>
+                                    <p>The environment is ~700 lines of Python across 5 files. The hard part was the reward function — designing one where the only path to high reward is actually solving the task, not satisfying a proxy. <em>(Update, November 2026. The reward this post ends on still has such a path. On read tasks, a long answer that contains the expected strings is paid in full, including when it also says wrong things. In a later run the median final answer grew from 264 to 2,244 characters as the score on those tasks rose. See <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>.)</em></p>
 
                                     <p>That, it turns out, requires more iterations than you'd expect.</p>
 

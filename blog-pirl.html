@@ -48,7 +48,7 @@
                                     <h1 class="post-title">Teaching a 4B Model to Chain Git Operations Through Pure RL: A Debugging Story</h1>
                                     <p class="post-subtitle">Training Qwen3-4B to discover multi-turn git tool chains entirely from reward signal &mdash; no demonstrations, no SFT. Six reward function versions, four failure modes, and the fix that finally worked.</p>
                                     <blockquote><p><em>Version note.</em> This post describes a 100-episode dataset (L1: 20, L2: 21, L3: 28, L4: 31). The environment has since grown to <strong>v0.8.0</strong> with 200 episodes (L1: 30, L2: 50, L3: 58, L4: 62). The debugging narrative is kept as-run.</p></blockquote>
-                                    <blockquote><p><em>Update, November 18, 2026.</em> The question in &ldquo;What's Next&rdquo; is now answered for a smaller model (Qwen3.5-2B): <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. That run did not memorize its training tasks and did not improve on harder L5 tasks. It cannot say what the model in this post did, which was never evaluated on held-out tasks. Two sentences below were corrected in light of it and are marked.</p></blockquote>
+                                    <blockquote><p><em>Update, November 2026.</em> The question in &ldquo;What's Next&rdquo; is now answered for a smaller model (Qwen3.5-2B): <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>. That run did not memorize its training tasks and did not improve on harder L5 tasks. It cannot say what the model in this post did, which was never evaluated on held-out tasks. Several statements below were corrected in November 2026, some from that evaluation and some from the stored metrics of the runs described here. Each is marked. This post did not record run ids. For the collapse, the metrics are those of the run the February post names. For the plateau and for the run that worked, they are from the only runs still stored on the platform that match the ones described: a 300-step run of 1 March 2026 that sat at 0.68, and a 300-step run of 8 March 2026. The training setup is as it was in March: the platform has since retired LoRA training in favour of full fine-tuning.</p></blockquote>
                                 </div>
 
                                 <hr class="rule">
@@ -57,7 +57,7 @@
 
                                     <p>Training a language model to use tools is usually done with supervised fine-tuning &mdash; you collect demonstrations of correct tool use and train the model to imitate them. We took a different approach: <strong>pure reinforcement learning with no demonstrations</strong>. The model had to discover how to chain git operations (status &rarr; log &rarr; show &rarr; add &rarr; commit) entirely from reward signal.</p>
 
-                                    <p>This is the story of how we got a 4-billion-parameter model (Qwen3-4B-Instruct) from a training reward of 0.68 to 0.97&ndash;1.00 on the 100 training episodes &mdash; and the four things that broke along the way. <em>(Corrected November 2026. The original said &ldquo;from broken to near-perfect on multi-turn git tool use&rdquo;, which had no base-model or held-out number behind it.)</em></p>
+                                    <p>This is the story of how we got a 4-billion-parameter model (Qwen3-4B-Instruct) from training runs stuck at a reward of 0.68 to a run that held about 0.99 on the 100 training episodes &mdash; and the four things that broke along the way. <em>(Corrected November 2026. The original said &ldquo;from broken to near-perfect on multi-turn git tool use&rdquo;, which had no base-model or held-out number behind it. A first correction said the model went &ldquo;from a training reward of 0.68 to 0.97&ndash;1.00&rdquo;; the run's stored metrics show it started at 0.92, and 0.68 is where the earlier runs were stuck.)</em></p>
 
                                     <h2>The Setup</h2>
 
@@ -116,22 +116,26 @@
 
                                     <h2>v0.3.0: Variance Starvation</h2>
 
-                                    <p>Our first real training run looked promising for about 30 steps, then collapsed.</p>
+                                    <p>Our first full training run looked promising for about 150 steps, then collapsed.</p>
 
-                                    <pre><code>Step 1:   Reward 0.96
-Step 30:  Reward 0.99
-Step 50:  Reward 0.0312
-Step 51:  Reward 0.0312
+                                    <pre><code>Step 0:   Reward 0.86
+Step 24:  Reward 1.00
+Step 149: Reward 0.95
+Step 152: Reward 0.00
+Step 153: Reward 0.0312
 ...
-Step 68:  Reward 0.0312</code></pre>
+Step 170: Reward 0.04
+Step 171: Reward 0.70</code></pre>
 
                                     <p><strong>What happened</strong>: The reward function was scoring tool <em>responses</em>, not the model's final answer. Since git commands return deterministic output, even random tool calls produced reward ~0.96. The model quickly hit 0.99+ on all 16 rollouts within each group.</p>
 
                                     <p>When all rollouts score nearly the same, <code>std(r) &asymp; 0</code>. GRPO divides by std, so the advantages become enormous noisy values &rarr; the gradient signal degrades &rarr; the model's policy drifts &rarr; it stops making tool calls entirely &rarr; reward collapses to 0.0312 (the format-gate minimum for a single partial match).</p>
 
-                                    <p><strong>The 19-step dead zone</strong> (steps 50-68) was stuck at exactly 0.0312 &mdash; the model had completely lost the ability to make tool calls and was getting minimal partial credit from text that happened to contain a matching fragment.</p>
+                                    <p><strong>The 19-step dead zone</strong> (steps 152-170) sat at or near 0.0312 &mdash; the model had stopped making tool calls (0.01 per rollout, down from 3.7) and was getting minimal partial credit from text that happened to contain a matching fragment.</p>
 
                                     <p><strong>Root cause</strong>: Variance starvation. When the reward function doesn't discriminate between rollouts, GRPO has nothing to learn from.</p>
+
+                                    <p><em>(Corrected November 2026 from the run's stored metrics. The original put the collapse at steps 50&ndash;68 of a run that started at 0.96. No stored run does that. The collapse is at step 152 of the 200-step run of 27 February, which started at 0.86. The <a href="/blog-llm-git-rl.html">February post</a> places that run after the reward was changed to score only the final message, not before as this section says. The stored metrics do not record the reward version, but they fit the February account: the only stored run that started near 0.96 was stopped after 18 steps. The mechanism described here, rewards saturating until rollouts in a group no longer differ, applies either way.)</em></p>
 
                                     <h2>v0.4.0: The Plateau</h2>
 
@@ -154,12 +158,13 @@ Step 68:  Reward 0.0312</code></pre>
 
                                     <p>We enabled <strong>online difficulty filtering</strong> to focus training on episodes the model hadn't mastered yet.</p>
 
-                                    <p><strong>Result</strong>: The reward flatlined at 0.68 for 265 steps. Then crashed.</p>
+                                    <p><strong>Result</strong>: The reward fell from 0.82 to 0.68 within about 50 steps and stayed there to the end of the run. The next two runs failed.</p>
 
-                                    <pre><code>Step 1:   Reward 0.68
-Step 100: Reward 0.68
-Step 200: Reward 0.68
-Step 265: Buffer crash — "No environments left with examples"</code></pre>
+                                    <pre><code>Steps 0-9:     Reward 0.78
+Steps 50-149:  Reward 0.68
+Steps 150-298: Reward 0.68</code></pre>
+
+                                    <p><em>(Corrected November 2026 from the stored metrics. The original said the reward was 0.68 from step 1 and that this run crashed at step 265. The stored run completed; the two runs after it failed, after 155 and 79 steps.)</em></p>
 
                                     <p><strong>Diagnosing the plateau</strong>: We decoded the reward value. With the tool bonus formula, a reward of 0.68 means:</p>
 
@@ -168,9 +173,9 @@ Step 265: Buffer crash — "No environments left with examples"</code></pre>
                                         <li>Write episodes: ~0.1 (tool bonus) + 0.0 (outcome) &asymp; 0.1</li>
                                     </ul>
 
-                                    <p>The <em>average</em> was 0.68 because read episodes scored ~0.8+ while write episodes scored exactly 0.1. The model had learned to use read tools effectively but never learned to call write tools (<code>git_add</code>, <code>git_commit</code>, <code>git_create_branch</code>).</p>
+                                    <p>The <em>average</em> was 0.68 because read episodes scored ~0.8+ while write episodes scored exactly 0.1. The model had learned to use read tools effectively but stopped calling write tools (<code>git_add</code>, <code>git_commit</code>, <code>git_create_branch</code>) after the first five steps. <em>(Corrected November 2026. The original said it &ldquo;never learned to call write tools&rdquo;. In the run's stored metrics it calls them in steps 0&ndash;4 and not once after.)</em></p>
 
-                                    <p><strong>Why write episodes stalled</strong>: On write episodes, the model would call read tools (git_status, git_log) &mdash; earning the 0.1 tool bonus &mdash; but never attempted git_add or git_commit. Since all 16 rollouts for a write episode scored the same 0.1, there was no within-group variance &rarr; no gradient &rarr; no learning. The same variance starvation problem, just at 0.1 instead of 0.99.</p>
+                                    <p><strong>Why write episodes stalled</strong>: On write episodes, the model would call read tools (git_status, git_log) &mdash; earning the 0.1 tool bonus &mdash; but stopped attempting git_add or git_commit. Since all 16 rollouts for a write episode scored the same 0.1, there was no within-group variance &rarr; no gradient &rarr; no learning. The same variance starvation problem, just at 0.1 instead of 0.99.</p>
 
                                     <h2>v0.5.0&ndash;v0.6.0: Buffer Drain</h2>
 
@@ -199,19 +204,19 @@ Step 265: Buffer crash — "No environments left with examples"</code></pre>
 
                                     <p><strong>Result</strong>:</p>
 
-                                    <pre><code>Step 1:   Reward 0.68
-Step 50:  Reward 0.85
-Step 100: Reward 0.95
-Step 150: Reward 0.99
-Step 200: Reward 1.00
-Step 250: Reward 0.99
-Step 300: Reward 0.99</code></pre>
+                                    <pre><code>Steps 0-9:     Reward 0.91
+Steps 40-59:   Reward 0.94
+Steps 90-109:  Reward 0.96
+Steps 140-159: Reward 0.98
+Steps 190-209: Reward 0.99
+Steps 240-259: Reward 0.99
+Steps 280-299: Reward 0.99</code></pre>
 
-                                    <p>The model went from 0.68 to near-perfect in ~150 steps, then sustained 0.97&ndash;1.00 for the remaining 150 steps. Total training time: approximately 3 hours.</p>
+                                    <p>The run started at 0.92 and climbed to about 0.99 over the first 150 steps, then stayed between 0.93 and 1.00 (mean 0.99) for the remaining 150. Total training time: about 3 hours 20 minutes. <em>(Corrected November 2026 from the run's stored metrics. The original listing started at 0.68 and the text said &ldquo;The model went from 0.68 to near-perfect in ~150 steps&rdquo;. 0.68 is where the earlier runs were stuck, not where this one began.)</em></p>
 
                                     <h2>What the Model Learned</h2>
 
-                                    <p>By step 150, the model had discovered these multi-step tool chains with zero demonstrations:</p>
+                                    <p>By step 150, the model was using these multi-step tool chains, with no demonstrations in training:</p>
 
                                     <p><strong>Read chains</strong>: <code>git_log</code> &rarr; extract commit hash &rarr; <code>git_show &lt;hash&gt;</code> &rarr; report findings. The model learned to parse structured git output, extract specific values (commit hashes, file names), and thread them into subsequent tool calls.</p>
 
@@ -219,22 +224,24 @@ Step 300: Reward 0.99</code></pre>
 
                                     <p><strong>Cross-branch navigation</strong>: <code>git_checkout feature-a</code> &rarr; <code>git_log</code> &rarr; extract info &rarr; <code>git_checkout main</code> &rarr; <code>git_create_branch &lt;name&gt;</code>. The model learned to navigate between branches, gather information, and return &mdash; a 4-5 tool chain requiring state tracking across turns.</p>
 
+                                    <p><em>(Corrected November 2026. The original said the model &ldquo;had discovered&rdquo; these chains. The run's stored metrics do not show that. In its first ten steps the model already made these calls about as often as in its last fifty: <code>git_add</code> 0.21 against 0.18 calls per rollout, <code>git_commit</code> 0.23 against 0.23, <code>git_log</code> 0.39 against 0.36, <code>git_show</code> 0.32 against 0.42. What rose was the training reward, from 0.92 to 0.99.)</em></p>
+
                                     <h2>Why This Is Interesting</h2>
 
-                                    <p><strong>Model size</strong>: 4B parameters. Most published tool-use training uses SFT with curated demonstrations on 70B+ models. We used pure RL on a model 17&times; smaller.</p>
+                                    <p><strong>Model size</strong>: 4B parameters. <em>(Corrected November 2026. The original went on to say that most published tool-use training uses SFT with curated demonstrations on 70B+ models, and that this model was 17&times; smaller. No source was given for that comparison.)</em></p>
 
-                                    <p><strong>No demonstrations</strong>: The model had no examples of correct tool use. It discovered <code>git_log &rarr; extract hash &rarr; git_show</code> entirely from the reward signal telling it "you reported the right commit hash" vs "you didn't."</p>
+                                    <p><strong>No demonstrations</strong>: The model was given no examples of correct tool use during training. Its only training signal was the reward telling it "you reported the right commit hash" vs "you didn't." <em>(Corrected November 2026. The original said it &ldquo;discovered&rdquo; <code>git_log &rarr; extract hash &rarr; git_show</code> &ldquo;entirely from the reward signal&rdquo;. The untrained model already made these calls in the first steps of the run.)</em></p>
 
                                     <p><strong>Multi-turn reasoning</strong>: This isn't single-turn function calling. The model makes 3-5 sequential tool calls, each depending on the output of the previous one. It learned to parse structured text output, extract specific values, and use them as arguments in subsequent calls.</p>
 
-                                    <p><strong>The reward design was everything</strong>: We spent 6 versions getting the reward right. The final insight &mdash; that a small bonus (0.2 vs 0.1) for <em>attempting</em> the right category of tool is enough to bootstrap learning &mdash; is general. Any RL setup where one action type is harder than another can benefit from a "you're on the right track" bonus that creates within-group variance for policy gradient methods.</p>
+                                    <p><strong>The reward design was everything</strong>: We spent 6 versions getting the reward right. The run that worked had a small bonus (0.2 vs 0.1) for <em>attempting</em> the right category of tool, and no difficulty filter. The bonus was never tested on its own: the runs with the bonus and the filter crashed, and no run had the filter off without the bonus. <em>(Corrected November 2026. The original said the bonus &ldquo;is enough to bootstrap learning&rdquo; and that this &ldquo;is general&rdquo;. A later test of the bonus on another model, Qwen3.5-4B, could not show an effect, because that model already solved every write task.)</em></p>
 
                                     <h2>Lessons Learned</h2>
 
                                     <ol>
                                         <li><strong>Variance starvation is the silent killer of GRPO training</strong>. If all rollouts in a group score the same, there's no gradient &mdash; no matter how high or low the score. Watch for flat reward curves and decode the actual per-episode-type rewards.</li>
                                         <li><strong>Difficulty filtering can backfire with bimodal reward distributions</strong>. If half your episodes are "easy" (reward &asymp; 1.0) and half are "hard" (reward &asymp; 0.1), the filter removes everything. The model never gets a chance to learn the hard tasks because they're filtered before it can start making progress.</li>
-                                        <li><strong>Small reward bonuses create large learning effects</strong>. The 0.1 difference between "called a write tool" (0.2) and "only called read tools" (0.1) was enough to bootstrap an entire capability. You don't need large reward differences &mdash; you need <em>any</em> difference that correlates with the right behavior direction.</li>
+                                        <li><strong>A small reward bonus may matter, but these runs do not isolate it</strong>. The run that worked had both the 0.1 difference between "called a write tool" (0.2) and "only called read tools" (0.1) and no difficulty filter. In the stored metrics the model called write tools from the first step of that run. In the earlier run that stuck at 0.68 it called them for five steps and then never again. So the two runs differ in whether write-tool calls survived training, not in whether the model could make them. <em>(Corrected November 2026. The original said the 0.1 difference &ldquo;was enough to bootstrap an entire capability&rdquo;.)</em></li>
                                         <li><strong>Decode your reward values</strong>. When we saw 0.68, we didn't just see "needs improvement." We decomposed it: 0.68 = average of read episodes (~0.8+) and write episodes (~0.1). This told us exactly what was broken and why.</li>
                                         <li><strong>Start simple, add complexity only when you understand the failure mode</strong>. We tried difficulty filtering, phased curricula, reads-only training &mdash; all before understanding that the core issue was within-group variance on write episodes. The fix was simpler than any of the attempted solutions.</li>
                                     </ol>

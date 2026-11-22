@@ -44,7 +44,8 @@
                             <span class="post-tag">Tool Use</span>
                         </div>
                         <h1 class="post-title">What Offline Ablations Reveal About Agentic Tool-Use Rewards</h1>
-                        <p class="post-subtitle">We scored fixed policies across 200 git episodes under six reward variants. The numbers are offline. They show why scoring tool responses erases the learning signal GRPO needs, and why a small write-tool bonus is decisive.</p>
+                        <p class="post-subtitle">We scored fixed policies across 200 git episodes under six reward variants. The numbers are offline. They show why scoring tool responses erases the learning signal GRPO needs, and that a small write-tool bonus opens a gap offline. Live, that gap was not shown to matter.</p>
+                        <blockquote><p><em>Update, November 2026.</em> Three statements below were corrected after the held-out evaluation in <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a> and are marked: the write-tool bonus was not shown to matter in live training, the filesystem stub was never run on a trained model, and the live comparison is one run per recipe. The environment variable shown is from July; the current environment takes the reward recipe as a configuration argument.</p></blockquote>
                     </div>
 
                     <hr class="rule">
@@ -74,7 +75,7 @@
                         </table>
                         <p>A3 does not merely over-credit lazy rollouts. It makes the good policy and the lazy policy look almost the same. Under GRPO, advantages are <code>(r_i - mean) / std</code> within a group. If perfect and empty both score ~0.99, there is nothing left to reinforce. That is the offline explanation of the original failure mode: the reward was already saturated before training started.</p>
 
-                        <h2>Result 2: the write-tool bootstrap is small and decisive</h2>
+                        <h2>Result 2: the write-tool bonus opens a small gap offline</h2>
                         <p>Hold write-episode outcomes at zero and compare only the tool bonus:</p>
                         <table>
                             <thead>
@@ -85,7 +86,7 @@
                                 <tr><td>A1</td><td>0.16</td><td>0.16</td><td><strong>0.00</strong></td></tr>
                             </tbody>
                         </table>
-                        <p>The 0.10 gap is small in absolute terms and large in GRPO terms. It is enough to prefer "attempt a write tool" over "only inspect." Remove it (A1), and that preference disappears.</p>
+                        <p>The 0.10 gap is small in absolute terms and large in GRPO terms. It is enough to prefer "attempt a write tool" over "only inspect." Remove it (A1), and that preference disappears. <em>(Corrected November 2026. The heading called this bootstrap &ldquo;small and decisive&rdquo;. The 0.10 gap is arithmetic on the reward formula. Whether it changes what a model learns was not shown: in the live runs below, Qwen3.5-4B solved every write task the first time it saw it, so the bonus had nothing to add.)</em></p>
 
                         <h2>Result 3: A6 shows why filter thresholds matter</h2>
                         <table>
@@ -99,7 +100,7 @@
                         </table>
                         <p>If stuck write attempts score around 0.1-0.4, a hard threshold of 0.1 throws most of them out before the model can climb. That matches the buffer-drain failure mode from training.</p>
 
-                        <h2>Result 4: the filesystem stub is a clean transfer probe</h2>
+                        <h2>Result 4: the filesystem stub is an untested transfer probe</h2>
                         <table>
                             <thead>
                                 <tr><th>Policy on FS L1-L2 (22 episodes)</th><th>Mean</th></tr>
@@ -111,6 +112,7 @@
                             </tbody>
                         </table>
                         <p>This is not a trained transfer result. It is the eval harness: same reward shape, different tools, room to measure whether a git-trained policy learned orchestration structure or git trivia.</p>
+                        <p><em>(Corrected November 2026. The heading called the stub &ldquo;a clean transfer probe&rdquo;. It was never run on a trained model, and its read tasks are graded like the git ones, by looking for expected strings in the final answer, so a model that answers at length would score on it too. The transfer test that was run in November used a separate filesystem task set, graded on the final state of the files and on exact values. The trained model did worse on it than the untrained one: <a href="/blog-git-rl-transfer.html#update-tool-server">follow-up</a>.)</em></p>
 
                         
                         <h2>Live confirmation: A0 vs A1 vs A3 on Prime</h2>
@@ -128,8 +130,8 @@
                             </tbody>
                         </table>
                         <p><strong>A3</strong> is catastrophic: over-credits tool responses, almost no within-group variance, then post-batch filters drop every rollout until the job dies.</p>
-                        <p><strong>A1</strong> is milder: training finishes, but zero-advantage is higher and effective batch is smaller than A0, with slightly less write-tool use. That lines up with the offline result that the elevated write-tool bonus is a small but real bootstrap signal.</p>
-                        <p><strong>A0</strong> remains the healthiest short-run recipe among the three.</p>
+                        <p><strong>A1</strong> is milder: training finishes, but zero-advantage is higher and effective batch is smaller than A0, with slightly less write-tool use. That is the direction the offline result predicts, but it is one run per recipe with no intervals: <code>git_add</code> rates were 0.200 for A0 and 0.186 for A1. <em>(Corrected November 2026. The original said this &ldquo;lines up with the offline result that the elevated write-tool bonus is a small but real bootstrap signal&rdquo;.)</em></p>
+                        <p><strong>A0</strong> remains the healthiest short-run recipe among the three, in one run each. <em>(&ldquo;In one run each&rdquo; added November 2026. There are no repeat runs and no intervals, and all of A0's measured gain was on read tasks graded on git's literal output.)</em></p>
 
                         <h2>What this does not claim</h2>
                         <ul>
@@ -137,11 +139,11 @@
                             <li>No claim that a new checkpoint improved from offline scores alone</li>
                             <li>No claim that filesystem transfer already works for a trained policy</li>
                         </ul>
-                        <p>The offline numbers explain the failure modes. The live runs above confirm the ordering: A3 saturates and dies, A1 trains weakly, A0 stays healthiest.</p>
+                        <p>The offline numbers explain the failure modes. The live runs above, one per recipe, are consistent with the ordering: A3 saturates and dies, A1 trains weakly, A0 stays healthiest.</p>
 
                         <h2>What is next</h2>
                         <ol>
-                            <li><strong>Zero-shot FS eval</strong> of the best git-trained checkpoint: does it transfer orchestration structure or git trivia?</li>
+                            <li><strong>Zero-shot FS eval</strong> of the best git-trained checkpoint: does it transfer orchestration structure or git trivia? <em>Update, November 2026: done for Qwen3.5-2B, on a separate filesystem task set. It did not transfer: the trained model did worse than the untrained one. See <a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a>.</em></li>
                             <li><strong>Per-level reward breakdown</strong>: confirm Level 1 saturates while Level 4 still climbs.</li>
                             <li><strong>Full-scale A0 run</strong> (256 batch / 16 rollouts) to check the short-run ranking holds.</li>
                         </ol>

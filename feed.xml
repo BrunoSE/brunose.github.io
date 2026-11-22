@@ -38,7 +38,7 @@
         <link>https://brunose.github.io/blog-reward-ablations.html</link>
         <guid isPermaLink="true">https://brunose.github.io/blog-reward-ablations.html</guid>
         <pubDate>Wed, 15 Jul 2026 12:00:00 GMT</pubDate>
-        <description>Offline ablations across 200 git episodes: scoring tool responses erases the GRPO learning signal, and a small write-tool bonus is decisive.</description>
+        <description>Offline ablations across 200 git episodes: scoring tool responses erases the GRPO learning signal, and a small write-tool bonus opens a gap offline that live runs did not confirm.</description>
     </item>
 
     <item>
