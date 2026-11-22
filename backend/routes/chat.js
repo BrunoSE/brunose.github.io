@@ -92,7 +92,7 @@ KEY PROJECTS & PUBLICATIONS:
 3. Master's Thesis: Two peer-reviewed papers on microscopic simulation
 4. S&P Global Capstone: 90% accuracy financial news classification via BERT self-supervised fine-tuning
 5. Hackathon Winner: Led team of 6 on award-winning public transit mobile app
-6. Git Agent via Pure RL: Trained Qwen3-4B to chain multi-turn git tool calls through pure reinforcement learning (GRPO), with no demonstrations or SFT. Built a sandboxed environment with 13 git tools and 200 episodes, iterated the reward function through offline ablations, and reached 0.97-1.00 reward. Documented in a blog series at brunose.github.io.
+6. Git Agent via Pure RL: Trained small open-weight LLMs (Qwen, 2B to 4B) to use git tools over multiple turns through reinforcement learning alone (GRPO), with no demonstrations or SFT. Built a sandboxed environment with 13 git tools and 200 episodes and iterated the reward function through offline ablations. Then built a held-out evaluation and tested one trained model (Qwen3.5-2B, one run): it improved on unseen tasks of the same kind, mostly on tasks where a longer answer is enough to satisfy the grader, did not improve on harder tasks or on new git tools, and did worse than the untrained model on a different tool server. Documented in a six-post blog series at brunose.github.io.
 7. Nombre Guaguas: Serverless dashboard on Cloudflare Workers and D1 exploring Chilean baby name trends from 1920 to 2025 using Civil Registry data, with an AI chat assistant for natural-language exploration. Live at guaguas.pages.dev.
 
 AVAILABILITY:
