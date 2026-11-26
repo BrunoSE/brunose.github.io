@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From 25.0% to 46.9% on Unseen Olympiad Math for $0.00 on Free Inkling-2-Mini | Bruno Stefoni</title>
+    <meta name="description" content="Testing Tinker's free Inkling-2-Mini tier at $0.00 spend: thinking-effort Pareto tuning, diagnostic-driven RL, multi-turn Python tool-integrated RL (+21.9 pp on OOD Polaris 1/8 Olympiad math), and open-sourcing tinker-inspect.">
+    <meta name="author" content="Bruno Stefoni">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://brunose.github.io/blog-inkling-tir-rl.html">
+    <meta property="og:title" content="From 25.0% to 46.9% on Unseen Olympiad Math for $0.00 on Free Inkling-2-Mini">
+    <meta property="og:description" content="Thinking-effort Pareto tuning, diagnostic-driven RL, multi-turn Python TIR RL (+21.9 pp zero-shot OOD Olympiad transfer at $0.00), and open-sourcing tinker-inspect.">
+    <meta property="og:image" content="https://brunose.github.io/assets/preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="stylesheet" href="/assets/retro.css">
+    <link rel="icon" type="image/png" href="/assets/favicon.png">
+    <link rel="alternate" type="application/rss+xml" title="Bruno Stefoni's Blog" href="/feed.xml">
+</head>
+<body>
+    <div class="page">
+        <header class="masthead small">
+            <a href="/" class="wordart">Bruno's Homepage</a>
+        </header>
+
+        <nav class="navbar" aria-label="Main">
+            <a href="/" class="btn98">Home</a>
+            <a href="/blog.html" class="btn98 active">Blog</a>
+            <a href="/chatbot.html" class="btn98">AI Chatbot</a>
+        </nav>
+
+        <main>
+            <section class="win">
+                <div class="win-bar">
+                    <span class="win-title">inkling-tir-rl.txt - Notepad</span>
+                    <span class="win-btns" aria-hidden="true"><i>_</i><i>&#9633;</i><i>&times;</i></span>
+                </div>
+                <div class="win-body">
+                    <div class="post-hero">
+                        <div class="post-meta">
+                            <span class="post-date">November 25, 2026</span>
+                            <span class="post-tag">Reinforcement Learning</span>
+                            <span class="post-tag">Tool Use</span>
+                            <span class="post-tag">Evaluation</span>
+                            <span class="post-tag">Diagnostics</span>
+                        </div>
+                        <h1 class="post-title">From 25.0% to 46.9% on Unseen Olympiad Math for $0.00 on Free Inkling-2-Mini</h1>
+                        <p class="post-subtitle">Tinker made Inkling-2-Mini free to train and sample. I put it through thinking-effort tuning, diagnostic-driven text RL, and multi-turn Python tool-integrated reasoning (TIR) RL at $0.00 spend, and open-sourced tinker-inspect along the way.</p>
+                    </div>
+
+                    <hr class="rule">
+
+                    <article class="prose">
+                        <h2>Following up on last week's transfer failure</h2>
+
+                        <p>In <a href="/blog-git-rl-transfer.html">last week's post</a>, RL on git tool use failed to transfer to harder tasks for two concrete reasons: a loose read grader rewarded longer answers instead of better tool use (median length jumped from 264 to 2,244 characters), and constant-reward group dropping quietly drove the run bill to $48.51.</p>
+
+                        <p>On November 25, Tinker made <code>thinkingmachines/Inkling-2-Mini:peft:65536:free</code> free to train and sample for accounts with a positive balance ($0.00 across prefill, cached prefill, sampling, and training). That gave me a clean way to test the exact opposite setup at zero compute cost:</p>
+
+                        <ul>
+                            <li><strong>An ungameable exact-match verifier.</strong> Competition math problems from <a href="https://huggingface.co/datasets/POLARIS-Project/Polaris-Dataset-53K" target="_blank" rel="noopener noreferrer">Polaris-Dataset-53K</a> filtered to exact rational answers, graded strictly on the reduced fraction inside the last <code>\boxed{}</code>. Longer answers cannot fool the grader.</li>
+                            <li><strong>Strict train/test separation.</strong> Every evaluation set is deduplicated against training by ID, normalized text, and alphanumeric-stripped text. In particular, zero <code>1/8</code> Olympiad problems ever appear in training.</li>
+                            <li><strong>Pre-filter diagnostics on every run.</strong> Before trusting a training curve or launching a second run, I inspected pre-filter rollout summaries, KL0 alignment, truncation rates, stragglers, and paired bootstrap confidence intervals using a tool I built and open-sourced during this sprint: <a href="https://github.com/BrunoSE/tinker-inspect" target="_blank" rel="noopener noreferrer"><code>tinker-inspect</code></a>.</li>
+                        </ul>
+
+                        <h2>1. Tuning thinking effort mattered more than doubling <code>max_tokens</code></h2>
+
+                        <p>Before touching math RL, I evaluated untrained <code>Inkling-2-Mini:peft:65536:free</code> on our existing multi-turn git tool benchmark, including the 32 unseen-tool L5 tasks (<code>l5_new_tools</code>, 3 attempts per task = 96 rollouts per condition). On the default <code>tml_v0</code> renderer, Inkling-2-Mini scored 87.5% &mdash; behind Qwen3.5-4B's 90.6% &mdash; with 32 <code>max_turns</code> hits and 11 mid-thinking truncations.</p>
+
+                        <p>Inspecting the paired transcripts showed why: <code>TmlV0Renderer</code> hardcodes <code>DEFAULT_EFFORT = 0.9</code>. On multi-turn tool calls, high effort caused the model to over-deliberate inside <code>&lt;|content_thinking|&gt;</code>, clip at <code>max_tokens=1024</code>, and burn turns retrying reads instead of invoking the unseen write tools.</p>
+
+                        <p>Doubling <code>max_tokens</code> from 1024 to 2048 at <code>effort=0.9</code> barely helped. Lowering the effort parameter to <code>0.2&ndash;0.5</code> solved the problem completely:</p>
+
+                        <table>
+                            <thead>
+                                <tr><th>Condition (<code>l5_new_tools</code>, 32 &times; 3)</th><th>Success</th><th>95% CI</th><th>Mean Turns</th><th>Action Tok</th><th>Max-Turns</th><th>Truncs</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Inkling <code>effort=0.9</code> @ 1024 (default)</td><td>87.5%</td><td>[78.1%, 94.8%]</td><td>8.81</td><td>&mdash;</td><td>32</td><td>11</td></tr>
+                                <tr><td>Inkling <code>effort=0.9</code> @ 2048</td><td>89.6%</td><td>[83.3%, 94.8%]</td><td>8.95</td><td>1,310</td><td>36</td><td>5</td></tr>
+                                <tr><td>Inkling <code>effort=0.0</code> @ 1024</td><td>92.7%</td><td>[87.5%, 96.9%]</td><td>6.68</td><td>492</td><td>4</td><td>1</td></tr>
+                                <tr><td>Inkling <code>effort=0.2</code> @ 1024</td><td><strong>94.8%</strong></td><td>[90.6%, 99.0%]</td><td><strong>5.85</strong></td><td><strong>334</strong></td><td><strong>1</strong></td><td><strong>0</strong></td></tr>
+                                <tr><td>Inkling <code>effort=0.5</code> @ 1024</td><td><strong>95.8%</strong></td><td>[91.7%, 99.0%]</td><td>6.55</td><td>487</td><td>2</td><td><strong>0</strong></td></tr>
+                                <tr><td>Qwen3.5-4B reference</td><td>90.6%</td><td>[83.3%, 96.9%]</td><td>6.07</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+                            </tbody>
+                        </table>
+
+                        <img src="/assets/blog/inkling-effort-pareto.svg" alt="Thinking-effort Pareto chart for Inkling-2-Mini on l5_new_tools showing accuracy vs action tokens">
+
+                        <p>Why did <em>less</em> thinking effort beat more? The <code>effort=0.9</code> @ 2048 control isolates the mechanism. Doubling the token budget cut mid-thinking truncations from 11 to 5, yet <code>max_turns</code> failures actually climbed from 32 to 36 and accuracy barely moved (87.5% &rarr; 89.6%). Reading the failed transcripts showed hesitation loops rather than budget starvation: because the synthetic git fixtures have quirky placeholder file contents (for example, Dockerfile lines inside <code>main.py</code>), high effort caused the model to second-guess the task (&ldquo;this commit looks suspicious&rdquo;) and burn all 10 turns on repeated <code>git_log</code> / <code>git_show</code> / <code>git_diff</code> reads without ever calling <code>git_merge</code> or <code>git_cherry_pick</code>. At <code>effort=0.2&ndash;0.5</code>, it checked the repo once, executed the requested write tool, and finished in ~6 turns with 1&ndash;2 <code>max_turns</code> hits.</p>
+
+                        <p>Lowering effort from <code>0.9</code> to <code>0.2&ndash;0.5</code> lifted unseen-tool success from 87.5% to 94.8%&ndash;95.8% at 2.7&times;&ndash;3.9&times; fewer action tokens and zero thinking truncations. One quirk worth noting: <code>effort=0.0</code> still generates thinking tokens and actually used more tokens than <code>effort=0.2</code>. I pinned all RL experiments below to <code>effort=0.2</code>. You can inspect the paired Qwen vs. Inkling transcripts directly in the <a href="https://brunose.github.io/tinker-inspect/qwen_vs_inkling_l5_new_tools.html" target="_blank" rel="noopener noreferrer">interactive diff report</a>.</p>
+
+                        <h2>2. Diagnostic-driven RL turned a flat run into +10.9 pp</h2>
+
+                        <p>Next I ran 16 steps of <code>stable_reinforce</code> RL on Polaris competition math problems (LoRA rank 32, <code>effort=0.2</code>). Run #1 (<code>max_tokens=2048</code>, <code>group_size=4</code>, <code>lr=4e-5</code>, difficulties <code>2/8..4/8</code>) came back completely flat on held-out Polaris <code>2/8..4/8</code> (64 tasks &times; 2 attempts): <code>0.289 &rarr; 0.289</code> (+0.0 pp).</p>
+
+                        <p>In standard <code>metrics.jsonl</code> logs, nothing looked obviously broken: KL0 was exact (<code>0.000000</code>), and <code>env/all/by_group/frac_mixed</code> read <code>1.0</code> because <code>tinker-cookbook</code> computes metrics <em>after</em> dropping constant-reward groups. Reconciling pre-filter <code>train_rollout_summaries.jsonl</code> in <code>tinker-inspect</code> immediately showed why Run #1 stalled:</p>
+
+                        <ul>
+                            <li><strong>61.3%</strong> of turns hit <code>max_tokens=2048</code> and were cut off mid-thought before emitting <code>\boxed{}</code>.</li>
+                            <li><strong>73%</strong> of sampled groups were discarded as constant-reward (<strong>109 of 192</strong> groups were all-bad).</li>
+                        </ul>
+
+                        <p>Acting directly on those two alerts in Run #2 &mdash; doubling <code>max_tokens</code> to 4096, raising <code>group_size</code> from 4 to 8, raising <code>lr</code> to <code>1.5e-4</code>, and training on <code>3/8..6/8</code> &mdash; cut truncation from 61.3% to 19.8%, dropped all-bad groups from 109 to 25, tripled trained tokens (384k &rarr; 1.14M), and turned the flat run into a statistically significant held-out gain:</p>
+
+                        <ul>
+                            <li><strong>Held-out Polaris <code>2/8..4/8</code> (64 &times; 2, 4096 tok):</strong> <code>56.2% &rarr; 67.2%</code> (<strong>+10.9 pp</strong>, 95% CI <code>[+2.3, +20.3]</code>, 15 wins / 3 regressions / 46 ties), while output tokens dropped 5.7% (2,539 &rarr; 2,395) and eval wall time fell 20% (497s &rarr; 397s).</li>
+                            <li><strong>Held-out MATH-500 Level 5 (64 &times; 2, 2048 tok):</strong> held steady at <code>81.2% &rarr; 81.2%</code> with 11.5% fewer thinking characters (no degradation on easier math).</li>
+                            <li><strong>Run #3 (Steps 16 &rarr; 32 continuation, <code>lr=8e-5</code>, <code>2/8..5/8</code>):</strong> zero-shot transfer to strictly harder <strong>OOD Polaris <code>1/8</code> Olympiad</strong> problems (48 &times; 2, zero <code>1/8</code> problems in training) climbed monotonically from <strong>25.0% (Base) &rarr; 34.4% (Step 16) &rarr; 37.5% (Step 32)</strong> (+12.5 pp, 95% CI <code>[+2.1, +22.9]</code>, 13W/3R/32T) while compressing output tokens 9.8% (2,855 &rarr; 2,574).</li>
+                        </ul>
+
+                        <p>Side-by-side training diagnostics for Run #1 vs. Run #2 are hosted in the <a href="https://brunose.github.io/tinker-inspect/compare_polaris_v1_vs_v2.html" target="_blank" rel="noopener noreferrer">comparison report</a>, and Run #2's full report is <a href="https://brunose.github.io/tinker-inspect/demo_inkling2_polaris_rl_v2.html" target="_blank" rel="noopener noreferrer">here</a>.</p>
+
+                        <h2>3. Multi-turn Python TIR RL: +21.9 pp on OOD Olympiad math</h2>
+
+                        <p>Text-only RL topped out at 37.5% on OOD Polaris <code>1/8</code> Olympiad problems. Next I switched to <strong>Tool-Integrated Reasoning (TIR)</strong> &mdash; interleaving chain-of-thought reasoning with executable tool calls (here, running Python scripts to test small cases, check algebra, or compute exact fractions) before giving a final answer. I gave <code>Inkling-2-Mini:peft:65536:free</code> a native <code>tml_v0</code> <code>run_python</code> tool running Python 3 in an isolated local subprocess with a 3-second process-group timeout and up to 4 turns per episode (<code>max_tokens=3072</code> per turn, <code>effort=0.2</code>), then ran 16 steps of multi-turn TIR RL on Polaris <code>2/8..5/8</code> (again with strictly 0 overlap against <code>1/8</code> or held-out <code>2/8..4/8</code>).</p>
+
+                        <p>Because <code>TmlV0Renderer</code> has the sequence extension property, multi-turn tool trajectories reuse KV prefixes cleanly: <code>tinker-inspect</code> reported <strong>55% prefix-cacheable prefill</strong> across 2.43M prefill tokens, only <strong>5.2%</strong> max-token truncation, exact <strong>KL0 (0.000000)</strong> on every step, and <strong>$0.00</strong> total spend across 30.2 minutes of wall time.</p>
+
+                        <p>Here is the complete 5-rung ladder on the exact same 48 unseen OOD Polaris <code>1/8</code> Olympiad problems (2 attempts each = 96 rollouts per condition):</p>
+
+                        <table>
+                            <thead>
+                                <tr><th>Method (OOD Polaris <code>1/8</code>, 48 &times; 2)</th><th>Accuracy</th><th>Delta vs Base CoT</th><th>95% Paired CI</th><th>Format OK</th><th>Out Tokens</th><th>Wall Time</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Base CoT (4096 tok)</td><td>25.0%</td><td>base</td><td>&mdash;</td><td>56.2%</td><td>2,855</td><td>255s</td></tr>
+                                <tr><td>Base TIR (+ <code>run_python</code>, 3072 &times; 4)</td><td>31.2%</td><td>+6.2 pp</td><td>[&minus;2.1, +15.6]</td><td>58.3%</td><td>2,698</td><td>421s</td></tr>
+                                <tr><td>Step-16 CoT RL</td><td>34.4%</td><td>+9.4 pp</td><td>[+0.0, +20.8]</td><td>62.5%</td><td>2,769</td><td>331s</td></tr>
+                                <tr><td>Step-32 CoT RL</td><td>37.5%</td><td>+12.5 pp</td><td>[+2.1, +21.9]</td><td>63.5%</td><td>2,574</td><td>278s</td></tr>
+                                <tr><td><strong>16-Step Multi-Turn TIR RL</strong></td><td><strong>46.9%</strong></td><td><strong>+21.9 pp</strong></td><td><strong>[+11.5, +32.3]</strong></td><td><strong>80.2%</strong></td><td><strong>1,781 (&minus;38%)</strong></td><td><strong>230s</strong></td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>Every dimension moved in the right direction at once. Relative to Base TIR (31.2%), 16 steps of multi-turn RL added <strong>+15.6 pp</strong> (95% CI <code>[+6.2, +26.0]</code>, 15 wins / 3 regressions / 30 ties), lifted <code>format_ok</code> from 58.3% to 80.2% (+21.9 pp), cut Python tool errors by <strong>36%</strong> (0.344 &rarr; 0.219, CI <code>[&minus;0.240, &minus;0.021]</code>), cut mean output tokens by <strong>34%</strong> (2,698 &rarr; 1,781, shorter on 45 of 48 tasks), and ran <strong>1.84&times; faster</strong> (421s &rarr; 230s). Unlike last week's git run, RL learned to think <em>less</em> and execute cleaner, tighter Python checks instead of padding outputs.</p>
+
+                        <p>Continuing TIR RL for another 16 steps (Steps 16 &rarr; 32, <code>lr=8e-5</code>, seed 99, exact KL0, $0.00) exposed a clean in-distribution vs. OOD tradeoff:</p>
+
+                        <table>
+                            <thead>
+                                <tr><th>TIR Checkpoint (Held-out Polaris <code>2/8..4/8</code>, 64 &times; 2)</th><th>Accuracy</th><th>Delta vs Base TIR</th><th>95% CI (W/R/T)</th><th>Format OK</th><th>Out Tokens</th><th>Wall Time</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Base TIR (<code>run_python</code>)</td><td>56.2%</td><td>base</td><td>&mdash;</td><td>72.7%</td><td>2,290</td><td>382s</td></tr>
+                                <tr><td>TIR Step 16</td><td>67.2%</td><td>+10.9 pp</td><td>[+3.1, +18.8] (15/4/45)</td><td>89.1%</td><td>1,519 (&minus;33.7%)</td><td>278s</td></tr>
+                                <tr><td><strong>TIR Step 32</strong></td><td><strong>68.0%</strong></td><td><strong>+11.7 pp</strong></td><td><strong>[+3.9, +20.3]</strong> (13/3/48)</td><td><strong>89.8%</strong></td><td><strong>1,290 (&minus;43.7%)</strong></td><td><strong>234s</strong></td></tr>
+                            </tbody>
+                        </table>
+
+                        <p>On in-distribution held-out <code>2/8..4/8</code>, Step 32 pushed accuracy to <strong>68.0%</strong> (+7 tasks flipped solved, 0 regressed) while cutting output tokens <strong>43.7%</strong> and bringing max-token truncation down to 1.6% during training. On OOD <code>1/8</code> Olympiad problems, Step 32 settled at 42.7% (+11.5 pp over Base TIR), leaving Step 16 (46.9%) as the OOD peak.</p>
+
+                        <p>Explore both interactive reports directly (no setup, zero CDN): the <a href="https://brunose.github.io/tinker-inspect/series_polaris18_ladder.html" target="_blank" rel="noopener noreferrer">5-point OOD Polaris 1/8 progression &amp; per-task heatmap</a> and the <a href="https://brunose.github.io/tinker-inspect/demo_inkling2_polaris_tir_rl_ood18.html" target="_blank" rel="noopener noreferrer">16-step Multi-Turn TIR RL full run &amp; transcript diff</a>.</p>
+
+                        <h2>4. Open-sourcing <code>tinker-inspect</code> v0.2</h2>
+
+                        <p>Every diagnostic that guided these runs is now packaged in <a href="https://github.com/BrunoSE/tinker-inspect" target="_blank" rel="noopener noreferrer"><code>tinker-inspect</code></a> &mdash; a zero-dependency CLI (Python 3.11+ stdlib only) that generates single-file, zero-CDN HTML reports from any Tinker RL <code>log_path</code> directory:</p>
+
+<pre><code># Run directly with uvx (no install needed)
+uvx --from git+https://github.com/BrunoSE/tinker-inspect tinker-inspect /path/to/tinker/log_dir
+
+# Compare 3+ checkpoints or methods as a paired progression curve + Pareto + task heatmap
+tinker-inspect series \
+  "Base CoT=base.jsonl" "Step 16=step16.jsonl" "TIR RL=tir.jsonl" \
+  --sanitize-paths --out series.html
+
+# Live-monitor an active Tinker RL run and exit 2 on KL0 drift or health failure
+tinker-inspect watch /path/to/active/log_dir --interval 5 --fail-fast</code></pre>
+
+                        <ul>
+                            <li><code>inspect</code> &mdash; checks sampler-trainer KL0 across every step, reconciles pre-filter <code>train_rollout_summaries.jsonl</code> to surface hidden constant-reward drop rates, reconstructs multi-turn prefill amplification and prefix-cache hit rates, plots per-step straggler Gantt charts from <code>timing_spans.jsonl</code>, and flags max-token truncation, verbosity drift, and tool execution errors.</li>
+                            <li><code>diff</code> &amp; <code>series</code> &mdash; compares two or more evaluation JSONLs (<code>verifiers v1</code>, legacy <code>vf-eval</code>, <code>git_tool_rl</code>, or native rollout JSONLs, with prompt-fallback pairing when task IDs differ) with deterministic 95% bootstrap CIs, accuracy-vs-tokens Pareto charts, per-task trajectory heatmaps, and expandable side-by-side transcripts.</li>
+                            <li><code>compare</code> &mdash; overlays two Tinker RL runs side-by-side to verify whether a diagnostic fix actually improved truncation, drop rate, and throughput.</li>
+                            <li><code>watch</code> &mdash; tails an active Tinker RL run in the terminal with deduplicated alerts and optional <code>--fail-fast</code>.</li>
+                        </ul>
+
+                        <p>Browse all six live interactive demos at <a href="https://brunose.github.io/tinker-inspect/" target="_blank" rel="noopener noreferrer">brunose.github.io/tinker-inspect</a>.</p>
+
+                        <h2>5. Two small upstream PRs to <code>tinker-cookbook</code></h2>
+
+                        <p>Running into real friction while building these experiments also produced two small upstream pull requests to <code>thinking-machines-lab/tinker-cookbook</code>:</p>
+
+                        <ul>
+                            <li><a href="https://github.com/thinking-machines-lab/tinker-cookbook/pull/1026" target="_blank" rel="noopener noreferrer">PR #1026</a> (<strong>merged</strong>): added eval defaults for <code>thinkingmachines/Inkling-2-Mini:peft:65536:free</code> so <code>BenchmarkConfig.for_model()</code> no longer raises <code>Unknown model</code>.</li>
+                            <li><a href="https://github.com/thinking-machines-lab/tinker-cookbook/pull/1027" target="_blank" rel="noopener noreferrer">PR #1027</a> (<strong>open, 7/7 CI green</strong>): exposed <code>default_effort</code> on <code>TmlV0Renderer</code> and added named presets (<code>tml_v0_low_reasoning</code>, <code>tml_v0_medium_reasoning</code>, <code>tml_v0_high_reasoning</code>, <code>tml_v0_xhigh_reasoning</code>) matching <code>sample_reasoning.py</code> so any RL, SFT, or benchmark pipeline can configure Inkling thinking effort via <code>renderer_name</code>.</li>
+                        </ul>
+
+                        <h2>What these runs cannot tell you</h2>
+
+                        <ul>
+                            <li><strong>Rational-answer subset of Polaris.</strong> Training and evaluation filtered Polaris to problems whose gold answer parses as a finite rational number, so exact-match grading is clean and deterministic; symbolic or proof-style Olympiad answers are excluded.</li>
+                            <li><strong>Sample size and single seed per stage.</strong> OOD <code>1/8</code> uses 48 problems &times; 2 attempts (96 rollouts) and held-out <code>2/8..4/8</code> uses 64 &times; 2 (128 rollouts), with one RL training seed per 16-step stage. The main gains (+15.6 pp and +21.9 pp on OOD <code>1/8</code>, +10.9 pp and +11.7 pp on <code>2/8..4/8</code>) are well outside their 95% paired bootstrap intervals, while smaller differences like Step 16 vs. Step 32 on OOD <code>1/8</code> (46.9% vs. 42.7%) are noisy.</li>
+                            <li><strong>One model family.</strong> All RL runs here use <code>thinkingmachines/Inkling-2-Mini:peft:65536:free</code> at <code>effort=0.2</code>. Whether the same 16-step TIR jump holds at other effort settings or on non-Inkling models is untested here.</li>
+                        </ul>
+
+                        <hr>
+                        <p>Previous post in this series:</p>
+                        <ul>
+                            <li><a href="/blog-git-rl-transfer.html">Did RL on Git Tool Use Transfer? We Finally Checked</a></li>
+                        </ul>
+                    </article>
+
+                    <div class="back-link">
+                        <a href="/blog.html">&larr; Back to Blog</a>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="foot">
+                <p>&copy; 2026 Bruno Stefoni &middot; <a href="/">Back to the homepage</a></p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

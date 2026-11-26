@@ -7,7 +7,15 @@
     <atom:link href="https://brunose.github.io/feed.xml" rel="self" type="application/rss+xml"/>
     <description>Technical writing on agents, reinforcement learning, and production AI.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 18 Nov 2026 12:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 25 Nov 2026 21:40:00 GMT</lastBuildDate>
+
+    <item>
+        <title>From 25.0% to 46.9% on Unseen Olympiad Math for $0.00 on Free Inkling-2-Mini</title>
+        <link>https://brunose.github.io/blog-inkling-tir-rl.html</link>
+        <guid isPermaLink="true">https://brunose.github.io/blog-inkling-tir-rl.html</guid>
+        <pubDate>Wed, 25 Nov 2026 21:40:00 GMT</pubDate>
+        <description>Thinking-effort Pareto tuning, diagnostic-driven RL, and 16 steps of multi-turn Python tool-integrated RL on Tinker's free Inkling-2-Mini tier (+21.9 pp on OOD Polaris 1/8 Olympiad math at $0.00), plus open-sourcing tinker-inspect.</description>
+    </item>
 
     <item>
         <title>Did RL on Git Tool Use Transfer? We Finally Checked</title>
